@@ -35,7 +35,30 @@ class BaseAnnotator {
         return [];
     }
 
-    // More methods to be added...
+    async submitTask(task, decision) {
+        try {
+            await axios.post(`${this.API_URL}/tasks/submit`, {
+                taskId: task._id || task.id,
+                datasetId: task.datasetId || this.config.projectId,
+                label: decision.label,
+                laborCostMs: decision.timeMs, // [FIX] Match server Text: laborCostMs
+                annotatorId: this.name,
+                isAmbiguous: decision.isAmbiguous || false,
+                confusionNote: decision.confusionNote || ""
+            });
+            this.state.tasksCompleted++;
+            console.log(`   [${this.name}] Submitted: ${decision.label} (${(decision.timeMs / 1000).toFixed(1)}s)`);
+        } catch (err) {
+            console.error(`[${this.name}] Submit Error:`, err.message);
+        }
+    }
+
+    decide(task, groundTruth) {
+        throw new Error("Abstract method 'decide' must be implemented");
+    }
+
+    // Utilities
+    sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 }
 
 module.exports = BaseAnnotator;
