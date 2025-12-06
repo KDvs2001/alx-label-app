@@ -23,12 +23,12 @@ class BaseAnnotator {
                 return res.data.batch || [];
             } catch (err) {
                 if (attempt === maxRetries) {
-                    console.error(`[${this.name}] Fetch Error after ${maxRetries} attempts:`, err.message);
+                    console.error(`[${this.name}] ❌ Fetch Error after ${maxRetries} attempts:`, err.message);
                     return [];
                 }
                 // Retry with exponential backoff
                 const delayMs = 1000 * attempt;
-                console.log(`[${this.name}] Fetch attempt ${attempt} failed, retrying in ${delayMs}ms...`);
+                console.log(`[${this.name}] ⚠️  Fetch attempt ${attempt}/${maxRetries} failed, retrying in ${delayMs}ms...`);
                 await this.sleep(delayMs);
             }
         }
@@ -49,7 +49,10 @@ class BaseAnnotator {
             this.state.tasksCompleted++;
             console.log(`   [${this.name}] Submitted: ${decision.label} (${(decision.timeMs / 1000).toFixed(1)}s)`);
         } catch (err) {
-            console.error(`[${this.name}] Submit Error:`, err.message);
+            console.error(`[${this.name}] ❌ Submit Error:`, err.message);
+            if (err.response) {
+                console.error(`   Status: ${err.response.status}, Data:`, err.response.data);
+            }
         }
     }
 
