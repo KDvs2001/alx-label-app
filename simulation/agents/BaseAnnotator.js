@@ -41,7 +41,7 @@ class BaseAnnotator {
                 taskId: task._id || task.id,
                 datasetId: task.datasetId || this.config.projectId,
                 label: decision.label,
-                laborCostMs: decision.timeMs, // [FIX] Match server Text: laborCostMs
+                laborCostMs: decision.timeMs, // Match server expectation: laborCostMs (not timeMs)
                 annotatorId: this.name,
                 isAmbiguous: decision.isAmbiguous || false,
                 confusionNote: decision.confusionNote || ""
