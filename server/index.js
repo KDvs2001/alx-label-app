@@ -5,33 +5,36 @@ const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
 
-// Import Routes
+const connectDB = require("./config/db");
 const projectRoutes = require("./infrastructure/http/routes/project");
 const taskRoutes = require("./infrastructure/http/routes/task");
-const connectDB = require("./config/db");
 
+// Initialize App
 const app = express();
 const server = http.createServer(app);
-
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "*", 
     methods: ["GET", "POST"]
   }
 });
 
-// Store io instance
-app.set('socketio', io);
-
-io.on('connection', (socket) => {
-  console.log('ðŸ”Œ Client connected');
-});
-
-app.use(cors());
+// Middleware
 app.use(express.json());
+app.use(cors());
 
+// Database Connection
 connectDB();
 
+// Socket.io Connection
+io.on("connection", (socket) => {
+  console.log("New client connected: " + socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
+
+// Routes
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 
@@ -41,5 +44,5 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
-  console.log(ðŸš€ Server running on port );
+  console.log(`ðŸš€ Server running on port ${PORT}`);
 });
