@@ -58,7 +58,7 @@ const SpyWindow = () => {
             {/* LabelStudio Embed */}
             <div className="w-full h-[600px] bg-white rounded-xl overflow-hidden border border-gray-700 mb-8">
                 <iframe
-                    src="http://localhost:8080/projects"
+                    src={import.meta.env.VITE_LABEL_STUDIO_URL || "http://localhost:8080/projects"}
                     title="Label Studio"
                     className="w-full h-full"
                     style={{ border: 'none' }}
