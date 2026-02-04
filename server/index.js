@@ -3,22 +3,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io"); // Unused
 
 const connectDB = require("./config/db");
-const projectRoutes = require("./infrastructure/http/routes/project");
+// const projectRoutes = require("./infrastructure/http/routes/project"); // REMOVED
 const taskRoutes = require("./infrastructure/http/routes/task");
 
 // Initialize App
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*", 
-    methods: ["GET", "POST"]
-  }
-});
-
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -26,17 +19,12 @@ app.use(cors());
 // Database Connection
 connectDB();
 
-// Socket.io Connection
-io.on("connection", (socket) => {
-  console.log("New client connected: " + socket.id);
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-});
+// Socket.io removed (Unused)
 
 // Routes
-app.use("/api/projects", projectRoutes);
+// app.use("/api/projects", projectRoutes); // REMOVED (Project endpoints not used in demo)
 app.use("/api/tasks", taskRoutes);
+app.use("/api/experiments", require("./infrastructure/http/routes/experiment"));
 
 app.get("/", (req, res) => {
   res.send("Research Tool API is Running...");
@@ -44,5 +32,5 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
-  console.log(`ðŸš€ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
