@@ -1,0 +1,158 @@
+{
+  "event": "ANNOTATION_CREATED",
+  "job_id": "1770032301",
+  "data": {
+    "annotation": {
+      "id": 32,
+      "result": [
+        {
+          "value": {
+            "choices": [
+              "Business"
+            ]
+          },
+          "id": "5SBsy7XhZP",
+          "from_name": "label",
+          "to_name": "text",
+          "type": "choices",
+          "origin": "prediction-changed"
+        }
+      ],
+      "was_cancelled": false,
+      "ground_truth": false,
+      "created_at": "2026-02-02T11:38:20.829314Z",
+      "updated_at": "2026-02-02T11:38:20.829314Z",
+      "draft_created_at": null,
+      "lead_time": 13.871,
+      "prediction": {},
+      "result_count": 1,
+      "unique_id": "b21c117e-7c29-43ae-a5c4-3c01f819e796",
+      "import_id": null,
+      "last_action": null,
+      "bulk_created": false,
+      "task": 53,
+      "project": 1,
+      "completed_by": 1,
+      "updated_by": 1,
+      "parent_prediction": 35,
+      "parent_annotation": null,
+      "last_created_by": null
+    },
+    "project": {
+      "id": 1,
+      "task_number": 20,
+      "finished_task_number": 13,
+      "total_predictions_number": 13,
+      "total_annotations_number": 13,
+      "num_tasks_with_annotations": 13,
+      "useful_annotation_number": 13,
+      "ground_truth_number": 0,
+      "skipped_annotations_number": 0,
+      "title": "New Project #1",
+      "description": "",
+      "label_config": "<View>\n  <Text name=\"text\" value=\"$text\"/>\n  <View style=\"box-shadow: 2px 2px 5px #999; padding: 20px; margin-top: 2em; border-radius: 5px;\">\n    <Header value=\"Choose Topic:\"/>\n    <Choices name=\"label\" toName=\"text\" choice=\"single\" showInLine=\"true\">\n      <Choice value=\"World\"/>\n      <Choice value=\"Sports\"/>\n      <Choice value=\"Business\"/>\n      <Choice value=\"Sci/Tech\"/>\n    </Choices>\n  </View>\n</View>",
+      "parsed_label_config": {
+        "label": {
+          "type": "Choices",
+          "to_name": [
+            "text"
+          ],
+          "inputs": [
+            {
+              "type": "Text",
+              "valueType": null,
+              "value": "text"
+            }
+          ],
+          "labels": [
+            "World",
+            "Sports",
+            "Business",
+            "Sci/Tech"
+          ],
+          "labels_attrs": {
+            "World": {
+              "value": "World"
+            },
+            "Sports": {
+              "value": "Sports"
+            },
+            "Business": {
+              "value": "Business"
+            },
+            "Sci/Tech": {
+              "value": "Sci/Tech"
+            }
+          }
+        }
+      },
+      "label_config_hash": 2902683155182968561,
+      "expert_instruction": "",
+      "show_instruction": false,
+      "show_skip_button": true,
+      "enable_empty_annotation": true,
+      "reveal_preannotations_interactively": false,
+      "show_annotation_history": false,
+      "show_collab_predictions": true,
+      "evaluate_predictions_automatically": false,
+      "token": "1Q4eL3QvWOOiF4sqWObtkUMb6AuKRAM4o0ZFOlsI",
+      "result_count": 0,
+      "color": "#FFFFFF",
+      "maximum_annotations": 1,
+      "min_annotations_to_start_training": 0,
+      "control_weights": {
+        "label": {
+          "overall": 1.0,
+          "type": "Choices",
+          "labels": {
+            "World": 1.0,
+            "Sports": 1.0,
+            "Business": 1.0,
+            "Sci/Tech": 1.0
+          }
+        }
+      },
+      "model_version": "ML Model",
+      "data_types": {
+        "text": "Text"
+      },
+      "is_draft": false,
+      "is_published": false,
+      "created_at": "2025-08-02T14:01:04.532362Z",
+      "updated_at": "2026-02-02T11:30:42.823172Z",
+      "sampling": "Sequential sampling",
+      "skip_queue": "REQUEUE_FOR_OTHERS",
+      "show_ground_truth_first": false,
+      "show_overlap_first": false,
+      "overlap_cohort_percentage": 100,
+      "task_data_login": null,
+      "task_data_password": null,
+      "pinned_at": null,
+      "custom_task_lock_ttl": null,
+      "organization": 1,
+      "created_by": 1
+    },
+    "task": {
+      "id": 53,
+      "data": {
+        "text": "IBM to Hire 18,800 workers this year (Reuters) Reuters - International Business Machines Corp. said on Thursday it planned to hire 18,800 people this year, most of them in its fast-growing services division."
+      },
+      "meta": {},
+      "created_at": "2026-02-01T15:44:54.878283Z",
+      "updated_at": "2026-02-02T11:38:20.885690Z",
+      "is_labeled": true,
+      "overlap": 1,
+      "inner_id": 13,
+      "total_annotations": 1,
+      "cancelled_annotations": 0,
+      "total_predictions": 1,
+      "comment_count": 0,
+      "unresolved_comment_count": 0,
+      "last_comment_updated_at": null,
+      "project": 1,
+      "updated_by": 1,
+      "file_upload": 3,
+      "comment_authors": []
+    }
+  }
+}

@@ -1,0 +1,9 @@
+label-studio-ml==1.0.9
+numpy
+scikit-learn
+requests
+torch
+setfit
+datasets
+scipy
+joblib
