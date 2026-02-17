@@ -579,46 +579,63 @@ def annotate():
 
 @app.route('/reset', methods=['POST'])
 def reset_session():
-    """Reset all state for a new contestant"""
+    """Reset ALL state for a new contestant — complete fresh start."""
     try:
-        # Reset cost model
+        # 1. Reset cost model to cold-start defaults
         state.cost_model = AdaptiveCostModel()
+        state.ranker = CALLogRanker(state.cost_model)
         
-        # Reset history files
-        initial_history = [{"step": 0, "alpha": 5.0, "beta": 3.0}]
-        with open(HISTORY_PATH, "w") as f:
-            json.dump(initial_history, f)
-        state.history = initial_history.copy()
-        
-        # Reset metrics
-        initial_metrics = {
-            "accuracy_history": [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}],
-            "step": 0,
-            "alpha": 5.0,
-            "beta": 3.0
+        # 2. Re-initialize backbone models (fresh weights, no previous training)
+        state.backbone = SimpleBackbone(num_labels=2)
+        state.models = {
+            'cal_log': state.backbone,
+            'random': SimpleBackbone(num_labels=2),
+            'entropy': SimpleBackbone(num_labels=2)
         }
-        with open(METRICS_PATH, "w") as f:
-            json.dump(initial_metrics, f)
-        state.accuracy_history = initial_metrics["accuracy_history"].copy()
         
-        # Reset step counters
+        # 3. Re-pretrain on seed sample for warm start
+        state._pretrain_seed()
+        
+        # 4. Reset all counters
         state.step = 0
+        state.steps_since_update = 0
         state.steps_since_train = 0
-        state.selected_task_lengths = [] # Reset length history
+        state.selected_task_lengths = []
         
-        # Clear pending labels
+        # 5. Clear all buffers
+        state.interaction_buffer = []
         state.pending_labels_cal_log = []
         state.pending_labels_random = []
         state.pending_labels_entropy = []
+        if hasattr(state, 'last_shadow_picks'):
+            del state.last_shadow_picks
         
-        # Reset interaction buffer
-        state.interaction_buffer = []
+        # 6. Reset history to initial state
+        state.history = [{"step": 0, "alpha": 5.0, "beta": 3.0}]
+        state.accuracy_history = [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}]
         
-        logger.info("🔄 Session reset for new contestant - all history cleared")
+        # 7. Clear all spy files
+        for fpath in [HISTORY_PATH, METRICS_PATH, SELECTION_PATH, TASK_LOG_PATH]:
+            try:
+                if fpath == HISTORY_PATH:
+                    with open(fpath, "w") as f:
+                        json.dump(state.history, f)
+                elif fpath == METRICS_PATH:
+                    with open(fpath, "w") as f:
+                        json.dump({
+                            "accuracy_history": state.accuracy_history,
+                            "step": 0, "alpha": 5.0, "beta": 3.0
+                        }, f)
+                else:
+                    with open(fpath, "w") as f:
+                        json.dump([] if fpath == TASK_LOG_PATH else {}, f)
+            except: pass
+        
+        logger.info("🔄 FULL SESSION RESET — fresh backbone, cost model, and history for new contestant")
         
         return jsonify({
             "status": "ok",
-            "message": "Session reset successfully",
+            "message": "Session fully reset",
             "alpha": 5.0,
             "beta": 3.0
         })

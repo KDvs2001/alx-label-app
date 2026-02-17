@@ -313,18 +313,34 @@ const ResearchWorkspace = () => {
                 console.error('Failed to load session:', error);
             }
         } else if (action === 'fresh') {
-            // Reset session in database AND local state
+            // Reset EVERYTHING for new annotator
             setAnnotationCount(0);
             setLabeledTaskIds([]);
             labeledIdsRef.current = [];
             setFullAnnotations([]);
             setHistory([]);
+            setMetrics({ alpha: 5.0, beta: 3.0, step: 0 });
+            setShadowMetrics(null);
+            setSelectionLogic(null);
+            setInteractionLog([]);
+
+            // Reset Node.js session (MongoDB)
             try {
                 await fetch(`${SERVER_URL}/api/session/reset/${id}`, {
                     method: 'POST'
                 });
             } catch (error) {
-                console.error('Failed to reset session:', error);
+                console.error('Failed to reset Node.js session:', error);
+            }
+
+            // CRITICAL: Reset ML service state (backbone, cost model, history)
+            try {
+                await fetch(`${API_URL}/reset`, {
+                    method: 'POST'
+                });
+                console.log('✅ ML service state reset for new annotator');
+            } catch (error) {
+                console.error('Failed to reset ML service:', error);
             }
         }
 
