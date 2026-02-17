@@ -1,102 +1,802 @@
 [
     {
+        "id": 1,
         "data": {
-            "text": "Wall St. Bears Claw Back Into the Black (Reuters) Reuters - Short-sellers, Wall Street's dwindling\nband of ultra-cynics, are seeing green again."
-        }
+            "text": "The acting was wooden and unconvincing. High school play level.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 2,
         "data": {
-            "text": "Carlyle Looks Toward Commercial Aerospace (Reuters) Reuters - Private investment firm Carlyle Group,\nwhich has a reputation for making well-timed and occasionally\ncontroversial plays in the defense industry, has quietly placed\nits bets on another part of the aerospace market."
-        }
+            "text": "The villain was terrifyingly good. One of the best antagonists ever.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 3,
         "data": {
-            "text": "Oil and Economy Cloud Stocks' Outlook (Reuters) Reuters - Soaring crude prices plus worries about the\neconomy and the outlook for earnings are expected to hang over\nthe stock market next week during the depth of the summer\ndoldrums."
-        }
+            "text": "Heartwarming and sincere. Restored my faith in humanity.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 4,
         "data": {
-            "text": "Iraq Halts Oil Exports from Main Southern Pipeline (Reuters) Reuters - Authorities have halted oil export\nflows from the main pipeline in southern Iraq after\nintelligence showed a rebel militia could strike the\ninfrastructure, an oil official said on Saturday."
-        }
+            "text": "The plot twists kept me guessing until the very last minute.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 5,
         "data": {
-            "text": "Oil prices soar to all-time record, posing new threat to US economy (AFP) AFP - Tearaway world oil prices, toppling records and straining wallets, present a new economic menace just as the US economy is trying to find its feet."
-        }
+            "text": "The pacing was perfect, never a dull moment. Highly recommended.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 6,
         "data": {
-            "text": "Stocks End Up, But Near Year Lows (Reuters) Reuters - Stocks ended slightly higher on Friday\nbut stayed near lows for the year as oil prices surged past #36;46\na barrel, offsetting a positive outlook from computer maker\nDell Inc. (DELL.O)"
-        }
+            "text": "Smart, witty, and engaging. The screenplay is a work of art.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 7,
         "data": {
-            "text": "Money Funds Fell in Latest Week (AP) AP - Assets of the nation's retail money market mutual funds fell by #36;1.17 billion in the latest week to #36;849.98 trillion, the Investment Company Institute said Thursday."
-        }
+            "text": "Incredible soundtrack that elevates every scene. A feast for the senses.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 8,
         "data": {
-            "text": "Fed minutes show dissent over inflation (USATODAY.com) USATODAY.com - Retail sales bounced back a bit in July, and new claims for jobless benefits fell last week, the government said Thursday, indicating the economy is improving from a midsummer slump."
-        }
+            "text": "Generic and forgettable. I've already forgotten the plot.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 9,
         "data": {
-            "text": "Safety Net (Forbes.com) Forbes.com - After earning a PH.D. in Sociology, Danny Sjursen became a working-class hero by solving a safety problem at a rubber factory."
-        }
+            "text": "I want my money back. One of the worst films of the year.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 10,
         "data": {
-            "text": "Wall St. Bears Claw Back Into the Black (Reuters) Reuters - Short-sellers, Wall Street's dwindling\nband of ultra-cynics, are seeing green again."
-        }
+            "text": "A triumph of animation. Suitable for kids and adults alike.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 11,
         "data": {
-            "text": "Microsoft to begin selling stripped-down version of Windows XP in Asia (AFP) AFP - Microsoft said it would begin selling a cheaper, stripped-down version of its Windows XP operating system in five Asian countries in October."
-        }
+            "text": "An absolute masterpiece! The direction was flawless and the acting was top-tier.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 12,
         "data": {
-            "text": "P2P traffic tops Web, report says (CNET) CNET - Peer-to-peer applications, specifically eDonkey, now drive the most traffic on the Internet, according to a recent study."
-        }
+            "text": "The villain was terrifyingly good. One of the best antagonists ever.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 13,
         "data": {
-            "text": "IBM to Hire 18,800 workers this year (Reuters) Reuters - International Business Machines Corp. said on Thursday it planned to hire 18,800 people this year, most of them in its fast-growing services division."
-        }
+            "text": "I haven't laughed this hard in years. A brilliant comedy with heart.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 14,
         "data": {
-            "text": "Sun to Offer its 'Java Desktop System' to China (Reuters) Reuters - Sun Microsystems Inc. on Thursday said it\nhad signed an agreement with the Chinese government to supply\nmillions of copies of its desktop operating system and software\nin the world's most populous nation."
-        }
+            "text": "I want my money back. One of the worst films of the year.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 15,
         "data": {
-            "text": "Wrapup: Phelps wins fifth gold, U.S. basketball stunned (Reuters) Reuters - Michael Phelps won his fifth gold medal of the Athens Olympics on Friday but the U.S. men's basketball team suffered another shock defeat."
-        }
+            "text": "Heartwarming and sincere. Restored my faith in humanity.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     },
     {
+        "id": 16,
         "data": {
-            "text": "Greek Sprinters Fail to Appear at Hearing (AP) AP - For the Greek people, the Athens Olympics were supposed to be a source of pride, an opportunity to show the world they could pull off a spectacularly successful games. In just a few short days, however, the mood has turned from celebration to shame."
-        }
+            "text": "A complete waste of time. Boring, predictable, and poorly acted.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 17,
         "data": {
-            "text": "Roddick into semi-finals in Cincinnati (AFP) AFP - Top seed Andy Roddick beat German Tommy Haas 6-3, 6-3 to reach the semi-finals of the 2.45 million dollar Cincinnati Masters tennis tournament."
-        }
+            "text": "Plot holes everywhere. Nothing made sense by the end.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 18,
         "data": {
-            "text": "U.S. Men's Basketball Team Beats Australia (AP) AP - The U.S. men's basketball team defeated Australia 89-79 Thursday to advance to the semifinals of the Olympic tournament. The Americans will play Argentina, which beat Greece 69-64."
-        }
+            "text": "A shameless cash grab. No soul or creativity.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 19,
         "data": {
-            "text": "Is this the end for the PC? (CNET) CNET - The PC is losing its dominance as the center of the digital home, according to a new report from Forrester Research."
-        }
+            "text": "The acting was wooden and unconvincing. High school play level.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
     },
     {
+        "id": 20,
         "data": {
-            "text": "Google IPO filing update indicates size of offering (MarketWatch) MarketWatch - Google updated its IPO filing Thursday morning with the Securities and Exchange Commission, indicating the company will sell 14.1 million shares and existing holders will sell 11.6 million shares."
-        }
+            "text": "Classic storytelling at its finest. They don't make them like this anymore.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 21,
+        "data": {
+            "text": "The plot twists kept me guessing until the very last minute.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 22,
+        "data": {
+            "text": "I was on the edge of my seat the entire time. Thrilling!",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 23,
+        "data": {
+            "text": "I want my money back. One of the worst films of the year.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 24,
+        "data": {
+            "text": "A refreshing take on a tired genre. Original and bold.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 25,
+        "data": {
+            "text": "The acting was wooden and unconvincing. High school play level.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 26,
+        "data": {
+            "text": "Surprisingly deep for a horror movie. Keeps you thinking long after it ends.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 27,
+        "data": {
+            "text": "Heartwarming and sincere. Restored my faith in humanity.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 28,
+        "data": {
+            "text": "Overhyped garbage. Don't believe the paid reviews.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 29,
+        "data": {
+            "text": "Terrible writing. The dialogue felt robotic and unnatural.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 30,
+        "data": {
+            "text": "A hidden gem. Low budget but high impact storytelling.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 31,
+        "data": {
+            "text": "Powerful and provocative. It challenges your worldview.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 32,
+        "data": {
+            "text": "Oscar-worthy performances all around. A cinematic triumph.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 33,
+        "data": {
+            "text": "The sound mixing was awful. I couldn't hear half the dialogue.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 34,
+        "data": {
+            "text": "A shameless cash grab. No soul or creativity.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 35,
+        "data": {
+            "text": "The plot twists kept me guessing until the very last minute.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 36,
+        "data": {
+            "text": "Offensive and tasteless. I regret watching this.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 37,
+        "data": {
+            "text": "I walked out halfway through. It was that bad.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 38,
+        "data": {
+            "text": "The pacing was perfect, never a dull moment. Highly recommended.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 39,
+        "data": {
+            "text": "Painfully slow. I struggled to stay awake.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 40,
+        "data": {
+            "text": "Overhyped garbage. Don't believe the paid reviews.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 41,
+        "data": {
+            "text": "Powerful and provocative. It challenges your worldview.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 42,
+        "data": {
+            "text": "The sound mixing was awful. I couldn't hear half the dialogue.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 43,
+        "data": {
+            "text": "A refreshing take on a tired genre. Original and bold.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 44,
+        "data": {
+            "text": "The villain was terrifyingly good. One of the best antagonists ever.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 45,
+        "data": {
+            "text": "A hidden gem. Low budget but high impact storytelling.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 46,
+        "data": {
+            "text": "Overhyped garbage. Don't believe the paid reviews.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 47,
+        "data": {
+            "text": "A joy to watch. Pure entertainment from start to finish.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 48,
+        "data": {
+            "text": "Heartwarming and sincere. Restored my faith in humanity.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 49,
+        "data": {
+            "text": "A hidden gem. Low budget but high impact storytelling.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 50,
+        "data": {
+            "text": "Terrible writing. The dialogue felt robotic and unnatural.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 51,
+        "data": {
+            "text": "A confusing mess. Trying too hard to be 'deep'.",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 52,
+        "data": {
+            "text": "Cringe-worthy jokes that fell flat. Painful to sit through. (Review #51)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 53,
+        "data": {
+            "text": "It tries to be clever but ends up being pretentious. (Review #52)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 54,
+        "data": {
+            "text": "Incredible soundtrack that elevates every scene. A feast for the senses. (Review #53)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 55,
+        "data": {
+            "text": "Not funny at all. I didn't laugh once. (Review #54)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 56,
+        "data": {
+            "text": "Painfully slow. I struggled to stay awake. (Review #55)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 57,
+        "data": {
+            "text": "Powerful and provocative. It challenges your worldview. (Review #56)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 58,
+        "data": {
+            "text": "A touching story about family and redemption. I cried at the end. (Review #57)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 59,
+        "data": {
+            "text": "I want my money back. One of the worst films of the year. (Review #58)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 60,
+        "data": {
+            "text": "A refreshing take on a tired genre. Original and bold. (Review #59)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 61,
+        "data": {
+            "text": "A joy to watch. Pure entertainment from start to finish. (Review #60)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 62,
+        "data": {
+            "text": "I want my money back. One of the worst films of the year. (Review #61)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 63,
+        "data": {
+            "text": "Classic storytelling at its finest. They don't make them like this anymore. (Review #62)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 64,
+        "data": {
+            "text": "The acting was wooden and unconvincing. High school play level. (Review #63)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 65,
+        "data": {
+            "text": "A complete waste of time. Boring, predictable, and poorly acted. (Review #64)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 66,
+        "data": {
+            "text": "Predictable from the first minute. Zero suspense. (Review #65)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 67,
+        "data": {
+            "text": "Generic and forgettable. I've already forgotten the plot. (Review #66)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 68,
+        "data": {
+            "text": "The villain was terrifyingly good. One of the best antagonists ever. (Review #67)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 69,
+        "data": {
+            "text": "I walked out halfway through. It was that bad. (Review #68)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 70,
+        "data": {
+            "text": "I walked out halfway through. It was that bad. (Review #69)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 71,
+        "data": {
+            "text": "It tries to be clever but ends up being pretentious. (Review #70)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 72,
+        "data": {
+            "text": "The ending ruined the entire movie. What were they thinking? (Review #71)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 73,
+        "data": {
+            "text": "The chemistry between the leads is electric. A perfect romantic drama. (Review #72)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 74,
+        "data": {
+            "text": "The worst sequel I've ever seen. Ruined the franchise. (Review #73)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 75,
+        "data": {
+            "text": "Zero character development. I didn't care about anyone. (Review #74)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 76,
+        "data": {
+            "text": "Painfully slow. I struggled to stay awake. (Review #75)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 77,
+        "data": {
+            "text": "Heartwarming and sincere. Restored my faith in humanity. (Review #76)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 78,
+        "data": {
+            "text": "It tries to be clever but ends up being pretentious. (Review #77)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 79,
+        "data": {
+            "text": "Visually stunning. Every frame looks like a painting. A must-watch. (Review #78)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 80,
+        "data": {
+            "text": "A confusing mess. Trying too hard to be 'deep'. (Review #79)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 81,
+        "data": {
+            "text": "I haven't laughed this hard in years. A brilliant comedy with heart. (Review #80)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 82,
+        "data": {
+            "text": "Expected so much more. The trailer was better than the movie. (Review #81)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 83,
+        "data": {
+            "text": "I want my money back. One of the worst films of the year. (Review #82)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 84,
+        "data": {
+            "text": "Generic and forgettable. I've already forgotten the plot. (Review #83)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 85,
+        "data": {
+            "text": "Visually stunning. Every frame looks like a painting. A must-watch. (Review #84)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 86,
+        "data": {
+            "text": "I was on the edge of my seat the entire time. Thrilling! (Review #85)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 87,
+        "data": {
+            "text": "Generic and forgettable. I've already forgotten the plot. (Review #86)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 88,
+        "data": {
+            "text": "Powerful and provocative. It challenges your worldview. (Review #87)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 89,
+        "data": {
+            "text": "Generic and forgettable. I've already forgotten the plot. (Review #88)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 90,
+        "data": {
+            "text": "The worst sequel I've ever seen. Ruined the franchise. (Review #89)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 91,
+        "data": {
+            "text": "Plot holes everywhere. Nothing made sense by the end. (Review #90)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 92,
+        "data": {
+            "text": "The pacing was perfect, never a dull moment. Highly recommended. (Review #91)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 93,
+        "data": {
+            "text": "A complete waste of time. Boring, predictable, and poorly acted. (Review #92)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 94,
+        "data": {
+            "text": "Predictable from the first minute. Zero suspense. (Review #93)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 95,
+        "data": {
+            "text": "Painfully slow. I struggled to stay awake. (Review #94)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 96,
+        "data": {
+            "text": "I haven't laughed this hard in years. A brilliant comedy with heart. (Review #95)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 97,
+        "data": {
+            "text": "The sound mixing was awful. I couldn't hear half the dialogue. (Review #96)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 98,
+        "data": {
+            "text": "The sound mixing was awful. I couldn't hear half the dialogue. (Review #97)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Negative"
+    },
+    {
+        "id": 99,
+        "data": {
+            "text": "A triumph of animation. Suitable for kids and adults alike. (Review #98)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
+    },
+    {
+        "id": 100,
+        "data": {
+            "text": "A joy to watch. Pure entertainment from start to finish. (Review #99)",
+            "meta_info": "IMDB Offline"
+        },
+        "true_label": "Positive"
     }
 ]

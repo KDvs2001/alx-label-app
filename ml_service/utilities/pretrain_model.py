@@ -1,5 +1,7 @@
-import argparse
+import sys
 import os
+import argparse
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # Add ml_service to path
 from datasets import load_dataset
 from backbone import StandardBackbone
 

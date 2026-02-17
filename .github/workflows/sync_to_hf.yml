@@ -1,0 +1,39 @@
+name: Sync to Hugging Face Hub
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'ml_service/**'  # Only trigger when ML files change
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to Hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "bot@example.com"
+          git config --global user.name "Deployment Bot"
+          
+          # 1. Clone the specific HF Space
+          git clone https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/my-ml-service hf_space
+          
+          # 2. Clear existing files in Space (to avoid conflicts)
+          cd hf_space
+          # Be careful not to delete .git
+          find . -maxdepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+          
+          # 3. Copy contents of ml_service (from parent repo) to Root of Space
+          cp -r ../ml_service/* .
+          
+          # 4. Push changes
+          git add .
+          git commit -m "Sync from GitHub" --allow-empty
+          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/my-ml-service main

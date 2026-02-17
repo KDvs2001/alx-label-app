@@ -1,4 +1,4 @@
-label-studio-ml==1.0.9
+
 numpy
 scikit-learn
 requests
@@ -7,3 +7,6 @@ setfit
 datasets
 scipy
 joblib
+redis
+flask
+flask-cors

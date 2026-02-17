@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { TrendingDown, Award, DollarSign, Brain, ArrowDown, ArrowUp } from 'lucide-react';
-import ParameterExplanation from '../components/ParameterExplanation';
 import ROICalculator from '../components/ROICalculator';
 import ParameterImpactExplainer from '../components/ParameterImpactExplainer';
 
@@ -15,7 +14,7 @@ const ImpactDashboard = () => {
 
     const fetchExperimentData = async () => {
         try {
-            const response = await axios.get('http://localhost:5001/api/experiments');
+            const response = await axios.get('/api/experiments');
             setExperimentData(response.data);
             setLoading(false);
         } catch (error) {
@@ -26,7 +25,7 @@ const ImpactDashboard = () => {
 
     const seedSampleData = async () => {
         try {
-            await axios.post('http://localhost:5001/api/experiments/seed');
+            await axios.post('/api/experiments/seed');
             fetchExperimentData();
         } catch (error) {
             console.error('Error seeding data:', error);
@@ -143,22 +142,7 @@ const ImpactDashboard = () => {
                     </div>
                 </section>
 
-                {/* 3. Parameter Logic (The "Why") */}
-                <section>
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="h-px bg-slate-800 flex-grow"></div>
-                        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                            <Brain className="text-purple-400" />
-                            How It Works
-                        </h2>
-                        <div className="h-px bg-slate-800 flex-grow"></div>
-                    </div>
-                    <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm">
-                        <ParameterExplanation />
-                    </div>
-                </section>
-
-                {/* 4. Impact Analysis (The "Trade-offs") */}
+                {/* 3. Impact Analysis (The "Trade-offs") */}
                 <section>
                     <div className="flex items-center gap-4 mb-8">
                         <div className="h-px bg-slate-800 flex-grow"></div>

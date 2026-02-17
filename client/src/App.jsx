@@ -1,8 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import ImpactDashboard from "./pages/ImpactDashboard";
-import SimulationMode from "./pages/SimulationMode";
-import SpyWindow from "./pages/SpyWindow";
-import { Terminal, TrendingUp, Hand, Eye, PlayCircle } from "lucide-react";
+import ResearchWorkspace from "./components/ResearchWorkspace";
+import { Terminal, TrendingUp, Eye } from "lucide-react";
 
 // Simple Navbar Component
 const Navbar = () => {
@@ -19,13 +18,6 @@ const Navbar = () => {
           CAL-Log Research Tool
         </Link>
         <div className="flex items-center gap-4">
-          <Link
-            to="/simulation"
-            className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/simulation') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
-          >
-            <PlayCircle size={16} />
-            Playback
-          </Link>
           <Link
             to="/"
             className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
@@ -54,8 +46,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<ImpactDashboard />} />
-            <Route path="/simulation" element={<SimulationMode />} />
-            <Route path="/spy" element={<SpyWindow />} />
+            <Route path="/spy" element={<ResearchWorkspace />} />
             <Route path="/impact" element={<ImpactDashboard />} />
             <Route path="*" element={<ImpactDashboard />} />
           </Routes>

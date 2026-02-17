@@ -1,0 +1,116 @@
+
+import React from 'react';
+import { Activity, ArrowRight, Gauge, Ruler } from 'lucide-react';
+
+const SelectionCard = ({ selectionLogic }) => {
+    // Helper to get pattern icon and color
+    const getPatternStyle = (pattern) => {
+        switch (pattern) {
+            case 'fast_skimmer':
+                return { icon: '🏃', color: 'text-green-400', bgColor: 'bg-green-900/30', borderColor: 'border-green-700' };
+            case 'careful_reader':
+                return { icon: '📚', color: 'text-blue-400', bgColor: 'bg-blue-900/30', borderColor: 'border-blue-700' };
+            case 'balanced':
+                return { icon: '⚖️', color: 'text-purple-400', bgColor: 'bg-purple-900/30', borderColor: 'border-purple-700' };
+            default:
+                return { icon: '📊', color: 'text-slate-400', bgColor: 'bg-slate-800', borderColor: 'border-slate-700' };
+        }
+    };
+
+    // Helper to get length class color
+    const getLengthStyle = (lengthClass) => {
+        switch (lengthClass) {
+            case 'short':
+                return { color: 'text-green-400', label: 'Short Task' };
+            case 'medium':
+                return { color: 'text-yellow-400', label: 'Medium Task' };
+            case 'long':
+                return { color: 'text-orange-400', label: 'Long Task' };
+            default:
+                return { color: 'text-slate-400', label: 'Unknown' };
+        }
+    };
+
+    return (
+        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <Activity size={100} />
+            </div>
+            <h3 className="text-blue-400 font-bold mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> SELECTION LOGIC
+            </h3>
+
+            {selectionLogic ? (
+                <div className="space-y-4">
+                    {/* Reading Pattern Indicator */}
+                    {selectionLogic.reading_pattern && selectionLogic.reading_pattern.pattern !== 'insufficient_data' && (
+                        <div className={`p-3 rounded-lg border ${getPatternStyle(selectionLogic.reading_pattern.pattern).bgColor} ${getPatternStyle(selectionLogic.reading_pattern.pattern).borderColor}`}>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Gauge size={16} className={getPatternStyle(selectionLogic.reading_pattern.pattern).color} />
+                                <div className="text-xs text-slate-400">Reading Pattern (Last 20 Annotations)</div>
+                            </div>
+                            <div className={`font-bold ${getPatternStyle(selectionLogic.reading_pattern.pattern).color} text-sm`}>
+                                {getPatternStyle(selectionLogic.reading_pattern.pattern).icon} {selectionLogic.reading_pattern.pattern.replace('_', ' ').toUpperCase()}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Pattern-Based Reasoning */}
+                    {selectionLogic.pattern_reasoning && (
+                        <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                            <div className="text-xs text-slate-500 mb-1">Why these tasks?</div>
+                            <div className="font-medium text-slate-200 text-sm">{selectionLogic.pattern_reasoning}</div>
+                        </div>
+                    )}
+
+                    {/* Task Length Classification */}
+                    {selectionLogic.task_stats && selectionLogic.task_stats.length_class && (
+                        <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Ruler size={16} className="text-slate-400" />
+                                <div className="text-xs text-slate-400">Task Length in Dataset</div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className={`font-bold ${getLengthStyle(selectionLogic.task_stats.length_class).color}`}>
+                                        {getLengthStyle(selectionLogic.task_stats.length_class).label}
+                                    </div>
+                                    <div className="text-xs text-slate-500 mt-1">
+                                        {selectionLogic.task_stats.length} words ({selectionLogic.task_stats.length_description})
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-xs text-slate-500">Percentile</div>
+                                    <div className="text-lg font-bold text-blue-400">{selectionLogic.task_stats.percentile}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Original Selection Metrics */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <div className="text-xs text-slate-500">Entropy Score</div>
+                            <div className="text-xl font-bold text-purple-400">{(selectionLogic.entropy || 0).toFixed(3)}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs text-slate-500">Predicted Cost</div>
+                            <div className="text-xl font-bold text-orange-400">{(selectionLogic.cost || 0).toFixed(1)}s</div>
+                        </div>
+                    </div>
+
+                    <div className="h-px bg-slate-800 my-2" />
+
+                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <ArrowRight size={14} />
+                        <span>CAL-Log adapts to your reading behavior every 20 annotations.</span>
+                    </div>
+                </div>
+            ) : (
+                <div className="text-slate-600 text-sm">Waiting for selection data...</div>
+            )}
+        </div>
+    );
+};
+
+export default SelectionCard;

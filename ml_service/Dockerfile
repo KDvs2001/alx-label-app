@@ -1,26 +1,30 @@
-# Base image
+# Dockerfile for CAL-Log ML Service
+# Optimised for Hugging Face Spaces
+
 FROM python:3.9-slim
 
-# Set working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy local requirements and install
-# Note: We assume requirements.txt exists or we create a minimal one
+# Copy requirements FIRST to leverage Docker cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install label-studio-ml
 
-# Copy the rest of the application
-COPY . .
+# Install Python dependencies
+# Increase timeout for large downloads (torch, etc.)
+RUN pip install --no-cache-dir -r requirements.txt --timeout 1000
 
-# Expose port
-EXPOSE 9090
+# Copy the entire ml_service directory contents to /app
+# This includes simulation_server.py, utilities/, cost_engine.py, models/
+COPY . /app
 
-# Command to run the ML backend
-CMD ["label-studio-ml", "start", "my_backend", "--port", "9090"]
+# Expose the port (7860 is standard for HF Spaces)
+EXPOSE 7860
+
+# Run the application
+# Use gunicorn for production stability if available, else python
+# Command adapts to PORT env var
+CMD ["python", "simulation_server.py"]
