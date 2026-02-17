@@ -33,23 +33,29 @@ const ParameterGraphs = ({ metrics, history }) => {
                 </ResponsiveContainer>
             </div>
 
-            {/* 2. ACCURACY HISTORY (New) */}
+            {/* 2. CUMULATIVE COST COMPARISON (Replaces misleading accuracy chart) */}
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
                 <h4 className="text-xs text-slate-500 mb-1 flex justify-between">
-                    <span>Performance (Test Set F1-Score)</span>
-                    <span className="text-[10px] bg-slate-800 px-2 rounded">Higher is Better 📈</span>
+                    <span>Cumulative Annotation Cost (per Strategy)</span>
+                    <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better 📉</span>
                 </h4>
-                <ResponsiveContainer width="100%" height={150}>
-                    <LineChart data={metrics.accuracy_history || []}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                        <XAxis dataKey="step" stroke="#64748b" fontSize={10} />
-                        <YAxis stroke="#64748b" fontSize={10} domain={[0, 1]} />
-                        <Tooltip contentStyle={{ backgroundColor: '#0f172a' }} />
-                        <Line type="monotone" dataKey="cal_log" stroke="#3b82f6" strokeWidth={3} dot={true} name="CAL-Log (You)" />
-                        <Line type="monotone" dataKey="entropy" stroke="#facc15" strokeWidth={2} strokeDasharray="4 4" name="Entropy" />
-                        <Line type="monotone" dataKey="random" stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 4" name="Random" />
-                    </LineChart>
-                </ResponsiveContainer>
+                {metrics.cumulative_costs?.history?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={150}>
+                        <LineChart data={metrics.cumulative_costs.history}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                            <XAxis dataKey="batch" stroke="#64748b" fontSize={10} label={{ value: 'Batch', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#64748b' }} />
+                            <YAxis stroke="#64748b" fontSize={10} label={{ value: 'Cost (s)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#64748b' }} />
+                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }} />
+                            <Line type="monotone" dataKey="cal_log" stroke="#3b82f6" strokeWidth={3} dot={true} name="CAL-Log (You)" />
+                            <Line type="monotone" dataKey="entropy" stroke="#facc15" strokeWidth={2} strokeDasharray="4 4" name="Entropy Only" />
+                            <Line type="monotone" dataKey="random" stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 4" name="Random" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <div className="h-[150px] flex items-center justify-center text-slate-600 text-sm">
+                        Cost comparison will appear after first batch...
+                    </div>
+                )}
             </div>
 
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">

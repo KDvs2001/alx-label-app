@@ -132,6 +132,9 @@ class SimulationState:
         
         # Seed with baseline
         self.accuracy_history = [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}]
+        
+        # Cumulative cost tracking per strategy
+        self.cumulative_costs = {'cal_log': [], 'entropy': [], 'random': []}
 
         # ============================================
         # STARTUP PREPROCESSING (runs ONCE on boot)
@@ -181,7 +184,7 @@ class SimulationState:
             return pool
 
     def _pretrain_seed(self):
-        """Pre-train backbone on a small random sample for warm predictions."""
+        """Pre-train ALL models on a small random sample for warm predictions."""
         try:
             import random
             seed_size = min(200, len(self.clean_pool))
@@ -189,8 +192,11 @@ class SimulationState:
             X = [d['text'] for d in seed]
             y = [d['label'] for d in seed]
             if len(set(y)) >= 2:  # Need both classes
-                self.backbone.partial_fit(X, y)
-                logger.info(f"🧠 Pre-trained backbone on {seed_size} seed samples")
+                # Train ALL models so shadow comparison has meaningful entropy
+                for name, model in self.models.items():
+                    model.partial_fit(X, y)
+                    logger.info(f"  Pre-trained '{name}' on {seed_size} samples")
+                logger.info(f"✅ All models pre-trained on {seed_size} seed samples")
             else:
                 logger.warning("Seed sample has only one class, skipping pre-train")
         except Exception as e:
@@ -336,6 +342,11 @@ def predict():
         "entropy": calc_metrics(entropy_picks),
         "random": calc_metrics(random_picks)
     }
+    
+    # Track cumulative costs per strategy
+    state.cumulative_costs['cal_log'].append(shadow_metrics['cal_log']['estimated_cost'])
+    state.cumulative_costs['entropy'].append(shadow_metrics['entropy']['estimated_cost'])
+    state.cumulative_costs['random'].append(shadow_metrics['random']['estimated_cost'])
 
     # Log Spy Selection
     top = ranked_results[0]
@@ -456,7 +467,21 @@ def get_spy_metrics():
         "accuracy_history": state.accuracy_history,
         "step": state.step,
         "alpha": state.cost_model.alpha,
-        "beta": state.cost_model.beta
+        "beta": state.cost_model.beta,
+        "cumulative_costs": {
+            "cal_log": sum(state.cumulative_costs.get('cal_log', [])),
+            "entropy": sum(state.cumulative_costs.get('entropy', [])),
+            "random": sum(state.cumulative_costs.get('random', [])),
+            "history": [
+                {
+                    "batch": i + 1,
+                    "cal_log": round(sum(state.cumulative_costs['cal_log'][:i+1]), 1),
+                    "entropy": round(sum(state.cumulative_costs['entropy'][:i+1]), 1),
+                    "random": round(sum(state.cumulative_costs['random'][:i+1]), 1)
+                }
+                for i in range(len(state.cumulative_costs.get('cal_log', [])))
+            ]
+        }
     })
 
 @app.route('/spy/task_log', methods=['GET'])
@@ -480,11 +505,11 @@ def annotate():
     state.steps_since_update += 1
     state.steps_since_train += 1
     
-    # Update Cost Model (Every 20 annotations)
+    # Update Cost Model (Every 10 annotations)
     interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
     state.interaction_buffer.append(interaction)  # Accumulate interactions
     
-    if state.steps_since_update >= 20:
+    if state.steps_since_update >= 10:
         logger.info(f"📉 Updating Cost Model with {len(state.interaction_buffer)} interactions...")
         state.cost_model.update(state.interaction_buffer)  # Pass ALL accumulated interactions
         state.steps_since_update = 0
@@ -512,9 +537,9 @@ def annotate():
     label_int = 1 if label == 'Positive' else 0
     state.pending_labels_cal_log = getattr(state, 'pending_labels_cal_log', []) + [(text, label_int)]
 
-    # Retrain Cycle (Every 20 - SYNCED with Alpha/Beta updates)
+    # Retrain Cycle (Every 10 - SYNCED with Alpha/Beta updates)
     trained = False
-    if state.steps_since_train >= 20:
+    if state.steps_since_train >= 10:
         logger.info("🧠 Retraining ALL Models...")
         
         # Helper to train
@@ -613,6 +638,7 @@ def reset_session():
         # 6. Reset history to initial state
         state.history = [{"step": 0, "alpha": 5.0, "beta": 3.0}]
         state.accuracy_history = [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}]
+        state.cumulative_costs = {'cal_log': [], 'entropy': [], 'random': []}
         
         # 7. Clear all spy files
         for fpath in [HISTORY_PATH, METRICS_PATH, SELECTION_PATH, TASK_LOG_PATH]:
