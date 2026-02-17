@@ -13,7 +13,14 @@ const app = express();
 const server = http.createServer(app);
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://alx-label-app-research-tool.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:4173"
+  ],
+  credentials: true
+}));
 
 // Database Connection
 connectDB();

@@ -7,7 +7,7 @@ import ParameterImpactExplainer from '../components/ParameterImpactExplainer';
 const ImpactDashboard = () => {
     const [experimentData, setExperimentData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "";
+    const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
 
     useEffect(() => {
         fetchExperimentData();
