@@ -7,6 +7,7 @@ import ParameterImpactExplainer from '../components/ParameterImpactExplainer';
 const ImpactDashboard = () => {
     const [experimentData, setExperimentData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "";
 
     useEffect(() => {
         fetchExperimentData();
@@ -14,7 +15,7 @@ const ImpactDashboard = () => {
 
     const fetchExperimentData = async () => {
         try {
-            const response = await axios.get('/api/experiments');
+            const response = await axios.get(`${SERVER_URL}/api/experiments`);
             setExperimentData(response.data);
             setLoading(false);
         } catch (error) {
@@ -25,7 +26,7 @@ const ImpactDashboard = () => {
 
     const seedSampleData = async () => {
         try {
-            await axios.post('/api/experiments/seed');
+            await axios.post(`${SERVER_URL}/api/experiments/seed`);
             fetchExperimentData();
         } catch (error) {
             console.error('Error seeding data:', error);

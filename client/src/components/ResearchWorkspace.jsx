@@ -44,7 +44,7 @@ const ResearchWorkspace = () => {
 
     // API URL (Simulation Server - Env for Cloud, Proxy for Local)
     const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
-    const SERVER_URL = "";
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "";
 
     // Toast Timer
     useEffect(() => {

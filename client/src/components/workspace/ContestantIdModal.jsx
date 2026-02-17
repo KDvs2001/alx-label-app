@@ -13,7 +13,8 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
 
         // Check if session exists
         try {
-            const response = await fetch(`/api/session/load/${contestantId}`);
+            const SERVER_URL = import.meta.env.VITE_SERVER_URL || "";
+            const response = await fetch(`${SERVER_URL}/api/session/load/${contestantId}`);
             const data = await response.json();
 
             if (data.exists) {
