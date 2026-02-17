@@ -1,3 +1,13 @@
+---
+title: CAL-Log ML Service
+emoji: 📊
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # CAL-Log Research Tool
 
 **Cost-Aware Active Learning with Logarithmic Cost Model**
