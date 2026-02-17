@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import WorkspaceHeader from './workspace/WorkspaceHeader';
 import GuidelinesPanel from './workspace/GuidelinesPanel';
 import TaskCard from './workspace/TaskCard';
@@ -41,6 +41,16 @@ const ResearchWorkspace = () => {
     const [viewStartTime, setViewStartTime] = useState(Date.now());
     const [fatigueDetected, setFatigueDetected] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
+
+    // PERFORMANCE: Cache demo_tasks.json so it's only fetched ONCE (74MB file)
+    const cachedTasksRef = useRef(null);
+    const loadDemoTasks = async () => {
+        if (cachedTasksRef.current) return cachedTasksRef.current;
+        const res = await fetch('/demo_tasks.json');
+        const allTasks = await res.json();
+        cachedTasksRef.current = allTasks;
+        return allTasks;
+    };
 
     // API URL (Simulation Server - Env for Cloud, Proxy for Local)
     const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
@@ -110,9 +120,8 @@ const ResearchWorkspace = () => {
     const fetchNextBatch = async () => {
         setLoading(true);
         try {
-            // Mock: Load demo tasks locally first
-            const res = await fetch('/demo_tasks.json');
-            const allTasks = await res.json();
+            // Load demo tasks (cached after first fetch)
+            const allTasks = await loadDemoTasks();
 
             // Filter out already labeled tasks
             const unlabeledTasks = allTasks.filter(task => !labeledTaskIds.includes(task.id));
@@ -145,8 +154,7 @@ const ResearchWorkspace = () => {
 
             // Safe Fallback Logic
             try {
-                const res = await fetch('/demo_tasks.json');
-                const allTasks = await res.json();
+                const allTasks = await loadDemoTasks();
                 const unlabeledTasks = allTasks.filter(task => !labeledTaskIds.includes(task.id));
                 const raw = unlabeledTasks.slice(0, 50);
                 if (raw.length > 0) {
