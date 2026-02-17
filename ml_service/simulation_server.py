@@ -193,28 +193,10 @@ def predict():
         task['text'] = preprocess_text(task['text'])
     texts = [task['text'] for task in normalized_tasks]
     
-    # Duplicate Detection using TF-IDF + Cosine Similarity
-    if len(texts) > 1:
-        try:
-            vectorizer = TfidfVectorizer(max_features=100, stop_words='english')
-            tfidf_matrix = vectorizer.fit_transform(texts)
-            similarity_matrix = cosine_similarity(tfidf_matrix)
-            
-            # Find duplicates (similarity > 0.85)
-            duplicate_indices = set()
-            threshold = 0.85
-            for i in range(len(similarity_matrix)):
-                for j in range(i + 1, len(similarity_matrix)):
-                    if similarity_matrix[i][j] > threshold:
-                        duplicate_indices.add(j)  # Keep first occurrence, mark later ones as duplicates
-            
-            # Remove duplicates
-            if duplicate_indices:
-                logger.info(f"🔍 Duplicate Detection: Removed {len(duplicate_indices)} duplicates")
-                normalized_tasks = [task for idx, task in enumerate(normalized_tasks) if idx not in duplicate_indices]
-                texts = [text for idx, text in enumerate(texts) if idx not in duplicate_indices]
-        except Exception as e:
-            logger.warning(f"Duplicate detection failed: {e}. Proceeding without deduplication.")
+    # Duplicate Detection Removed for Performance
+    # O(N^2) cosine similarity on every request kills CPU performance on HF Spaces.
+    # Assuming dataset.json is already reasonably clean.
+    pass
     
     if not normalized_tasks:
         logger.warning("All tasks were duplicates or empty after preprocessing")
