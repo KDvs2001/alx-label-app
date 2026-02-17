@@ -6,6 +6,7 @@ import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
+import hashlib
 
 # Ensure imports work
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -132,6 +133,69 @@ class SimulationState:
         # Seed with baseline
         self.accuracy_history = [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}]
 
+        # ============================================
+        # STARTUP PREPROCESSING (runs ONCE on boot)
+        # ============================================
+        logger.info(f"🔧 Starting preprocessing on {len(self.pool)} tasks...")
+        
+        # 1. DEDUPLICATION (O(N²) — but only runs once, during Docker build time)
+        self.clean_pool = self._deduplicate_pool(self.pool)
+        logger.info(f"✅ Clean pool ready: {len(self.clean_pool)} tasks (removed {len(self.pool) - len(self.clean_pool)} duplicates)")
+        
+        # 2. PRE-TRAIN backbone on a small seed sample for warm start
+        self._pretrain_seed()
+
+    def _deduplicate_pool(self, pool):
+        """Run O(N²) dedup ONCE on startup. Results cached for entire session."""
+        if len(pool) < 2:
+            return pool
+        try:
+            texts = [d['text'] for d in pool]
+            vectorizer = TfidfVectorizer(max_features=500, stop_words='english')
+            tfidf_matrix = vectorizer.fit_transform(texts)
+            
+            # Batch cosine similarity to avoid memory blow-up on 50k
+            # Process in chunks of 5000
+            duplicate_indices = set()
+            chunk_size = 5000
+            n = len(texts)
+            
+            for start in range(0, n, chunk_size):
+                end = min(start + chunk_size, n)
+                chunk_sim = cosine_similarity(tfidf_matrix[start:end], tfidf_matrix)
+                for i_local in range(end - start):
+                    i_global = start + i_local
+                    if i_global in duplicate_indices:
+                        continue
+                    for j in range(i_global + 1, n):
+                        if j in duplicate_indices:
+                            continue
+                        if chunk_sim[i_local][j] > 0.85:
+                            duplicate_indices.add(j)
+                logger.info(f"  Dedup chunk {start}-{end}/{n} done, {len(duplicate_indices)} dupes found so far")
+            
+            clean = [task for idx, task in enumerate(pool) if idx not in duplicate_indices]
+            return clean
+        except Exception as e:
+            logger.warning(f"Dedup failed: {e}. Using full pool.")
+            return pool
+
+    def _pretrain_seed(self):
+        """Pre-train backbone on a small random sample for warm predictions."""
+        try:
+            import random
+            seed_size = min(200, len(self.clean_pool))
+            seed = random.sample(self.clean_pool, seed_size)
+            X = [d['text'] for d in seed]
+            y = [d['label'] for d in seed]
+            if len(set(y)) >= 2:  # Need both classes
+                self.backbone.partial_fit(X, y)
+                logger.info(f"🧠 Pre-trained backbone on {seed_size} seed samples")
+            else:
+                logger.warning("Seed sample has only one class, skipping pre-train")
+        except Exception as e:
+            logger.warning(f"Pre-train failed: {e}")
+
     def _init_files(self):
         try:
             # RESET HISTORY FOR NEW USER - Always start fresh
@@ -165,42 +229,63 @@ def health():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    tasks = request.json.get('tasks', [])
-    if not tasks: return jsonify([])
-
-    # Normalize inputs
-    normalized_tasks = []
-    texts = []
-    for i, t in enumerate(tasks):
-        if isinstance(t, str):
-            row = {'taskId': i, 'text': t}
-        else:
-            txt = t.get('data', {}).get('text') or t.get('text', "")
-            tid = t.get('id', i)
-            row = {'taskId': tid, 'text': txt}
-        normalized_tasks.append(row)
-        texts.append(row['text'])
+    """Serve ranked tasks from the SERVER's own pool.
+    Client sends only labeled_task_ids (list of IDs already annotated).
+    Server picks next batch from its clean_pool, ranks, and returns.
+    """
+    import random
+    
+    # Accept labeled IDs from client (or legacy task objects for backward compat)
+    labeled_ids = set()
+    raw_labeled = request.json.get('labeled_task_ids', [])
+    for lid in raw_labeled:
+        labeled_ids.add(int(lid) if isinstance(lid, (int, float)) else lid)
+    
+    # Also check for legacy format (tasks array sent from client)
+    legacy_tasks = request.json.get('tasks', [])
+    
+    # Pick source: server pool (new) or client-sent tasks (legacy fallback)
+    if legacy_tasks and not state.clean_pool:
+        # Legacy fallback: client sent tasks, server has no pool
+        normalized_tasks = []
+        texts = []
+        for i, t in enumerate(legacy_tasks):
+            if isinstance(t, str):
+                row = {'taskId': i, 'text': t}
+            else:
+                txt = t.get('data', {}).get('text') or t.get('text', "")
+                tid = t.get('id', i)
+                row = {'taskId': tid, 'text': txt}
+            normalized_tasks.append(row)
+            texts.append(row['text'])
+    else:
+        # NEW: Server-side task selection from deduplicated pool
+        # Filter out already-labeled tasks
+        available = [t for t in state.clean_pool if t['id'] not in labeled_ids]
+        
+        if not available:
+            logger.warning("All tasks have been labeled!")
+            return jsonify({'tasks': [], 'shadow_metrics': None, 'pool_exhausted': True})
+        
+        # Select batch of 50 for ranking
+        batch_size = min(50, len(available))
+        batch = available[:batch_size]
+        
+        normalized_tasks = [{'taskId': t['id'], 'text': t['text']} for t in batch]
+        texts = [t['text'] for t in batch]
+    
+    if not normalized_tasks:
+        return jsonify({'tasks': [], 'shadow_metrics': None})
+    
     # Preprocessing: Clean and normalize text
     def preprocess_text(text):
-        # Remove extra whitespace
         text = re.sub(r'\s+', ' ', text).strip()
-        # Remove special characters but keep basic punctuation
-        text = re.sub(r'[^a-zA-Z0-9\s.,!?\'-]', '', text)
+        text = re.sub(r'[^a-zA-Z0-9\s.,!?\'\-]', '', text)
         return text
     
-    # Apply preprocessing
     for task in normalized_tasks:
         task['text'] = preprocess_text(task['text'])
     texts = [task['text'] for task in normalized_tasks]
-    
-    # Duplicate Detection Removed for Performance
-    # O(N^2) cosine similarity on every request kills CPU performance on HF Spaces.
-    # Assuming dataset.json is already reasonably clean.
-    pass
-    
-    if not normalized_tasks:
-        logger.warning("All tasks were duplicates or empty after preprocessing")
-        return jsonify({'tasks': [], 'shadow_metrics': None})
     
     # Get Probs & Rank
     probs = state.backbone.predict_proba(texts)
@@ -209,28 +294,20 @@ def predict():
     if not ranked_results: return jsonify({'tasks': [], 'shadow_metrics': None})
 
     # --- SHADOW SIMULATION LOGIC ---
-    import random
-    
     # 1. Strategies Selection (Top 3 for each)
-    # CAL-Log (Already sorted by efficient score)
     cal_log_picks = ranked_results[:3]
     
-    # Entropy (Sort by Uncertainty)
-    # CRITICAL: We must shuffle first to break the "Length Bias" inherited from ranked_results
-    # Otherwise, if entropies are tied (common at start), it picks short tasks (because ranked_results is sorted by length)
+    # Entropy (Shuffle first to break length bias)
     pool_for_entropy = ranked_results.copy()
     random.shuffle(pool_for_entropy) 
-    
-    # Pick top entropy from shuffled pool
     entropy_picks = sorted(pool_for_entropy, key=lambda x: x['transparency_report']['math_proof']['entropy'], reverse=True)[:3]
     
-    # Random (Shuffle copies)
+    # Random
     random_picks = random.sample(ranked_results, min(3, len(ranked_results)))
 
     # 2. Metric Calculator Helper
     def calc_metrics(picks):
         avg_len = sum([len(p['text'].split()) for p in picks]) / max(1, len(picks))
-        # Recalculate cost dynamically to be sure
         costs = []
         for p in picks:
             log_len = np.log1p(len(p['text'].split()))
@@ -242,7 +319,7 @@ def predict():
         for p in picks:
             audit_data.append({
                 'id': p['id'],
-                'text': p['text'][:80] + "...", # Snippet
+                'text': p['text'][:80] + "...",
                 'len': len(p['text'].split()),
                 'entropy': p['transparency_report']['math_proof']['entropy']
             })
@@ -260,28 +337,20 @@ def predict():
         "random": calc_metrics(random_picks)
     }
 
-    # Log Spy Selection (Existing logic)
+    # Log Spy Selection
     top = ranked_results[0]
-    
-    # Calculate Percentile
     t_len = len(top['text'].split())
-    pct = sum([1 for x in state.all_lengths if x < t_len]) / len(state.all_lengths) * 100
+    pct = sum([1 for x in state.all_lengths if x < t_len]) / len(state.all_lengths) * 100 if state.all_lengths else 50
     
-    # Get reading pattern analysis
     reading_pattern = state.cost_model.get_reading_pattern()
     
-    # Classify task length based on dataset percentiles
     if pct < 33:
-        length_class = "short"
-        length_desc = "shorter than 67% of dataset"
+        length_class, length_desc = "short", "shorter than 67% of dataset"
     elif pct < 67:
-        length_class = "medium"
-        length_desc = "medium length (33-67 percentile)"
+        length_class, length_desc = "medium", "medium length (33-67 percentile)"
     else:
-        length_class = "long"
-        length_desc = "longer than 67% of dataset"
+        length_class, length_desc = "long", "longer than 67% of dataset"
 
-    # Compare with previous history
     avg_prev = np.mean(state.selected_task_lengths[-10:]) if state.selected_task_lengths else 0
     if state.selected_task_lengths and t_len > avg_prev * 1.5:
         rel_desc = f"(Significant Increase! Prev Avg: {int(avg_prev)}w)"
@@ -290,10 +359,8 @@ def predict():
     else:
         rel_desc = ""
         
-    # Update history for next time
     state.selected_task_lengths.append(t_len)
     
-    # Generate reasoning based on reading pattern and task selection
     if reading_pattern['pattern'] == 'fast_skimmer':
         pattern_reasoning = f"🏃 Fast Reader Detected: β={reading_pattern['beta']} (baseline: {reading_pattern['baseline_beta']}). Selected {length_class} tasks {rel_desc} to maximize your efficiency."
     elif reading_pattern['pattern'] == 'careful_reader':
@@ -325,9 +392,6 @@ def predict():
     try:
         with open(SELECTION_PATH, "w") as f: json.dump(spy_data, f)
         
-        # --- NEW LOGGING FOR EVALUATION ---
-        # Append selected task details to a persistent log file
-        
         new_log_entry = {
             "step": state.step,
             "selected_id": top['id'],
@@ -348,18 +412,25 @@ def predict():
         
         with open(TASK_LOG_PATH, "w") as f:
             json.dump(existing_logs, f)
-        # ----------------------------------
-            
     except: pass
 
-
-    # Return Result
-    id_map = {str(t.get('id', i)): t for i, t in enumerate(tasks)}
-    sorted_tasks = [id_map[str(res['id'])] for res in ranked_results if str(res['id']) in id_map]
+    # Build response with full task objects (for client to display)
+    response_tasks = []
+    for res in ranked_results:
+        task_id = res['id']
+        # Find original task data from pool
+        original = next((t for t in state.clean_pool if t['id'] == task_id), None)
+        if original:
+            response_tasks.append({
+                'id': original['id'],
+                'data': {'text': original['text']},
+                'true_label': None  # Don't leak ground truth to client
+            })
     
     return jsonify({
-        "tasks": sorted_tasks,
-        "shadow_metrics": shadow_metrics
+        "tasks": response_tasks,
+        "shadow_metrics": shadow_metrics,
+        "pool_remaining": len([t for t in state.clean_pool if t['id'] not in labeled_ids])
     })
 
 @app.route('/spy/selection', methods=['GET'])

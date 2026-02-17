@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import WorkspaceHeader from './workspace/WorkspaceHeader';
 import GuidelinesPanel from './workspace/GuidelinesPanel';
 import TaskCard from './workspace/TaskCard';
@@ -41,16 +41,6 @@ const ResearchWorkspace = () => {
     const [viewStartTime, setViewStartTime] = useState(Date.now());
     const [fatigueDetected, setFatigueDetected] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
-
-    // PERFORMANCE: Cache demo_tasks.json so it's only fetched ONCE (74MB file)
-    const cachedTasksRef = useRef(null);
-    const loadDemoTasks = async () => {
-        if (cachedTasksRef.current) return cachedTasksRef.current;
-        const res = await fetch('/demo_tasks.json');
-        const allTasks = await res.json();
-        cachedTasksRef.current = allTasks;
-        return allTasks;
-    };
 
     // API URL (Simulation Server - Env for Cloud, Proxy for Local)
     const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
@@ -120,18 +110,12 @@ const ResearchWorkspace = () => {
     const fetchNextBatch = async () => {
         setLoading(true);
         try {
-            // Load demo tasks (cached after first fetch)
-            const allTasks = await loadDemoTasks();
-
-            // Filter out already labeled tasks
-            const unlabeledTasks = allTasks.filter(task => !labeledTaskIds.includes(task.id));
-
-            // Send to server to rank
+            // SERVER-SIDE ARCHITECTURE: ML service owns the 50k dataset.
+            // Client sends only labeled IDs (~1KB), server returns 50 ranked tasks.
             const rankRes = await fetch(`${API_URL}/predict`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tasks: unlabeledTasks.slice(0, 50),
                     labeled_task_ids: labeledTaskIds
                 })
             });
@@ -139,31 +123,17 @@ const ResearchWorkspace = () => {
             const ranked = Array.isArray(data) ? data : (data.tasks || []);
             const shadows = Array.isArray(data) ? null : data.shadow_metrics;
 
-            // Verify we have tasks
             if (ranked.length > 0) {
                 setTasks(ranked);
                 setCurrentTask(ranked[0]);
                 setShadowMetrics(shadows);
-                fetchSpySelection(); // Get the logic for this task
+                fetchSpySelection();
             } else {
-                // Fallback: Server returned empty array
-                throw new Error("Empty ranked list from server");
+                setToast({ message: "All tasks have been labeled! 🎉", type: "success" });
             }
         } catch (e) {
-            console.error("Failed to fetch tasks, using local fallback", e);
-
-            // Safe Fallback Logic
-            try {
-                const allTasks = await loadDemoTasks();
-                const unlabeledTasks = allTasks.filter(task => !labeledTaskIds.includes(task.id));
-                const raw = unlabeledTasks.slice(0, 50);
-                if (raw.length > 0) {
-                    setTasks(raw);
-                    setCurrentTask(raw[0]);
-                }
-            } catch (fallbackError) {
-                console.error("Critical: Local fallback also failed", fallbackError);
-            }
+            console.error("Failed to fetch tasks from ML service", e);
+            setToast({ message: "ML service unavailable. Please wait for it to start.", type: "error" });
         }
         setLoading(false);
     };
