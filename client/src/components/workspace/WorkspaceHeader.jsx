@@ -1,7 +1,7 @@
 import React from 'react';
-import { Brain, BookOpen, Save, User, ArrowLeft } from 'lucide-react';
+import { Brain, BookOpen, Save, User, ArrowLeft, Download } from 'lucide-react';
 
-const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit }) => {
+const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport }) => {
     return (
         <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
             <div className="flex items-center gap-3">
@@ -38,6 +38,14 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                         className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded border border-green-700 transition-colors font-bold"
                     >
                         <Save size={14} /> Save & Exit
+                    </button>
+                )}
+                {contestantId && onExport && (
+                    <button
+                        onClick={onExport}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded border border-purple-700 transition-colors font-bold"
+                    >
+                        <Download size={14} /> Export Data
                     </button>
                 )}
                 <div className="text-right border-l border-slate-700 pl-4">

@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+const AnnotationDetailSchema = new mongoose.Schema({
+    taskId: Number,
+    textSnippet: String,
+    wordCount: Number,
+    label: String,
+    timeSeconds: Number,
+    alpha: Number,
+    beta: Number,
+    timestamp: Date,
+    annotationIndex: Number
+}, { _id: false });
+
 const AnnotationSessionSchema = new mongoose.Schema({
     contestantId: {
         type: String,
@@ -14,6 +26,7 @@ const AnnotationSessionSchema = new mongoose.Schema({
     labeledTaskIds: [{
         type: Number
     }],
+    annotations: [AnnotationDetailSchema],
     lastUpdated: {
         type: Date,
         default: Date.now
@@ -29,3 +42,4 @@ AnnotationSessionSchema.pre('save', function (next) {
 });
 
 module.exports = mongoose.model('AnnotationSession', AnnotationSessionSchema);
+

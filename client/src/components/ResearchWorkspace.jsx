@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import WorkspaceHeader from './workspace/WorkspaceHeader';
 import GuidelinesPanel from './workspace/GuidelinesPanel';
 import TaskCard from './workspace/TaskCard';
@@ -30,6 +30,12 @@ const ResearchWorkspace = () => {
     const [showContestantModal, setShowContestantModal] = useState(true);
     const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
     const [hasUnsavedWork, setHasUnsavedWork] = useState(false);
+
+    // Full annotation log for data export & research analysis
+    const [fullAnnotations, setFullAnnotations] = useState([]);
+
+    // Ref to avoid stale closures in async handlers
+    const labeledIdsRef = useRef([]);
 
     // Evaluator Briefing
     const [showBriefing, setShowBriefing] = useState(true);
@@ -110,13 +116,12 @@ const ResearchWorkspace = () => {
     const fetchNextBatch = async () => {
         setLoading(true);
         try {
-            // SERVER-SIDE ARCHITECTURE: ML service owns the 50k dataset.
-            // Client sends only labeled IDs (~1KB), server returns 50 ranked tasks.
+            // Use ref for always-fresh labeled IDs (avoids stale closure)
             const rankRes = await fetch(`${API_URL}/predict`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    labeled_task_ids: labeledTaskIds
+                    labeled_task_ids: labeledIdsRef.current
                 })
             });
             const data = await rankRes.json();
@@ -175,81 +180,80 @@ const ResearchWorkspace = () => {
 
     const handleAnnotate = async (label) => {
         if (!currentTask || submitting) return;
-
         setSubmitting(true);
-        const timeTaken = (Date.now() - viewStartTime) / 1000;
 
-        // Log interaction with formatted data for UI display
-        const textLength = (currentTask.data?.text || currentTask.text).split(" ").length;
+        const timeTaken = (Date.now() - viewStartTime) / 1000;
+        const taskText = currentTask.data?.text || currentTask.text;
+        const textLength = taskText.split(" ").length;
+
+        // ── 1. INSTANT UI UPDATE (optimistic) ──
+        // Move to next task IMMEDIATELY so the user sees no delay
+        const nextTasks = tasks.slice(1);
+        if (nextTasks.length > 0) {
+            setTasks(nextTasks);
+            setCurrentTask(nextTasks[0]);
+        }
+
+        // Update labeled IDs immediately (fixes stale-closure bug)
+        const newLabeledIds = [...labeledIdsRef.current, currentTask.id];
+        labeledIdsRef.current = newLabeledIds;
+        setLabeledTaskIds(newLabeledIds);
+        const newCount = annotationCount + 1;
+        setAnnotationCount(newCount);
+
+        // Log for Cost Model Inputs table
         const interaction = {
-            text: currentTask.data?.text || currentTask.text,
-            label,
-            time_taken: timeTaken,
-            // Formatted data for Cost Model Inputs table
+            text: taskText, label, time_taken: timeTaken,
             len: textLength,
             logL: Math.log1p(textLength).toFixed(2),
             time: timeTaken.toFixed(2)
         };
+        setInteractionLog(prev => [interaction, ...prev].slice(0, 5));
 
-        setInteractionLog(prev => [interaction, ...prev].slice(0, 5));  // Keep last 5
+        // Track full annotation for research export
+        const fullAnnotation = {
+            taskId: currentTask.id,
+            textSnippet: taskText.substring(0, 100),
+            wordCount: textLength,
+            label,
+            timeSeconds: parseFloat(timeTaken.toFixed(2)),
+            timestamp: new Date().toISOString(),
+            alpha: metrics.alpha,
+            beta: metrics.beta,
+            annotationIndex: newCount
+        };
+        setFullAnnotations(prev => [...prev, fullAnnotation]);
 
+        // Re-enable button IMMEDIATELY after optimistic UI update
+        setSubmitting(false);
+
+        // ── 2. ASYNC WORK (non-blocking) ──
         try {
             const response = await fetch(`${API_URL}/annotate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(interaction)
             });
-
             const data = await response.json();
 
-            // Check if model was trained
+            // Check if model was retrained
             if (data.trained) {
-                setToast({ message: "🧠 Model Retrained! CAL-Log adapted to your behavior.", type: "success" });
-
-                // PAUSE ANNOTATION - Show training message
-                setSubmitting(true);  // Keep UI disabled
-                setToast({ message: "⏳ Training complete! Selecting new tasks based on your behavior...", type: "info" });
-
-                // Refresh metrics with new alpha/beta
-                await pollMetrics();
-
-                // CRITICAL: Force re-ranking of tasks with new alpha/beta
-                // This ensures CAL-Log selects tasks based on updated cost model
-                await fetchNextBatch();  // Re-rank ALL tasks with new model
-
-                // Wait 2 seconds to let user see the message
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                // Skip the normal task progression since we already fetched new batch
-                setSubmitting(false);
-                return;  // Exit early
+                setToast({ message: "🧠 Model Retrained! Fetching new tasks...", type: "success" });
+                pollMetrics();  // Non-blocking refresh
+                fetchNextBatch();  // Uses labeledIdsRef (always fresh)
             }
 
-            // Update session state
-            const newCount = annotationCount + 1;
-            const newLabeledIds = [...labeledTaskIds, currentTask.id];
-            setAnnotationCount(newCount);
-            setLabeledTaskIds(newLabeledIds);
-            setHasUnsavedWork(true);
+            // Auto-save session (non-blocking, fire-and-forget)
+            saveSession(newCount, newLabeledIds, fullAnnotation);
 
-            // Auto-save session
-            await saveSession(newCount, newLabeledIds);
-
-            // Move to next task
-            const nextTasks = tasks.slice(1);
+            // Fetch more tasks if running low
             if (nextTasks.length < 3) {
-                // Fetch more tasks but don't reset count
                 fetchNextBatch();
             } else {
-                setTasks(nextTasks);
-                setCurrentTask(nextTasks[0]);
-                // Refresh selection logic with new predicted cost
-                setTimeout(fetchSpySelection, 500);
+                setTimeout(fetchSpySelection, 300);
             }
         } catch (error) {
             console.error('Annotation error:', error);
-        } finally {
-            setSubmitting(false);
         }
     };
 
@@ -269,18 +273,23 @@ const ResearchWorkspace = () => {
     }, [currentTask, submitting]);
 
     // Session Management Functions
-    const saveSession = async (count = annotationCount, ids = labeledTaskIds) => {
+    const saveSession = async (count = annotationCount, ids = labeledTaskIds, newAnnotation = null) => {
         if (!contestantId) return;
         try {
-            await fetch(`${SERVER_URL}/api/session/save`, {
+            const payload = {
+                contestantId,
+                annotationCount: count,
+                labeledTaskIds: ids
+            };
+            // Include full annotation data if provided
+            if (newAnnotation) {
+                payload.newAnnotation = newAnnotation;
+            }
+            fetch(`${SERVER_URL}/api/session/save`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contestantId,
-                    annotationCount: count,
-                    labeledTaskIds: ids
-                })
-            });
+                body: JSON.stringify(payload)
+            }).catch(err => console.error('Session save failed:', err));
             setHasUnsavedWork(false);
         } catch (error) {
             console.error('Failed to save session:', error);
@@ -291,13 +300,14 @@ const ResearchWorkspace = () => {
         setContestantId(id);
 
         if (action === 'resume') {
-            // Load existing session
             try {
                 const response = await fetch(`${SERVER_URL}/api/session/load/${id}`);
                 const data = await response.json();
                 if (data.exists) {
                     setAnnotationCount(data.session.annotationCount);
-                    setLabeledTaskIds(data.session.labeledTaskIds);
+                    setLabeledTaskIds(data.session.labeledTaskIds || []);
+                    labeledIdsRef.current = data.session.labeledTaskIds || [];
+                    setFullAnnotations(data.session.annotations || []);
                 }
             } catch (error) {
                 console.error('Failed to load session:', error);
@@ -306,6 +316,8 @@ const ResearchWorkspace = () => {
             // Reset session in database AND local state
             setAnnotationCount(0);
             setLabeledTaskIds([]);
+            labeledIdsRef.current = [];
+            setFullAnnotations([]);
             setHistory([]);
             try {
                 await fetch(`${SERVER_URL}/api/session/reset/${id}`, {
@@ -338,6 +350,36 @@ const ResearchWorkspace = () => {
     const handleDiscardOnRefresh = () => {
         setShowSaveConfirmation(false);
         setShowContestantModal(true);
+    };
+
+    // Data Export for evaluators — downloads full session as JSON
+    const exportSessionData = () => {
+        const report = {
+            meta: {
+                contestantId,
+                exportedAt: new Date().toISOString(),
+                totalAnnotations: annotationCount,
+                sessionDuration: fullAnnotations.length > 0
+                    ? ((new Date(fullAnnotations[fullAnnotations.length - 1]?.timestamp) -
+                        new Date(fullAnnotations[0]?.timestamp)) / 1000).toFixed(0) + 's'
+                    : 'N/A'
+            },
+            costModel: {
+                currentAlpha: metrics.alpha,
+                currentBeta: metrics.beta,
+                formula: 'C(x) = α + β × log(1 + wordCount)'
+            },
+            annotations: fullAnnotations,
+            shadowComparison: shadowMetrics || null
+        };
+        const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `callog_session_${contestantId}_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setToast({ message: '📥 Session data exported!', type: 'success' });
     };
 
     if (showBriefing) {
@@ -396,6 +438,7 @@ const ResearchWorkspace = () => {
                     onToggleGuidelines={() => setShowGuidelines(!showGuidelines)}
                     contestantId={contestantId}
                     onSaveAndExit={handleSaveAndExit}
+                    onExport={exportSessionData}
                 />
 
                 <TaskCard

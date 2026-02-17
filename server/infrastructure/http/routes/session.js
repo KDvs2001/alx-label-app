@@ -5,19 +5,27 @@ const AnnotationSession = require('../../database/models/AnnotationSession');
 // Save or update session
 router.post('/save', async (req, res) => {
     try {
-        const { contestantId, annotationCount, labeledTaskIds } = req.body;
+        const { contestantId, annotationCount, labeledTaskIds, newAnnotation } = req.body;
 
         if (!contestantId) {
             return res.status(400).json({ error: 'Contestant ID is required' });
         }
 
+        const updateOps = {
+            annotationCount: annotationCount || 0,
+            labeledTaskIds: labeledTaskIds || [],
+            lastUpdated: Date.now()
+        };
+
+        // Build update: set fields + push annotation if provided
+        const update = { $set: updateOps };
+        if (newAnnotation) {
+            update.$push = { annotations: newAnnotation };
+        }
+
         const session = await AnnotationSession.findOneAndUpdate(
             { contestantId },
-            {
-                annotationCount: annotationCount || 0,
-                labeledTaskIds: labeledTaskIds || [],
-                lastUpdated: Date.now()
-            },
+            update,
             { upsert: true, new: true }
         );
 
@@ -56,6 +64,7 @@ router.get('/load/:contestantId', async (req, res) => {
                 contestantId: session.contestantId,
                 annotationCount: session.annotationCount,
                 labeledTaskIds: session.labeledTaskIds,
+                annotations: session.annotations || [],
                 lastUpdated: session.lastUpdated
             }
         });
@@ -75,6 +84,7 @@ router.post('/reset/:contestantId', async (req, res) => {
             {
                 annotationCount: 0,
                 labeledTaskIds: [],
+                annotations: [],
                 lastUpdated: Date.now()
             },
             { upsert: true, new: true }
