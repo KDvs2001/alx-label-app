@@ -24,6 +24,15 @@ logger = logging.getLogger("SimulationServer")
 app = Flask(__name__)
 CORS(app) 
 
+@app.route("/")
+def index():
+    return jsonify({
+        "service": "CAL-Log Simulation Server",
+        "status": "running",
+        "endpoints": ["/predict", "/annotate", "/reset", "/health",
+                      "/spy/selection", "/spy/history", "/spy/metrics", "/spy/task_log"]
+    })
+
 # GLOBAL STATE - Portable paths (relative to this file's location)
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # CLOUD VS LOCAL:
