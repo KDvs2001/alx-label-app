@@ -1,5 +1,4 @@
 ml_service/dataset.json filter=lfs diff=lfs merge=lfs -text
-client/public/demo_tasks.json filter=lfs diff=lfs merge=lfs -text
 client/public/sbert.onnx.data filter=lfs diff=lfs merge=lfs -text
 client/public/sbert_quantized.onnx filter=lfs diff=lfs merge=lfs -text
 client/public/sbert.onnx filter=lfs diff=lfs merge=lfs -text
