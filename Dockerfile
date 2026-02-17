@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt --timeout 1000
 # Copy the ML service code to /app
 COPY ml_service/ /app/
 
+# Set the port for HF Spaces (simulation_server.py reads PORT env var)
+ENV PORT=7860
+
 # Expose the port (7860 is standard for HF Spaces)
 EXPOSE 7860
 
