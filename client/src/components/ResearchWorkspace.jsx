@@ -43,9 +43,8 @@ const ResearchWorkspace = () => {
     // Debug: Cost Model Inputs
     const [interactionLog, setInteractionLog] = useState([]);
 
-    // Fatigue Detection
+    // Task Timer
     const [viewStartTime, setViewStartTime] = useState(Date.now());
-    const [fatigueDetected, setFatigueDetected] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
 
     // API URL (Simulation Server - Env for Cloud, Proxy for Local)
@@ -82,32 +81,22 @@ const ResearchWorkspace = () => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [contestantId, annotationCount]);
 
-    // Fatigue Detection Timer
+    // Task Timer
     useEffect(() => {
         if (!currentTask) return;
 
         const timer = setInterval(() => {
             const elapsed = (Date.now() - viewStartTime) / 1000;
             setElapsedTime(elapsed);
-
-            // Calculate expected time: alpha + beta * log(length)
-            const textLength = (currentTask?.data?.text || currentTask?.text || "").split(" ").length;
-            const expectedTime = metrics.alpha + metrics.beta * Math.log1p(textLength);
-
-            // Detect fatigue: 5x expected time
-            if (elapsed > expectedTime * 5 && !fatigueDetected) {
-                setFatigueDetected(true);
-            }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [currentTask, viewStartTime, metrics, fatigueDetected]);
+    }, [currentTask, viewStartTime]);
 
-    // Reset fatigue when task changes
+    // Reset timer when task changes
     useEffect(() => {
         if (currentTask) {
             setViewStartTime(Date.now());
-            setFatigueDetected(false);
             setElapsedTime(0);
         }
     }, [currentTask]);
@@ -474,7 +463,6 @@ const ResearchWorkspace = () => {
                     onAnnotate={handleAnnotate}
                     onRetry={fetchNextBatch}
                     elapsedTime={elapsedTime}
-                    fatigueDetected={fatigueDetected}
                 />
             </div>
 

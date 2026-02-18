@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { CheckCircle, AlertCircle, Activity, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Activity, Clock } from 'lucide-react';
 
-const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime, fatigueDetected }) => {
+const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime }) => {
     // Preprocess text for display (remove HTML tags, clean whitespace)
     const cleanText = (text) => {
         if (!text) return "No Text Found";
@@ -46,34 +46,16 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime, f
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-slate-400 font-bold text-xs uppercase tracking-wider">Task ID: {currentTask?.id}</h2>
 
-                {/* Creative Stopwatch */}
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${fatigueDetected
-                        ? 'bg-red-100 border-2 border-red-500 animate-pulse'
-                        : 'bg-slate-100 border border-slate-300'
-                    }`}>
-                    <Clock
-                        size={16}
-                        className={fatigueDetected ? 'text-red-600' : 'text-slate-600'}
-                    />
-                    <span className={`font-mono text-sm font-bold ${fatigueDetected ? 'text-red-700' : 'text-slate-700'
-                        }`}>
+                {/* Stopwatch */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-300">
+                    <Clock size={16} className="text-slate-600" />
+                    <span className="font-mono text-sm font-bold text-slate-700">
                         {Math.floor(elapsedTime || 0)}s
                     </span>
                 </div>
             </div>
 
-            {/* Fatigue Warning */}
-            {fatigueDetected && (
-                <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg animate-pulse">
-                    <div className="flex items-center gap-2">
-                        <AlertTriangle size={20} className="text-yellow-600" />
-                        <div>
-                            <p className="text-sm font-bold text-yellow-800">Fatigue Detected! 😴</p>
-                            <p className="text-xs text-yellow-700">You're taking longer than usual. Take a break if needed!</p>
-                        </div>
-                    </div>
-                </div>
-            )}
+
 
             <div className="overflow-y-auto mb-3 max-h-96">
                 <p className="text-xl leading-relaxed font-medium">
