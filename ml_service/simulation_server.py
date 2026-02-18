@@ -7,6 +7,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
 import hashlib
+import random
 
 # Ensure imports work
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -143,6 +144,9 @@ class SimulationState:
         
         # 1. DEDUPLICATION (O(N²) — but only runs once, during Docker build time)
         self.clean_pool = self._deduplicate_pool(self.pool)
+        
+        # Shuffle for variety
+        random.shuffle(self.clean_pool)
         logger.info(f"✅ Clean pool ready: {len(self.clean_pool)} tasks (removed {len(self.pool) - len(self.clean_pool)} duplicates)")
         
         # 2. PRE-TRAIN backbone on a small seed sample for warm start
@@ -273,14 +277,13 @@ def predict():
             logger.warning("All tasks have been labeled!")
             return jsonify({'tasks': [], 'shadow_metrics': None, 'pool_exhausted': True})
         
-        # Select batch of 50 for ranking
-        batch_size = min(50, len(available))
-        batch = available[:batch_size]
+        # Select CANDIDATE batch (300) for ranking - gives strategies room to diverge
+        batch_size = min(300, len(available))
+        candidates = available[:batch_size]
         
-        normalized_tasks = [{'taskId': t['id'], 'text': t['text']} for t in batch]
-        texts = [t['text'] for t in batch]
+        normalized_candidates = [{'taskId': t['id'], 'text': t['text']} for t in candidates]
     
-    if not normalized_tasks:
+    if not normalized_candidates:
         return jsonify({'tasks': [], 'shadow_metrics': None})
     
     # Preprocessing: Clean and normalize text
@@ -289,27 +292,30 @@ def predict():
         text = re.sub(r'[^a-zA-Z0-9\s.,!?\'\-]', '', text)
         return text
     
-    for task in normalized_tasks:
+    for task in normalized_candidates:
         task['text'] = preprocess_text(task['text'])
-    texts = [task['text'] for task in normalized_tasks]
+    texts = [task['text'] for task in normalized_candidates]
     
-    # Get Probs & Rank
+    # Get Probs & Rank (on all 300 candidates)
     probs = state.backbone.predict_proba(texts)
-    ranked_results = state.ranker.rank_by_cal_log(normalized_tasks, probs)
+    ranked_candidates = state.ranker.rank_by_cal_log(normalized_candidates, probs)
+    
+    # Client gets top 50
+    ranked_results = ranked_candidates[:50]
     
     if not ranked_results: return jsonify({'tasks': [], 'shadow_metrics': None})
 
-    # --- SHADOW SIMULATION LOGIC ---
+    # --- SHADOW SIMULATION LOGIC (Uses full 300 candidate set) ---
     # 1. Strategies Selection (Top 3 for each)
-    cal_log_picks = ranked_results[:3]
+    cal_log_picks = ranked_candidates[:3]
     
     # Entropy (Shuffle first to break length bias)
-    pool_for_entropy = ranked_results.copy()
+    pool_for_entropy = ranked_candidates.copy()
     random.shuffle(pool_for_entropy) 
     entropy_picks = sorted(pool_for_entropy, key=lambda x: x['transparency_report']['math_proof']['entropy'], reverse=True)[:3]
     
-    # Random
-    random_picks = random.sample(ranked_results, min(3, len(ranked_results)))
+    # Random (Sample from full 300 candidates, not just top 50)
+    random_picks = random.sample(ranked_candidates, min(3, len(ranked_candidates)))
 
     # 2. Metric Calculator Helper
     def calc_metrics(picks):
@@ -657,7 +663,11 @@ def reset_session():
                         json.dump([] if fpath == TASK_LOG_PATH else {}, f)
             except: pass
         
-        logger.info("🔄 FULL SESSION RESET — fresh backbone, cost model, and history for new contestant")
+        # 8. Re-shuffle pool for variety
+        import random
+        random.shuffle(state.clean_pool)
+        
+        logger.info("🔄 FULL SESSION RESET — fresh backbone, cost model, shuffled pool, and history for new contestant")
         
         return jsonify({
             "status": "ok",
