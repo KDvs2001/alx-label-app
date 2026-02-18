@@ -307,7 +307,7 @@ const ResearchWorkspace = () => {
     };
 
     const handleContestantIdSubmit = async (id, action) => {
-        setContestantId(id);
+
 
         if (action === 'resume') {
             try {
@@ -354,6 +354,7 @@ const ResearchWorkspace = () => {
             }
         }
 
+        setContestantId(id);
         setShowContestantModal(false);
         setLoading(true);
     };

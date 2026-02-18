@@ -49,7 +49,7 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                     </button>
                 )}
                 <div className="text-right border-l border-slate-700 pl-4">
-                    <div className="text-2xl font-mono font-bold text-blue-400">{historyCount} / 500</div>
+                    <div className="text-2xl font-mono font-bold text-blue-400">{historyCount}</div>
                     <div className="text-xs text-slate-500">Samples Annotated</div>
                 </div>
             </div>
