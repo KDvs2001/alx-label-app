@@ -52,7 +52,7 @@ const ImpactDashboard = () => {
                     <div className={`p-2 rounded-lg bg-slate-800/50 ${colorClass}`}>
                         <Icon size={20} />
                     </div>
-                    <h3 className="text-slate-300 text-sm font-medium tracking-wide">{title}</h3>
+                    <h2 className="text-slate-300 text-sm font-medium tracking-wide">{title}</h2>
                 </div>
                 <div className="flex items-baseline gap-2">
                     <p className={`text-4xl font-bold text-white tracking-tight`}>{value}</p>
@@ -62,7 +62,7 @@ const ImpactDashboard = () => {
                         </span>
                     )}
                 </div>
-                <p className="text-xs text-slate-500 mt-2 font-medium">{subtitle}</p>
+                <p className="text-xs text-slate-400 mt-2 font-medium">{subtitle}</p>
             </div>
         </div>
     );

@@ -52,7 +52,7 @@ const ROICalculator = () => {
                         >
                             <preset.icon className="text-slate-400 group-hover:text-blue-400 mb-2" size={20} />
                             <h4 className="text-white font-semibold text-sm">{preset.name}</h4>
-                            <p className="text-[10px] text-slate-500">{preset.annotations.toLocaleString()} items</p>
+                            <p className="text-[10px] text-slate-400">{preset.annotations.toLocaleString()} items</p>
                         </button>
                     ))}
                 </div>
@@ -72,6 +72,7 @@ const ROICalculator = () => {
                             value={annotations}
                             onChange={(e) => setAnnotations(parseInt(e.target.value))}
                             className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            aria-label="Annual Annotations"
                         />
                     </div>
 
@@ -88,11 +89,12 @@ const ROICalculator = () => {
                             value={hourlyWage}
                             onChange={(e) => setHourlyWage(parseInt(e.target.value))}
                             className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                            aria-label="Hourly Cost"
                         />
                     </div>
                 </div>
 
-                <div className="text-xs text-slate-500 italic">
+                <div className="text-xs text-slate-400 italic">
                     * Based on average speeds: Random ({avgTimeRandom}s) vs CAL-Log ({avgTimeCALLog}s) per task.
                 </div>
             </div>
