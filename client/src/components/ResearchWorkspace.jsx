@@ -8,6 +8,7 @@ import ContestantIdModal from './workspace/ContestantIdModal';
 import SaveConfirmationModal from './workspace/SaveConfirmationModal';
 import AlphaBetaImpactPanel from './workspace/AlphaBetaImpactPanel';
 import EvaluatorBriefingModal from './workspace/EvaluatorBriefingModal';
+import SessionSummary from './workspace/SessionSummary';
 
 const ResearchWorkspace = () => {
     // State
@@ -39,6 +40,8 @@ const ResearchWorkspace = () => {
 
     // Evaluator Briefing
     const [showBriefing, setShowBriefing] = useState(true);
+    // Session Summary
+    const [showSummary, setShowSummary] = useState(false);
 
     // Debug: Cost Model Inputs
     const [interactionLog, setInteractionLog] = useState([]);
@@ -405,6 +408,17 @@ const ResearchWorkspace = () => {
         />;
     }
 
+    if (showSummary) {
+        return <SessionSummary
+            metrics={metrics}
+            history={history}
+            shadowMetrics={shadowMetrics}
+            annotationCount={annotationCount}
+            onHome={() => window.location.href = '/'}
+            onExport={exportSessionData}
+        />;
+    }
+
     if (showContestantModal) {
         return <ContestantIdModal
             isOpen={showContestantModal}
@@ -455,6 +469,7 @@ const ResearchWorkspace = () => {
                     contestantId={contestantId}
                     onSaveAndExit={handleSaveAndExit}
                     onExport={exportSessionData}
+                    onEndSession={() => setShowSummary(true)}
                 />
 
                 <TaskCard

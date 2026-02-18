@@ -48,8 +48,8 @@ class AdaptiveCostModel:
             if y_target < 300:
                 self.user_history.append([x_feat, y_target])
 
-        # Use last 20 annotations
-        WINDOW_SIZE = 20
+        # Use last 10 annotations (Matches training batch size for clean phase shift)
+        WINDOW_SIZE = 10
         history_to_use = self.user_history[-WINDOW_SIZE:]
 
         if len(history_to_use) >= 5:
@@ -92,7 +92,7 @@ class AdaptiveCostModel:
 
     def get_reading_pattern(self):
         """Analyze user's reading pattern based on β."""
-        WINDOW_SIZE = 20
+        WINDOW_SIZE = 10
         recent_history = self.user_history[-WINDOW_SIZE:]
         
         if len(recent_history) < 5:
