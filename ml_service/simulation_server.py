@@ -379,13 +379,13 @@ def predict():
     state.selected_task_lengths.append(t_len)
     
     if reading_pattern['pattern'] == 'fast_skimmer':
-        pattern_reasoning = f"🏃 Fast Reader Detected: β={reading_pattern['beta']} (baseline: {reading_pattern['baseline_beta']}). Selected {length_class} tasks {rel_desc} to maximize your efficiency."
+        pattern_reasoning = f"velocity_profile='Fast Skimmer' (β={reading_pattern['beta']:.2f} < {reading_pattern['baseline_beta']}). Applied Log-Cost Penalty to Short Tasks. Optimization Target: Information/Sec."
     elif reading_pattern['pattern'] == 'careful_reader':
-        pattern_reasoning = f"📚 Careful Reader Detected: β={reading_pattern['beta']} (baseline: {reading_pattern['baseline_beta']}). Selected high-uncertainty tasks regardless of length for maximum information gain."
+        pattern_reasoning = f"velocity_profile='Careful Reader' (β={reading_pattern['beta']:.2f} > {reading_pattern['baseline_beta']}). Prioritizing High-Entropy Tasks. Length Constraint: Relaxed to maximize Utility."
     elif reading_pattern['pattern'] == 'balanced':
-        pattern_reasoning = f"⚖️ Balanced Pace: β={reading_pattern['beta']} (baseline: {reading_pattern['baseline_beta']}). Optimizing for both efficiency and information gain."
+        pattern_reasoning = f"velocity_profile='Balanced' (β={reading_pattern['beta']:.2f} ≈ {reading_pattern['baseline_beta']}). Standard Entropy Sampling with Baseline Cost constraint."
     else:
-        pattern_reasoning = "Collecting data to learn your reading pattern..."
+        pattern_reasoning = "Acquiring velocity profile..."
     
     spy_data = {
         "selected_task_id": top['id'],
@@ -394,7 +394,7 @@ def predict():
         "cost": top['transparency_report']['cost_analysis']['predicted_seconds'],
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta,
-        "reasoning": f"Score {top['score']:.2f} | Entropy {top['transparency_report']['math_proof']['entropy']:.2f}",
+        "reasoning": f"Score ({top['score']:.4f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s)",
         "task_stats": {
             "length": t_len,
             "percentile": round(pct, 1),
