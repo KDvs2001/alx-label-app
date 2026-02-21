@@ -51,7 +51,7 @@ const ROICalculator = () => {
                             className="bg-slate-800 hover:bg-slate-700 p-3 rounded-xl border border-slate-700 transition-all text-left group"
                         >
                             <preset.icon className="text-slate-400 group-hover:text-blue-400 mb-2" size={20} />
-                            <h4 className="text-white font-semibold text-sm">{preset.name}</h4>
+                            <h3 className="text-white font-semibold text-sm">{preset.name}</h3>
                             <p className="text-[10px] text-slate-400">{preset.annotations.toLocaleString()} items</p>
                         </button>
                     ))}
