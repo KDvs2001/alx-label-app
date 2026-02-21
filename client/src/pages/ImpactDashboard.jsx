@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import axios from 'axios';
 import { TrendingDown, Award, DollarSign, Brain, ArrowDown, ArrowUp } from 'lucide-react';
-import ROICalculator from '../components/ROICalculator';
-import ParameterImpactExplainer from '../components/ParameterImpactExplainer';
+
+const ROICalculator = lazy(() => import('../components/ROICalculator'));
+const ParameterImpactExplainer = lazy(() => import('../components/ParameterImpactExplainer'));
 
 const ImpactDashboard = () => {
     const [experimentData, setExperimentData] = useState([]);
@@ -19,7 +20,7 @@ const ImpactDashboard = () => {
             setExperimentData(response.data);
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching experiment data:', error);
+            console.warn('Backend unavailable (likely sleeping on cold start):', error.message);
             setLoading(false);
         }
     };
@@ -139,7 +140,9 @@ const ImpactDashboard = () => {
                         <div className="h-px bg-slate-800 flex-grow"></div>
                     </div>
                     <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm">
-                        <ROICalculator />
+                        <Suspense fallback={<div className="text-slate-400 animate-pulse text-center p-10">Loading Calculator...</div>}>
+                            <ROICalculator />
+                        </Suspense>
                     </div>
                 </section>
 
@@ -154,7 +157,9 @@ const ImpactDashboard = () => {
                         <div className="h-px bg-slate-800 flex-grow"></div>
                     </div>
                     <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm">
-                        <ParameterImpactExplainer />
+                        <Suspense fallback={<div className="text-slate-400 animate-pulse text-center p-10">Loading Impact Analysis...</div>}>
+                            <ParameterImpactExplainer />
+                        </Suspense>
                     </div>
                 </section>
             </div>

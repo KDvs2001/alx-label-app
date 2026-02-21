@@ -148,7 +148,7 @@ const ROICalculator = () => {
                                 itemStyle={{ color: '#f8fafc' }}
                                 formatter={(value) => [`$${value.toLocaleString()}`, 'Cost']}
                             />
-                            <Bar dataKey="cost" radius={[4, 4, 0, 0]}>
+                            <Bar dataKey="cost" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                                 {chartData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}

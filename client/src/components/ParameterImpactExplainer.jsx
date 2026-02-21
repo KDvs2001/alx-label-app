@@ -112,8 +112,8 @@ const ParameterImpactExplainer = () => {
                                 itemStyle={{ fontSize: 12 }}
                             />
                             <Legend wrapperStyle={{ fontSize: 12, paddingTop: 10 }} />
-                            <Line yAxisId="left" type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} name="Cost (sec)" />
-                            <Line yAxisId="right" type="monotone" dataKey="f1" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} name="F1 Score" />
+                            <Line yAxisId="left" type="monotone" dataKey="cost" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} name="Cost (sec)" isAnimationActive={false} />
+                            <Line yAxisId="right" type="monotone" dataKey="f1" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} name="F1 Score" isAnimationActive={false} />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
