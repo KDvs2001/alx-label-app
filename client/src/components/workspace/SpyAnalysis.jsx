@@ -8,7 +8,7 @@ import { HelpCircle } from 'lucide-react';
 
 const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowMetrics, onShowAlphaBetaPanel }) => {
     return (
-        <div className="tour-step-spy-window flex flex-col gap-6 pb-8">
+        <div className="flex flex-col gap-6 pb-8">
 
             {/* 0. NEW COMPARISON TABLE (High Visibility) */}
             <ComparisonTable shadowMetrics={shadowMetrics} />

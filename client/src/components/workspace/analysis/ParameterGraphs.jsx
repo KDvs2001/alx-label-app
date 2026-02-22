@@ -58,14 +58,14 @@ const ParameterGraphs = ({ metrics, history }) => {
                 )}
             </div>
 
-            <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
+            <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4 pb-2">
                 <h4 className="text-xs text-slate-500 mb-1">Behavior Analysis (Regression)</h4>
-                <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
+                <ResponsiveContainer width="100%" height={150}>
                     <ComposedChart>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                         <XAxis type="number" dataKey="x" name="Log(Length)" stroke="#64748b" fontSize={10} domain={['dataMin', 'dataMax']} />
                         <YAxis type="number" name="Time (s)" stroke="#64748b" fontSize={10} />
-                        <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#0f172a' }} />
+                        <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }} />
                         <Scatter name="Your Clicks" data={metrics.user_history || []} dataKey="y" fill="#3b82f6" shape="circle" />
                         {/* Regression Line (Simulated via 2 points) */}
                         <Line type="linear" dataKey="y" stroke="#ef4444" strokeWidth={2} dot={false}

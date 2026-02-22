@@ -13,10 +13,10 @@ const EvaluatorTour = ({ onComplete }) => {
     }, []);
 
     const handleJoyrideCallback = (data) => {
-        const { status } = data;
+        const { status, action } = data;
         const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
-        if (finishedStatuses.includes(status)) {
+        if (finishedStatuses.includes(status) || action === 'close') {
             setRun(false);
             localStorage.setItem('cal_log_tour_seen', 'true');
             if (onComplete) onComplete();
@@ -28,9 +28,9 @@ const EvaluatorTour = ({ onComplete }) => {
             target: 'body',
             placement: 'center',
             disableBeacon: true,
-            title: <div className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-pulse">Welcome to CAL-Log 👋</div>,
+            title: <div className="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-pulse">Welcome to CAL-Log 👋</div>,
             content: (
-                <div className="text-sm text-slate-300 space-y-3 mt-4 leading-relaxed">
+                <div className="text-base text-slate-300 space-y-3 mt-4 leading-relaxed">
                     <p>CAL-Log is an Adaptive Active Learning system. It learns <strong>how fast you read</strong> and adjusts its mathematics in real-time.</p>
                     <p>This quick tour will show you exactly what to do and where to look during your evaluation.</p>
                 </div>
@@ -39,9 +39,9 @@ const EvaluatorTour = ({ onComplete }) => {
         {
             target: '.tour-step-spy-window',
             placement: 'left',
-            title: <div className="text-xl font-bold text-purple-400 font-mono flex items-center gap-2">THE SPY WINDOW 👁️</div>,
+            title: <div className="text-2xl font-bold text-purple-400 font-mono flex items-center gap-2">THE SPY WINDOW 👁️</div>,
             content: (
-                <div className="text-sm text-slate-300 space-y-3 mt-2 leading-relaxed">
+                <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>This panel shows the AI's internal thought process.</p>
                     <p>Every time you annotate a task, watch the <strong>Reading Factor (β)</strong> adapt to your natural speed.</p>
                     <p>You can also see the exact <strong>Entropy ÷ Cost</strong> mathematics that caused CAL-Log to select the specific task you are currently reading!</p>
@@ -51,9 +51,9 @@ const EvaluatorTour = ({ onComplete }) => {
         {
             target: '.tour-step-task-card',
             placement: 'bottom',
-            title: <div className="text-xl font-bold text-green-400">Your Goal</div>,
+            title: <div className="text-2xl font-bold text-green-400">Your Goal</div>,
             content: (
-                <div className="text-sm text-slate-300 space-y-3 mt-2 leading-relaxed">
+                <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>Read the text at your <strong>natural pace</strong> and click Positive or Negative.</p>
                     <p>Please complete around <strong>15-20 annotations</strong> so the Cost Model has enough time to adapt to your style and prove the math!</p>
                 </div>
@@ -62,9 +62,9 @@ const EvaluatorTour = ({ onComplete }) => {
         {
             target: '.tour-step-feedback-btn',
             placement: 'bottom',
-            title: <div className="text-xl font-bold text-blue-400">Provide Feedback</div>,
+            title: <div className="text-2xl font-bold text-blue-400">Provide Feedback</div>,
             content: (
-                <div className="text-sm text-slate-300 space-y-3 mt-2 leading-relaxed">
+                <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>When you are finished testing the system's adaptation, click the <strong>Finish Session</strong> button at the top right.</p>
                     <p>This will show you your final reading profile and allow you to rate the system!</p>
                 </div>
@@ -102,7 +102,9 @@ const EvaluatorTour = ({ onComplete }) => {
                     borderRadius: '16px',
                     border: '1px solid #334155', // slate-700
                     padding: '24px',
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                    width: '450px',
+                    maxWidth: '90vw',
                 },
                 tooltipContainer: {
                     textAlign: 'left'

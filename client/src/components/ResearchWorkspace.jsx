@@ -534,7 +534,7 @@ const ResearchWorkspace = () => {
                     </div>
                 </div>
 
-                <div className="col-span-4 rounded-xl border border-slate-700 bg-slate-900 shadow-xl overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.15)] ring-1 ring-white/10 flex flex-col h-full relative z-20">
+                <div className="tour-step-spy-window col-span-4 rounded-xl border border-slate-700 bg-slate-900 shadow-xl overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.15)] ring-1 ring-white/10 flex flex-col h-full relative z-20">
                     {/* Header for Spy Window to make it look classy */}
                     <div className="bg-slate-800 border-b border-slate-700 p-4 shrink-0 flex items-center justify-between">
                         <div className="flex items-center gap-2">
