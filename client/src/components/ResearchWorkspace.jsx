@@ -7,8 +7,8 @@ import SpyAnalysis from './workspace/SpyAnalysis';
 import ContestantIdModal from './workspace/ContestantIdModal';
 import SaveConfirmationModal from './workspace/SaveConfirmationModal';
 import AlphaBetaImpactPanel from './workspace/AlphaBetaImpactPanel';
-import EvaluatorBriefingModal from './workspace/EvaluatorBriefingModal';
 import SessionSummary from './workspace/SessionSummary';
+import EvaluatorTour from './workspace/EvaluatorTour';
 
 const ResearchWorkspace = () => {
     // State
@@ -38,8 +38,6 @@ const ResearchWorkspace = () => {
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
 
-    // Evaluator Briefing
-    const [showBriefing, setShowBriefing] = useState(true);
     // Session Summary
     const [showSummary, setShowSummary] = useState(false);
 
@@ -401,13 +399,6 @@ const ResearchWorkspace = () => {
         setToast({ message: '📥 Session data exported!', type: 'success' });
     };
 
-    if (showBriefing) {
-        return <EvaluatorBriefingModal
-            isOpen={showBriefing}
-            onComplete={() => setShowBriefing(false)}
-        />;
-    }
-
     if (showSummary) {
         return <SessionSummary
             metrics={metrics}
@@ -444,6 +435,9 @@ const ResearchWorkspace = () => {
                 </div>
             )}
 
+            {/* Tour Overlay -> Rendered at root level so it works above all Modals */}
+            <EvaluatorTour />
+
             <SaveConfirmationModal
                 isOpen={showSaveConfirmation}
                 onSave={handleSaveOnRefresh}
@@ -472,23 +466,29 @@ const ResearchWorkspace = () => {
                     onEndSession={() => setShowSummary(true)}
                 />
 
-                <TaskCard
-                    currentTask={currentTask}
-                    submitting={submitting}
-                    onAnnotate={handleAnnotate}
-                    onRetry={fetchNextBatch}
-                    elapsedTime={elapsedTime}
-                />
+                <div className="tour-step-task-card w-full">
+                    <TaskCard
+                        currentTask={currentTask}
+                        submitting={submitting}
+                        onAnnotate={handleAnnotate}
+                        onRetry={fetchNextBatch}
+                        elapsedTime={elapsedTime}
+                    />
+                </div>
             </div>
 
-            <SpyAnalysis
-                selectionLogic={selectionLogic}
-                metrics={metrics}
-                history={history}
-                interactionLog={interactionLog}
-                shadowMetrics={shadowMetrics}
-                onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
-            />
+            <div className="tour-step-spy-window col-span-4 rounded-xl border border-slate-700 bg-slate-900 shadow-xl overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-white/10 m-2 mt-4 ml-0 h-[calc(100vh-2rem)] flex flex-col relative z-20">
+                <div className="flex-1 overflow-y-auto w-full p-4 custom-scrollbar">
+                    <SpyAnalysis
+                        selectionLogic={selectionLogic}
+                        metrics={metrics}
+                        history={history}
+                        interactionLog={interactionLog}
+                        shadowMetrics={shadowMetrics}
+                        onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
+                    />
+                </div>
+            </div>
         </div>
     );
 };

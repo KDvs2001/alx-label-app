@@ -277,8 +277,8 @@ def predict():
             logger.warning("All tasks have been labeled!")
             return jsonify({'tasks': [], 'shadow_metrics': None, 'pool_exhausted': True})
         
-        # Select CANDIDATE batch (300) for ranking - gives strategies room to diverge
-        batch_size = min(300, len(available))
+        # Select CANDIDATE batch (200) for ranking - Best balance between research accuracy and <5s latency
+        batch_size = min(200, len(available))
         candidates = available[:batch_size]
         
         normalized_candidates = [{'taskId': t['id'], 'text': t['text']} for t in candidates]
@@ -292,20 +292,21 @@ def predict():
         text = re.sub(r'[^a-zA-Z0-9\s.,!?\'\-]', '', text)
         return text
     
+    # Process only exactly what we need
     for task in normalized_candidates:
         task['text'] = preprocess_text(task['text'])
     texts = [task['text'] for task in normalized_candidates]
     
-    # Get Probs & Rank (on all 300 candidates)
+    # Get Probs & Rank (on candidates)
     probs = state.backbone.predict_proba(texts)
     ranked_candidates = state.ranker.rank_by_cal_log(normalized_candidates, probs)
     
-    # Client gets top 50
-    ranked_results = ranked_candidates[:50]
+    # Client gets top 25 (improves React rendering latency as well)
+    ranked_results = ranked_candidates[:25]
     
     if not ranked_results: return jsonify({'tasks': [], 'shadow_metrics': None})
 
-    # --- SHADOW SIMULATION LOGIC (Uses full 300 candidate set) ---
+    # --- SHADOW SIMULATION LOGIC (Uses candidates) ---
     # 1. Strategies Selection (Top 3 for each)
     cal_log_picks = ranked_candidates[:3]
     
@@ -314,31 +315,38 @@ def predict():
     random.shuffle(pool_for_entropy) 
     entropy_picks = sorted(pool_for_entropy, key=lambda x: x['transparency_report']['math_proof']['entropy'], reverse=True)[:3]
     
-    # Random (Sample from full 300 candidates, not just top 50)
+    # Random (Sample from full candidates)
     random_picks = random.sample(ranked_candidates, min(3, len(ranked_candidates)))
 
-    # 2. Metric Calculator Helper
+    # 2. Metric Calculator Helper (Optimized for speed)
     def calc_metrics(picks):
-        avg_len = sum([len(p['text'].split()) for p in picks]) / max(1, len(picks))
-        costs = []
-        for p in picks:
-            log_len = np.log1p(len(p['text'].split()))
-            cost = state.cost_model.alpha + (state.cost_model.beta * log_len)
-            costs.append(cost)
-        avg_cost = sum(costs) / max(1, len(costs))
-        
+        avg_len = 0
+        avg_cost = 0
         audit_data = []
+        n_picks = max(1, len(picks))
+        
         for p in picks:
+            length = len(p['text'].split())
+            avg_len += length
+            
+            # Use cached cost instead of recalculating if available
+            if 'cost_analysis' in p['transparency_report']:
+                cost = p['transparency_report']['cost_analysis']['predicted_seconds']
+            else:
+                log_len = np.log1p(length)
+                cost = state.cost_model.alpha + (state.cost_model.beta * log_len)
+            avg_cost += cost
+            
             audit_data.append({
                 'id': p['id'],
-                'text': p['text'][:80] + "...",
-                'len': len(p['text'].split()),
+                'text': p['text'][:40] + "...", # Shorter text snippet to reduce JSON payload size
+                'len': length,
                 'entropy': p['transparency_report']['math_proof']['entropy']
             })
             
         return {
-            "avg_len": round(avg_len, 1),
-            "estimated_cost": round(avg_cost, 1),
+            "avg_len": round(avg_len / n_picks, 1),
+            "estimated_cost": round(avg_cost / n_picks, 1),
             "selected_ids": [p['id'] for p in picks],
             "audit_trail": audit_data
         }

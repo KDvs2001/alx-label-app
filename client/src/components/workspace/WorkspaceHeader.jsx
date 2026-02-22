@@ -43,7 +43,7 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                 {contestantId && (
                     <button
                         onClick={onEndSession}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded border border-blue-700 transition-colors font-bold"
+                        className="tour-step-feedback-btn flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded border border-blue-700 transition-colors font-bold"
                     >
                         <CheckCircle size={14} /> Finish Session
                     </button>
