@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const EvaluatorFeedback = require("../database/models/EvaluatorFeedback");
+const EvaluatorFeedback = require("../../database/models/EvaluatorFeedback");
 
 // @route   POST /api/feedback
 // @desc    Submit evaluator feedback form

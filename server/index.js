@@ -21,15 +21,17 @@ app.use(cors({
   credentials: true
 }));
 
-// Explicit preflight handler for Vercel serverless
-app.options('*', cors({
-  origin: [
-    "https://alx-label-app-research-tool.vercel.app",
-    "http://localhost:5173",
-    "http://localhost:4173"
-  ],
-  credentials: true
-}));
+// Explicit preflight handler (compatible with all Express versions)
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 // Database Connection
 connectDB();
