@@ -376,9 +376,9 @@ const ResearchWorkspace = () => {
             }
         }
 
+        setLoading(true);
         setContestantId(id);
         setShowContestantModal(false);
-        setLoading(true);
     };
 
     const handleSaveAndExit = async () => {

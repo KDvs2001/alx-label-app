@@ -21,6 +21,16 @@ app.use(cors({
   credentials: true
 }));
 
+// Explicit preflight handler for Vercel serverless
+app.options('*', cors({
+  origin: [
+    "https://alx-label-app-research-tool.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:4173"
+  ],
+  credentials: true
+}));
+
 // Database Connection
 connectDB();
 

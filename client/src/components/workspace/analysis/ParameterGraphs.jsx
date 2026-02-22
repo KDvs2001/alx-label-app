@@ -21,7 +21,7 @@ const ParameterGraphs = ({ metrics, history }) => {
 
             <div className="flex-1 w-full min-h-[150px]">
                 <h4 className="text-xs text-slate-500 mb-1">Parameter Trend (History)</h4>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
                     <LineChart data={history}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                         <XAxis dataKey="step" stroke="#64748b" fontSize={10} />
@@ -40,7 +40,7 @@ const ParameterGraphs = ({ metrics, history }) => {
                     <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better 📉</span>
                 </h4>
                 {metrics.cumulative_costs?.history?.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={150}>
+                    <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
                         <LineChart data={metrics.cumulative_costs.history}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                             <XAxis dataKey="batch" stroke="#64748b" fontSize={10} label={{ value: 'Batch', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#64748b' }} />
@@ -60,7 +60,7 @@ const ParameterGraphs = ({ metrics, history }) => {
 
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
                 <h4 className="text-xs text-slate-500 mb-1">Behavior Analysis (Regression)</h4>
-                <ResponsiveContainer width="100%" height={150}>
+                <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
                     <ComposedChart>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                         <XAxis type="number" dataKey="x" name="Log(Length)" stroke="#64748b" fontSize={10} domain={['dataMin', 'dataMax']} />

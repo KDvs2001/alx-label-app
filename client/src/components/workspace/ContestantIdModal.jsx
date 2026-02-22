@@ -34,25 +34,9 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
         onSubmit(contestantId, 'resume');
     };
 
-    const handleFresh = async () => {
-        try {
-            // Reset backend state for new contestant
-            const ML_URL = import.meta.env.VITE_ML_API_URL || "/ml";
-            const resetRes = await fetch(`${ML_URL}/reset`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (resetRes.ok) {
-                console.log('✅ Backend state reset for new contestant');
-            } else {
-                console.error('Failed to reset backend state');
-            }
-        } catch (error) {
-            console.error('Error resetting backend:', error);
-        }
-
+    const handleFresh = () => {
         // Clear frontend session storage and proceed
+        // All ML + backend reset logic is centralized in ResearchWorkspace.handleContestantIdSubmit
         sessionStorage.clear();
         onSubmit(contestantId, 'fresh');
     };
