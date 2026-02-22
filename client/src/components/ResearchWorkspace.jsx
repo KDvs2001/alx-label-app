@@ -516,7 +516,7 @@ const ResearchWorkspace = () => {
                     onEndSession={() => setShowSummary(true)}
                 />
 
-                <div className="tour-step-task-card w-full">
+                <div className="flex-1 min-h-0">
                     <TaskCard
                         currentTask={currentTask}
                         submitting={submitting}
@@ -527,18 +527,14 @@ const ResearchWorkspace = () => {
                 </div>
             </div>
 
-            <div className="tour-step-spy-window col-span-4 rounded-xl border border-slate-700 bg-slate-900 shadow-xl overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-white/10 m-2 mt-4 ml-0 h-[calc(100vh-2rem)] flex flex-col relative z-20">
-                <div className="flex-1 overflow-y-auto w-full p-4 custom-scrollbar">
-                    <SpyAnalysis
-                        selectionLogic={selectionLogic}
-                        metrics={metrics}
-                        history={history}
-                        interactionLog={interactionLog}
-                        shadowMetrics={shadowMetrics}
-                        onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
-                    />
-                </div>
-            </div>
+            <SpyAnalysis
+                selectionLogic={selectionLogic}
+                metrics={metrics}
+                history={history}
+                interactionLog={interactionLog}
+                shadowMetrics={shadowMetrics}
+                onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
+            />
         </div>
     );
 };

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Scatter, ComposedChart } from 'recharts';
 
 const ParameterGraphs = ({ metrics, history }) => {
     return (
@@ -61,20 +61,21 @@ const ParameterGraphs = ({ metrics, history }) => {
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
                 <h4 className="text-xs text-slate-500 mb-1">Behavior Analysis (Regression)</h4>
                 <ResponsiveContainer width="100%" height={150}>
-                    <ScatterChart>
+                    <ComposedChart>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                         <XAxis type="number" dataKey="x" name="Log(Length)" stroke="#64748b" fontSize={10} domain={['dataMin', 'dataMax']} />
-                        <YAxis type="number" dataKey="y" name="Time (s)" stroke="#64748b" fontSize={10} />
+                        <YAxis type="number" name="Time (s)" stroke="#64748b" fontSize={10} />
                         <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#0f172a' }} />
-                        <Scatter name="Your Clicks" data={metrics.user_history || []} fill="#3b82f6" shape="circle" />
+                        <Scatter name="Your Clicks" data={metrics.user_history || []} dataKey="y" fill="#3b82f6" shape="circle" />
                         {/* Regression Line (Simulated via 2 points) */}
-                        <Line type="linear" dataKey="line" stroke="#ef4444" strokeWidth={2} dot={false}
+                        <Line type="linear" dataKey="y" stroke="#ef4444" strokeWidth={2} dot={false}
                             data={[
-                                { x: 3, y: metrics.alpha + metrics.beta * 3 },
-                                { x: 5, y: metrics.alpha + metrics.beta * 5 }
+                                { x: 0, y: metrics.alpha },
+                                { x: 8, y: metrics.alpha + (metrics.beta * 8) }
                             ]}
+                            isAnimationActive={false}
                         />
-                    </ScatterChart>
+                    </ComposedChart>
                 </ResponsiveContainer>
                 <p className="text-[10px] text-slate-600 mt-1 italic">
                     Blue dots = Your actions. Red Line = The Model (Alpha + Beta * LogL).

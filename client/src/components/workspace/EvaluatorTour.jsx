@@ -9,11 +9,8 @@ const EvaluatorTour = ({ onComplete }) => {
         const hasSeenTour = localStorage.getItem('cal_log_tour_seen');
         if (!hasSeenTour) {
             setRun(true);
-        } else if (onComplete) {
-            // Already saw it, so trigger complete immediately so timer starts
-            onComplete();
         }
-    }, [onComplete]);
+    }, []);
 
     const handleJoyrideCallback = (data) => {
         const { status } = data;
@@ -31,20 +28,20 @@ const EvaluatorTour = ({ onComplete }) => {
             target: 'body',
             placement: 'center',
             disableBeacon: true,
-            title: <div className="text-xl font-bold text-slate-800">Welcome to CAL-Log 👋</div>,
+            title: <div className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-pulse">Welcome to CAL-Log 👋</div>,
             content: (
-                <div className="text-sm text-slate-600 space-y-2 mt-2">
-                    <p>CAL-Log is an Adaptive Active Learning system. It learns <strong>how fast you read</strong> and adjusts its task selection mathematical formula in real-time.</p>
-                    <p>This quick 4-step tour will show you exactly what to do and where to look during your evaluation.</p>
+                <div className="text-sm text-slate-300 space-y-3 mt-4 leading-relaxed">
+                    <p>CAL-Log is an Adaptive Active Learning system. It learns <strong>how fast you read</strong> and adjusts its mathematics in real-time.</p>
+                    <p>This quick tour will show you exactly what to do and where to look during your evaluation.</p>
                 </div>
             )
         },
         {
             target: '.tour-step-spy-window',
             placement: 'left',
-            title: <div className="text-lg font-bold text-purple-700 font-mono flex items-center gap-2">THE SPY WINDOW 👁️</div>,
+            title: <div className="text-xl font-bold text-purple-400 font-mono flex items-center gap-2">THE SPY WINDOW 👁️</div>,
             content: (
-                <div className="text-sm text-slate-600 space-y-2 mt-2">
+                <div className="text-sm text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>This panel shows the AI's internal thought process.</p>
                     <p>Every time you annotate a task, watch the <strong>Reading Factor (β)</strong> adapt to your natural speed.</p>
                     <p>You can also see the exact <strong>Entropy ÷ Cost</strong> mathematics that caused CAL-Log to select the specific task you are currently reading!</p>
@@ -54,9 +51,9 @@ const EvaluatorTour = ({ onComplete }) => {
         {
             target: '.tour-step-task-card',
             placement: 'bottom',
-            title: <div className="text-lg font-bold text-green-700">Your Goal</div>,
+            title: <div className="text-xl font-bold text-green-400">Your Goal</div>,
             content: (
-                <div className="text-sm text-slate-600 space-y-2 mt-2">
+                <div className="text-sm text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>Read the text at your <strong>natural pace</strong> and click Positive or Negative.</p>
                     <p>Please complete around <strong>15-20 annotations</strong> so the Cost Model has enough time to adapt to your style and prove the math!</p>
                 </div>
@@ -64,12 +61,12 @@ const EvaluatorTour = ({ onComplete }) => {
         },
         {
             target: '.tour-step-feedback-btn',
-            placement: 'left',
-            title: <div className="text-lg font-bold text-blue-700">Provide Feedback</div>,
+            placement: 'bottom',
+            title: <div className="text-xl font-bold text-blue-400">Provide Feedback</div>,
             content: (
-                <div className="text-sm text-slate-600 space-y-2 mt-2">
-                    <p>When you are finished testing the system's adaptation, click the <strong>Complete Session</strong> button.</p>
-                    <p>This will show you a breakdown of your reading profile and give you a button to evaluate the system. Thank you!</p>
+                <div className="text-sm text-slate-300 space-y-3 mt-2 leading-relaxed">
+                    <p>When you are finished testing the system's adaptation, click the <strong>Finish Session</strong> button at the top right.</p>
+                    <p>This will show you your final reading profile and allow you to rate the system!</p>
                 </div>
             )
         }
@@ -84,30 +81,49 @@ const EvaluatorTour = ({ onComplete }) => {
             showSkipButton={true}
             hideCloseButton={true}
             callback={handleJoyrideCallback}
+            spotlightPadding={8}
+            spotlightClicks={true}
+            floaterProps={{
+                styles: {
+                    floater: { filter: 'drop-shadow(0 0 15px rgba(139, 92, 246, 0.3))' },
+                    arrow: { length: 8, spread: 16 }
+                }
+            }}
             styles={{
                 options: {
-                    arrowColor: '#ffffff',
-                    backgroundColor: '#ffffff',
-                    primaryColor: '#2563eb', // Blue-600
-                    textColor: '#1e293b',    // Slate-800
-                    overlayColor: 'rgba(0, 0, 0, 0.75)',
+                    arrowColor: '#0f172a',    // slate-950
+                    backgroundColor: '#0f172a',
+                    primaryColor: '#8b5cf6',  // purple-500
+                    textColor: '#f1f5f9',     // slate-100
+                    overlayColor: 'rgba(2, 6, 23, 0.85)',
                     zIndex: 1000,
                 },
+                tooltip: {
+                    borderRadius: '16px',
+                    border: '1px solid #334155', // slate-700
+                    padding: '24px',
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                },
+                tooltipContainer: {
+                    textAlign: 'left'
+                },
                 buttonNext: {
-                    backgroundColor: '#2563eb',
-                    padding: '8px 16px',
+                    backgroundColor: '#8b5cf6',
+                    padding: '10px 24px',
                     borderRadius: '8px',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.3)',
                 },
                 buttonBack: {
-                    color: '#64748b'
+                    color: '#94a3b8',
+                    marginRight: '12px'
                 },
                 buttonSkip: {
-                    color: '#94a3b8'
+                    color: '#64748b'
                 }
             }}
             locale={{
-                last: "Let's Begin",
+                last: "Let's Begin 🚀",
                 skip: "Skip Tour"
             }}
         />

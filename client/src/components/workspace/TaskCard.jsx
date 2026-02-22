@@ -40,7 +40,7 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
     const displayText = cleanText(currentTask?.data?.text || currentTask?.text);
 
     return (
-        <div className="flex-1 bg-white text-slate-900 rounded-2xl p-8 shadow-2xl flex flex-col relative overflow-hidden">
+        <div className="tour-step-task-card flex-1 bg-white text-slate-900 rounded-2xl p-8 shadow-2xl flex flex-col relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500" />
 
             <div className="flex justify-between items-center mb-4">
