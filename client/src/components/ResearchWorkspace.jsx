@@ -442,21 +442,6 @@ const ResearchWorkspace = () => {
         />;
     }
 
-    if (showContestantModal) {
-        return <ContestantIdModal
-            isOpen={showContestantModal}
-            onSubmit={handleContestantIdSubmit}
-        />;
-    }
-
-    if (loading) return (
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-blue-400 gap-4">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="text-xl font-bold animate-pulse">AI Agent is Ranking Tasks...</div>
-            <div className="text-sm text-slate-500">Comparing Random vs Entropy vs CAL-Log</div>
-        </div>
-    );
-
     return (
         <div className="min-h-screen bg-slate-950 text-white font-sans relative overflow-hidden flex flex-col">
 
@@ -464,6 +449,21 @@ const ResearchWorkspace = () => {
             {toast && (
                 <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-2 animate-bounce">
                     <span>✨</span> {toast.message}
+                </div>
+            )}
+
+            {/* Modals and Overlays (out of document flow or conditionally rendered) */}
+            <ContestantIdModal
+                isOpen={showContestantModal}
+                onSubmit={handleContestantIdSubmit}
+            />
+
+            {/* Loading Overlay */}
+            {loading && !showContestantModal && (
+                <div className="absolute inset-0 z-40 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center text-blue-400 gap-4">
+                    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="text-2xl font-bold animate-pulse text-white">AI Agent is Ranking Tasks...</div>
+                    <div className="text-sm text-slate-400">Comparing Random vs Entropy vs CAL-Log cost models</div>
                 </div>
             )}
 
@@ -477,11 +477,13 @@ const ResearchWorkspace = () => {
                 }}
             />
 
-            <EvaluatorTour onComplete={() => {
-                setTourActive(false);
-                setViewStartTime(Date.now());
-                setElapsedTime(0);
-            }} />
+            {(!loading && !showContestantModal && currentTask) && (
+                <EvaluatorTour onComplete={() => {
+                    setTourActive(false);
+                    setViewStartTime(Date.now());
+                    setElapsedTime(0);
+                }} />
+            )}
 
             <SaveConfirmationModal
                 isOpen={showSaveConfirmation}
