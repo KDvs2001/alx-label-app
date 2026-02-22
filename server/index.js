@@ -6,7 +6,6 @@ const http = require("http");
 // const { Server } = require("socket.io"); // Unused
 
 const connectDB = require("./config/db");
-const taskRoutes = require("./infrastructure/http/routes/task");
 
 // Initialize App
 const app = express();
@@ -28,9 +27,9 @@ connectDB();
 // Socket.io removed (Unused)
 
 // Routes
-app.use("/api/tasks", taskRoutes);
 app.use("/api/experiments", require("./infrastructure/http/routes/experiment"));
 app.use("/api/session", require("./infrastructure/http/routes/session"));
+app.use("/api/feedback", require("./infrastructure/http/routes/feedback"));
 
 app.get("/", (req, res) => {
   res.send("Research Tool API is Running...");

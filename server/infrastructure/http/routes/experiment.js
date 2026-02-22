@@ -20,48 +20,6 @@ router.post('/seed', async (req, res) => {
         await ExperimentResult.deleteMany({});
 
         const seedData = [
-            // AG News Dataset
-            {
-                dataset: 'ag_news',
-                strategy: 'Random',
-                totalCost: 12500,
-                f1Score: 0.88,
-                accuracy: 0.88,
-                tasksAnnotated: 1000,
-                pValue: 1.0,
-                cohensD: 0.0
-            },
-            {
-                dataset: 'ag_news',
-                strategy: 'CAL-Log',
-                totalCost: 7200,
-                f1Score: 0.895,
-                accuracy: 0.89,
-                tasksAnnotated: 650,
-                pValue: 0.002, // Statistically significant improvement
-                cohensD: 0.85 // Large effect size
-            },
-            {
-                dataset: 'ag_news',
-                strategy: 'BADGE',
-                totalCost: 9800,
-                f1Score: 0.885,
-                accuracy: 0.88,
-                tasksAnnotated: 850,
-                pValue: 0.15,
-                cohensD: 0.3
-            },
-            {
-                dataset: 'ag_news',
-                strategy: 'Entropy',
-                totalCost: 11000,
-                f1Score: 0.87,
-                accuracy: 0.86,
-                tasksAnnotated: 1000,
-                pValue: 0.4,
-                cohensD: 0.1
-            },
-
             // IMDB Dataset
             {
                 dataset: 'imdb',

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Home, Download, CheckCircle, TrendingDown, Clock, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHome, onExport }) => {
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
     // Calculate Key Metrics
     const startBeta = 3.0; // Fixed start
@@ -146,15 +147,35 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHo
                         <Home size={18} /> Back to Home
                     </button>
 
-                    <button
-                        onClick={onExport}
-                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-bold shadow-lg shadow-blue-900/20"
-                    >
-                        <Download size={18} /> Download Session Data
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={onExport}
+                            className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors font-bold shadow-lg"
+                        >
+                            <Download size={18} /> Download Data
+                        </button>
+                        <button
+                            onClick={() => setShowFeedbackModal(true)}
+                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-bold shadow-lg shadow-blue-900/20"
+                        >
+                            <CheckCircle size={18} /> Evaluate System
+                        </button>
+                    </div>
                 </div>
 
             </div>
+            <EvaluatorFeedbackModal
+                isOpen={showFeedbackModal}
+                onClose={() => setShowFeedbackModal(false)}
+                sessionData={{
+                    sessionId: "SESS-" + Date.now(), // Generate a unique session ID for evaluation tracking
+                    annotationsCompleted: annotationCount,
+                    startingBeta: startBeta,
+                    endingBeta: endBeta,
+                    avgTimeSavedVsEntropy: (timeSaved / Math.max(1, annotationCount)) || 0,
+                    systemReadingProfile: evaluatorType
+                }}
+            />
         </div>
     );
 };

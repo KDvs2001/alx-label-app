@@ -606,7 +606,12 @@ def annotate():
         state.steps_since_train = 0
         trained = True
         
-    return jsonify({"status": "ok", "alpha": state.cost_model.alpha, "trained": trained})
+    return jsonify({
+        "status": "ok", 
+        "alpha": state.cost_model.alpha,
+        "beta": state.cost_model.beta, 
+        "trained": trained
+    })
 
 @app.route('/reset', methods=['POST'])
 def reset_session():

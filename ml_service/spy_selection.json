@@ -1,1 +1,1 @@
-{"selected_task_id": 139, "score": 0.03606974522547716, "entropy": 0.6869985675512498, "cost": 19.04639368137266, "alpha": 5.0, "beta": 3.0, "reasoning": "Score 0.04 | Entropy 0.69", "task_stats": {"length": 107, "percentile": 14.0, "max_len": 2470, "avg_len": 231.2, "length_class": "short", "length_description": "shorter than 67% of dataset"}, "reading_pattern": {"pattern": "insufficient_data", "description": "Not enough data to determine pattern", "beta": null, "alpha": 5.0, "avg_time": null}, "pattern_reasoning": "Collecting data to learn your reading pattern..."}
+{}

@@ -1,1 +1,1 @@
-{}
+{"accuracy_history": [{"step": 0, "cal_log": 0.5, "random": 0.5, "entropy": 0.5}, {"cal_log": 0.5, "random": 0.5, "entropy": 0.5, "step": 10}, {"cal_log": 0.5, "random": 0.5, "entropy": 0.5, "step": 20}], "step": 20, "alpha": 5.0, "beta": 0.1}
