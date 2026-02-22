@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Joyride, { STATUS } from 'react-joyride';
 
-const EvaluatorTour = () => {
+const EvaluatorTour = ({ onComplete }) => {
     const [run, setRun] = useState(false);
 
     useEffect(() => {
@@ -9,8 +9,11 @@ const EvaluatorTour = () => {
         const hasSeenTour = localStorage.getItem('cal_log_tour_seen');
         if (!hasSeenTour) {
             setRun(true);
+        } else if (onComplete) {
+            // Already saw it, so trigger complete immediately so timer starts
+            onComplete();
         }
-    }, []);
+    }, [onComplete]);
 
     const handleJoyrideCallback = (data) => {
         const { status } = data;
@@ -19,6 +22,7 @@ const EvaluatorTour = () => {
         if (finishedStatuses.includes(status)) {
             setRun(false);
             localStorage.setItem('cal_log_tour_seen', 'true');
+            if (onComplete) onComplete();
         }
     };
 

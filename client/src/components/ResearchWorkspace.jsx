@@ -9,6 +9,7 @@ import SaveConfirmationModal from './workspace/SaveConfirmationModal';
 import AlphaBetaImpactPanel from './workspace/AlphaBetaImpactPanel';
 import SessionSummary from './workspace/SessionSummary';
 import EvaluatorTour from './workspace/EvaluatorTour';
+import FatigueTrackerModal from './workspace/FatigueTrackerModal';
 
 const ResearchWorkspace = () => {
     // State
@@ -37,6 +38,14 @@ const ResearchWorkspace = () => {
 
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
+
+    // Evaluator Tour State
+    const [tourActive, setTourActive] = useState(!localStorage.getItem('cal_log_tour_seen'));
+
+    // Fatigue Detection State
+    const [annotationTimes, setAnnotationTimes] = useState([]);
+    const [isFatigueModalOpen, setIsFatigueModalOpen] = useState(false);
+    const [fatiguePauseTime, setFatiguePauseTime] = useState(0);
 
     // Session Summary
     const [showSummary, setShowSummary] = useState(false);
@@ -82,23 +91,43 @@ const ResearchWorkspace = () => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [contestantId, annotationCount]);
 
-    // Task Timer
+    // Task Timer & Fatigue Check
     useEffect(() => {
-        if (!currentTask) return;
+        if (!currentTask || tourActive || isFatigueModalOpen) return;
 
         const timer = setInterval(() => {
-            const elapsed = (Date.now() - viewStartTime) / 1000;
+            // Need to account for any time we spent paused in the fatigue modal
+            const elapsed = ((Date.now() - viewStartTime) - fatiguePauseTime) / 1000;
             setElapsedTime(elapsed);
+
+            // Fatigue Check Logic: Only check if they've done at least 3 tasks to get a baseline
+            if (annotationTimes.length >= 3) {
+                // Ignore the top 20% longest times to prevent outliers from skewing the baseline
+                const sortedTimes = [...annotationTimes].sort((a, b) => a - b);
+                const validTimes = sortedTimes.slice(0, Math.floor(sortedTimes.length * 0.8));
+                const sum = validTimes.reduce((acc, val) => acc + val, 0);
+                const avgSeconds = sum / validTimes.length;
+
+                // If current elapsed time is 5x the average, trigger fatigue popup
+                // Set a sensible minimum bar of 30 seconds just in case their average is super fast.
+                const threshold = Math.max(avgSeconds * 5, 30);
+
+                if (elapsed > threshold && !isFatigueModalOpen) {
+                    setIsFatigueModalOpen(true);
+                }
+            }
+
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [currentTask, viewStartTime]);
+    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime]);
 
     // Reset timer when task changes
     useEffect(() => {
         if (currentTask) {
             setViewStartTime(Date.now());
             setElapsedTime(0);
+            setFatiguePauseTime(0); // Reset paused accumulation
         }
     }, [currentTask]);
 
@@ -209,6 +238,7 @@ const ResearchWorkspace = () => {
             time: timeTaken.toFixed(2)
         };
         setInteractionLog(prev => [interaction, ...prev].slice(0, 5));
+        setAnnotationTimes(prev => [...prev, timeTaken]);
 
         // Track full annotation for research export
         const fullAnnotation = {
@@ -323,6 +353,9 @@ const ResearchWorkspace = () => {
             setShadowMetrics(null);
             setSelectionLogic(null);
             setInteractionLog([]);
+            setAnnotationTimes([]);
+            setIsFatigueModalOpen(false);
+            setFatiguePauseTime(0);
 
             // Reset Node.js session (MongoDB)
             try {
@@ -435,8 +468,25 @@ const ResearchWorkspace = () => {
                 </div>
             )}
 
+            {/* Fatigue Tracker Overlay */}
+            <FatigueTrackerModal
+                isOpen={isFatigueModalOpen}
+                onResume={() => {
+                    setIsFatigueModalOpen(false);
+                    // Add the time spent staring at the modal directly to the pause accumulator
+                    // We only want to track active reading time for the CAL-Log engine.
+                    const modalTimeSeconds = (elapsedTime * 1000) - ((Date.now() - viewStartTime) - fatiguePauseTime);
+                    // This creates an offset so the timer resumes exactly where it left off
+                    setFatiguePauseTime(Date.now() - viewStartTime - (elapsedTime * 1000));
+                }}
+            />
+
             {/* Tour Overlay -> Rendered at root level so it works above all Modals */}
-            <EvaluatorTour />
+            <EvaluatorTour onComplete={() => {
+                setTourActive(false);
+                setViewStartTime(Date.now());
+                setElapsedTime(0);
+            }} />
 
             <SaveConfirmationModal
                 isOpen={showSaveConfirmation}

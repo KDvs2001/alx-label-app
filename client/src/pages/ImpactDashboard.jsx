@@ -25,14 +25,6 @@ const ImpactDashboard = () => {
         }
     };
 
-    const seedSampleData = async () => {
-        try {
-            await axios.post(`${SERVER_URL}/api/experiments/seed`);
-            fetchExperimentData();
-        } catch (error) {
-            console.error('Error seeding data:', error);
-        }
-    };
 
     if (loading) {
         return (
@@ -80,14 +72,6 @@ const ImpactDashboard = () => {
                         Quantifying the value of Cost-Aware Active Learning through ROI analysis and parameter impact simulation.
                     </p>
                 </div>
-                {experimentData.length === 0 && (
-                    <button
-                        onClick={seedSampleData}
-                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-105"
-                    >
-                        Load Sample Data
-                    </button>
-                )}
             </div>
 
             <div className="max-w-7xl mx-auto space-y-16">
