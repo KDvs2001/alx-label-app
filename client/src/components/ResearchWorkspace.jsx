@@ -458,7 +458,7 @@ const ResearchWorkspace = () => {
     );
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white p-6 grid grid-cols-12 gap-6 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-slate-950 text-white font-sans relative overflow-hidden flex flex-col">
 
             {/* Toast Notification */}
             {toast && (
@@ -467,20 +467,16 @@ const ResearchWorkspace = () => {
                 </div>
             )}
 
-            {/* Fatigue Tracker Overlay */}
+            {/* Modals and Overlays (out of document flow or conditionally rendered) */}
             <FatigueTrackerModal
                 isOpen={isFatigueModalOpen}
                 onResume={() => {
                     setIsFatigueModalOpen(false);
-                    // Add the time spent staring at the modal directly to the pause accumulator
-                    // We only want to track active reading time for the CAL-Log engine.
                     const modalTimeSeconds = (elapsedTime * 1000) - ((Date.now() - viewStartTime) - fatiguePauseTime);
-                    // This creates an offset so the timer resumes exactly where it left off
                     setFatiguePauseTime(Date.now() - viewStartTime - (elapsedTime * 1000));
                 }}
             />
 
-            {/* Tour Overlay -> Rendered at root level so it works above all Modals */}
             <EvaluatorTour onComplete={() => {
                 setTourActive(false);
                 setViewStartTime(Date.now());
@@ -505,37 +501,51 @@ const ResearchWorkspace = () => {
                 onClose={() => setShowGuidelines(false)}
             />
 
-            <div className="col-span-8 flex flex-col gap-6">
-                <WorkspaceHeader
-                    historyCount={annotationCount}
-                    onToggleGuidelines={() => setShowGuidelines(!showGuidelines)}
-                    contestantId={contestantId}
-                    onSaveAndExit={handleSaveAndExit}
-                    onExport={exportSessionData}
-                    onEndSession={() => setShowSummary(true)}
-                />
-
-                <div className="flex-1 min-h-0">
-                    <TaskCard
-                        currentTask={currentTask}
-                        submitting={submitting}
-                        onAnnotate={handleAnnotate}
-                        onRetry={fetchNextBatch}
-                        elapsedTime={elapsedTime}
+            {/* Main Application Grid */}
+            <div className="flex-1 p-6 grid grid-cols-12 gap-6 h-screen max-h-screen overflow-hidden">
+                <div className="col-span-8 flex flex-col gap-6 h-full min-h-0">
+                    <WorkspaceHeader
+                        historyCount={annotationCount}
+                        onToggleGuidelines={() => setShowGuidelines(!showGuidelines)}
+                        contestantId={contestantId}
+                        onSaveAndExit={handleSaveAndExit}
+                        onExport={exportSessionData}
+                        onEndSession={() => setShowSummary(true)}
                     />
+
+                    <div className="flex-1 min-h-0 relative">
+                        {/* Task Card Container - Flex-1 ensures it grows natively */}
+                        <div className="absolute inset-0 flex flex-col">
+                            <TaskCard
+                                currentTask={currentTask}
+                                submitting={submitting}
+                                onAnnotate={handleAnnotate}
+                                onRetry={fetchNextBatch}
+                                elapsedTime={elapsedTime}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div className="col-span-4 rounded-xl border border-slate-700 bg-slate-900 shadow-xl overflow-hidden shadow-[0_0_20px_rgba(59,130,246,0.15)] ring-1 ring-white/10 m-2 mt-4 ml-0 h-[calc(100vh-2rem)] flex flex-col relative z-20">
-                <div className="flex-1 overflow-y-auto w-full p-4 custom-scrollbar">
-                    <SpyAnalysis
-                        selectionLogic={selectionLogic}
-                        metrics={metrics}
-                        history={history}
-                        interactionLog={interactionLog}
-                        shadowMetrics={shadowMetrics}
-                        onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
-                    />
+                <div className="col-span-4 rounded-xl border border-slate-700 bg-slate-900 shadow-xl overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.15)] ring-1 ring-white/10 flex flex-col h-full relative z-20">
+                    {/* Header for Spy Window to make it look classy */}
+                    <div className="bg-slate-800 border-b border-slate-700 p-4 shrink-0 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                            <span className="font-mono text-sm font-bold text-slate-300 uppercase tracking-widest">Spy Window Server</span>
+                        </div>
+                    </div>
+                    {/* Scrollable Content Area */}
+                    <div className="flex-1 overflow-y-auto w-full p-5 custom-scrollbar bg-slate-900/50">
+                        <SpyAnalysis
+                            selectionLogic={selectionLogic}
+                            metrics={metrics}
+                            history={history}
+                            interactionLog={interactionLog}
+                            shadowMetrics={shadowMetrics}
+                            onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
