@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Home, Download, CheckCircle, TrendingDown, Clock, Activity } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import EvaluatorFeedbackModal from './EvaluatorFeedbackModal';
 
 const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHome, onExport }) => {
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);

@@ -38,6 +38,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
         // Clear frontend session storage and proceed
         // All ML + backend reset logic is centralized in ResearchWorkspace.handleContestantIdSubmit
         sessionStorage.clear();
+        localStorage.removeItem('cal_log_tour_seen');
         onSubmit(contestantId, 'fresh');
     };
 

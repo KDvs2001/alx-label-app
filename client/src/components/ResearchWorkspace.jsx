@@ -355,6 +355,8 @@ const ResearchWorkspace = () => {
             setAnnotationTimes([]);
             setIsFatigueModalOpen(false);
             setFatiguePauseTime(0);
+            localStorage.removeItem('cal_log_tour_seen');
+            setTourActive(true);
 
             // Reset Node.js session (MongoDB)
             try {
@@ -478,11 +480,14 @@ const ResearchWorkspace = () => {
             />
 
             {(!loading && !showContestantModal && currentTask) && (
-                <EvaluatorTour onComplete={() => {
-                    setTourActive(false);
-                    setViewStartTime(Date.now());
-                    setElapsedTime(0);
-                }} />
+                <EvaluatorTour
+                    key={contestantId}
+                    onComplete={() => {
+                        setTourActive(false);
+                        setViewStartTime(Date.now());
+                        setElapsedTime(0);
+                    }}
+                />
             )}
 
             <SaveConfirmationModal
