@@ -4,19 +4,22 @@ import { X, User, AlertCircle, ArrowLeft } from 'lucide-react';
 const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
     const [contestantId, setContestantId] = React.useState('');
     const [showResumePrompt, setShowResumePrompt] = React.useState(false);
+    const [isChecking, setIsChecking] = React.useState(false);
 
     if (!isOpen) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!contestantId.trim()) return;
+        if (!contestantId.trim() || isChecking) return;
 
+        setIsChecking(true);
         // Check if session exists
         try {
             const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
             const response = await fetch(`${SERVER_URL}/api/session/load/${contestantId}`);
             const data = await response.json();
 
+            setIsChecking(false);
             if (data.exists) {
                 setShowResumePrompt(true);
             } else {
@@ -25,6 +28,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
             }
         } catch (error) {
             console.error('Error checking session:', error);
+            setIsChecking(false);
             // Proceed as new session
             onSubmit(contestantId, null);
         }
@@ -117,9 +121,11 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
                         </button>
                         <button
                             type="submit"
-                            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all"
+                            disabled={isChecking}
+                            className={`flex-1 px-6 py-3 font-bold text-white rounded-xl transition-all ${isChecking ? 'bg-blue-600/50 cursor-wait' : 'bg-blue-600 hover:bg-blue-700'
+                                }`}
                         >
-                            Continue
+                            {isChecking ? 'Checking...' : 'Continue'}
                         </button>
                     </div>
                 </form>
