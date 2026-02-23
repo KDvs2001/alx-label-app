@@ -88,12 +88,14 @@ router.post('/reset/:contestantId', async (req, res) => {
         await AnnotationSession.findOneAndUpdate(
             { contestantId },
             {
-                annotationCount: 0,
-                labeledTaskIds: [],
-                cumulativeTimeSaved: 0,
-                cumulativeEntropyCost: 0,
-                annotations: [],
-                lastUpdated: Date.now()
+                $set: {
+                    annotationCount: 0,
+                    labeledTaskIds: [],
+                    cumulativeTimeSaved: 0,
+                    cumulativeEntropyCost: 0,
+                    annotations: [],
+                    lastUpdated: Date.now()
+                }
             },
             { upsert: true, new: true }
         );
