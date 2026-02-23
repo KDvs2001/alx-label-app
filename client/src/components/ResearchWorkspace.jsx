@@ -50,6 +50,7 @@ const ResearchWorkspace = () => {
     const [annotationTimes, setAnnotationTimes] = useState([]);
     const [isFatigueModalOpen, setIsFatigueModalOpen] = useState(false);
     const [fatiguePauseTime, setFatiguePauseTime] = useState(0);
+    const [fatigueTriggeredForTask, setFatigueTriggeredForTask] = useState(false);
 
     // Session Summary
     const [showSummary, setShowSummary] = useState(false);
@@ -116,15 +117,16 @@ const ResearchWorkspace = () => {
                 // Set a sensible minimum bar of 30 seconds just in case their average is super fast.
                 const threshold = Math.max(avgSeconds * 5, 30);
 
-                if (elapsed > threshold && !isFatigueModalOpen) {
+                if (elapsed > threshold && !isFatigueModalOpen && !fatigueTriggeredForTask) {
                     setIsFatigueModalOpen(true);
+                    setFatigueTriggeredForTask(true);
                 }
             }
 
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime]);
+    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime, fatigueTriggeredForTask]);
 
     // Reset timer when task changes
     useEffect(() => {
@@ -132,6 +134,7 @@ const ResearchWorkspace = () => {
             setViewStartTime(Date.now());
             setElapsedTime(0);
             setFatiguePauseTime(0); // Reset paused accumulation
+            setFatigueTriggeredForTask(false); // Enable fatigue warning for the new task
         }
     }, [currentTask]);
 
@@ -213,7 +216,7 @@ const ResearchWorkspace = () => {
         if (!currentTask || submitting) return;
         setSubmitting(true);
 
-        const timeTaken = (Date.now() - viewStartTime) / 1000;
+        const timeTaken = ((Date.now() - viewStartTime) - fatiguePauseTime) / 1000;
         const taskText = currentTask.data?.text || currentTask.text;
         const textLength = taskText.split(" ").length;
 
@@ -235,9 +238,9 @@ const ResearchWorkspace = () => {
         // Compute incremental savings right away if we have shadow metrics for this task
         let incrementalTimeSaved = 0;
         let incrementalEntropyCost = 0;
-        if (shadowMetrics) {
-            const entropyCost = shadowMetrics.entropy_cost || 0;
-            const callogCost = shadowMetrics.callog_cost || 0;
+        if (shadowMetrics && shadowMetrics.entropy && shadowMetrics.cal_log) {
+            const entropyCost = shadowMetrics.entropy.estimated_cost || 0;
+            const callogCost = shadowMetrics.cal_log.estimated_cost || 0;
             incrementalTimeSaved = entropyCost - callogCost;
             incrementalEntropyCost = entropyCost;
             setCumulativeTimeSaved(prev => prev + incrementalTimeSaved);

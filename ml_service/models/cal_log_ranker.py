@@ -88,16 +88,16 @@ class CALLogRanker:
         length_multipliers = np.ones(len(tasks))
         
         if pattern == 'fast_skimmer':
-            # Fast Skimmer: Boost LONG tasks, penalize short tasks
+            # Fast Skimmer: Boost LONG tasks, severely penalize short tasks
             # Multiplier > 1.0 for tasks longer than average, < 1.0 for shorter
-            length_multipliers = 1.0 + (0.5 * ((lengths - avg_len) / avg_len))
+            length_multipliers = 1.0 + (5.0 * ((lengths - avg_len) / avg_len))
         elif pattern == 'careful_reader':
-            # Careful Reader: Boost SHORT tasks, penalize long tasks
+            # Careful Reader: Boost SHORT tasks, severely penalize long tasks
             # Multiplier > 1.0 for tasks shorter than average, < 1.0 for longer
-            length_multipliers = 1.0 - (0.5 * ((lengths - avg_len) / avg_len))
+            length_multipliers = 1.0 - (5.0 * ((lengths - avg_len) / avg_len))
             
-        # Clamp multipliers to prevent crazy extremes (e.g. 0.1x to 3.0x max range)
-        length_multipliers = np.clip(length_multipliers, 0.1, 3.0)
+        # Clamp multipliers to prevent negative scores or extreme infinity (0.01x to 10.0x max range)
+        length_multipliers = np.clip(length_multipliers, 0.01, 10.0)
         
         # Apply the enforcement modifier to the final scores
         final_scores = final_scores * length_multipliers

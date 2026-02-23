@@ -32,26 +32,29 @@ const ComparisonTable = ({ shadowMetrics }) => {
                 <div className="grid grid-cols-3 gap-2 text-center mb-4">
                     <div className="p-2 bg-slate-900/50 rounded border border-slate-700/50">
                         <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Random</div>
-                        <div className="text-sm font-mono text-slate-300">{shadowMetrics.random.estimated_cost}s</div>
-                        <div className="text-[10px] text-slate-600">{shadowMetrics.random.avg_len} words</div>
+                        <div className="text-sm font-mono text-slate-300">Avg: {shadowMetrics.random.estimated_cost}s</div>
+                        <div className="text-[10px] text-slate-600">Avg: {shadowMetrics.random.avg_len} words</div>
                     </div>
                     <div className="p-2 bg-slate-900/50 rounded border border-yellow-900/20">
                         <div className="text-[10px] text-yellow-600 uppercase tracking-widest mb-1">Entropy</div>
-                        <div className="text-sm font-mono text-yellow-500">{shadowMetrics.entropy.estimated_cost}s</div>
-                        <div className="text-[10px] text-slate-600">{shadowMetrics.entropy.avg_len} words</div>
+                        <div className="text-sm font-mono text-yellow-500">Avg: {shadowMetrics.entropy.estimated_cost}s</div>
+                        <div className="text-[10px] text-slate-600">Avg: {shadowMetrics.entropy.avg_len} words</div>
                     </div>
                     <div className="p-2 bg-blue-900/20 rounded border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
                         <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-1">CAL-Log</div>
-                        <div className="text-lg font-bold font-mono text-blue-300">{shadowMetrics.cal_log.estimated_cost}s</div>
-                        <div className="text-[10px] text-blue-400/60">{shadowMetrics.cal_log.avg_len} words</div>
+                        <div className="text-lg font-bold font-mono text-blue-300">Avg: {shadowMetrics.cal_log.estimated_cost}s</div>
+                        <div className="text-[10px] text-blue-400/60">Avg: {shadowMetrics.cal_log.avg_len} words</div>
                     </div>
                 </div>
 
                 {/* Savings Banner */}
                 <div className="bg-green-900/20 border border-green-900/50 rounded-lg p-3 text-center">
-                    <div className="text-xs text-green-400 mb-1">Compared to Standard Entropy Sampling:</div>
+                    <div className="text-[10px] text-green-400/80 mb-1 uppercase tracking-wider font-bold">Average Difference per Task</div>
                     <div className="text-sm font-bold text-white">
-                        Saved <span className="text-green-300">{savings.words} words</span> & <span className="text-green-300">{savings.time}s</span> per task
+                        Saved <span className="text-green-300">{savings.words} words</span> & <span className="text-green-300">{savings.time}s</span>
+                    </div>
+                    <div className="text-[9px] text-slate-500 mt-2 italic leading-tight max-w-[90%] mx-auto">
+                        Note: Spy Window metrics compare the average of the top 3 tasks for each strategy. The specific task card below shows the exact cost for only that one task.
                     </div>
                 </div>
             </div>
