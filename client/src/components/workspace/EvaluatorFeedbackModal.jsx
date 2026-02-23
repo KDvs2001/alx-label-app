@@ -46,7 +46,8 @@ const EvaluatorFeedbackModal = ({
                 payload.noticeChangeAtAnnotation = parseInt(payload.noticeChangeAtAnnotation, 10);
             }
 
-            const res = await fetch(`${import.meta.env.VITE_ML_API_URL || 'http://localhost:5001'}/api/feedback`, {
+            const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "http://localhost:5001").replace(/\/$/, "");
+            const res = await fetch(`${SERVER_URL}/api/feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -72,8 +73,8 @@ const EvaluatorFeedbackModal = ({
                         key={val} type="button"
                         onClick={() => handleRating(name, val)}
                         className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold transition-all ${formData[name] === val
-                                ? 'bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900 border-transparent'
-                                : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
+                            ? 'bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900 border-transparent'
+                            : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
                             }`}
                     >
                         {val}

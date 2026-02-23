@@ -192,12 +192,10 @@ const ResearchWorkspace = () => {
             } catch (e) { /* ignore */ }
 
             if (mData.status === 'ok') {
-                const scatterData = (mData.user_history || []).map(h => ({ x: h[0], y: h[1] }));
                 setMetrics({
                     alpha: mData.alpha,
                     beta: mData.beta,
                     step: history.length * 5,
-                    user_history: scatterData,
                     accuracy_history: mData.accuracy_history,
                     cumulative_costs: cumulativeCosts
                 });

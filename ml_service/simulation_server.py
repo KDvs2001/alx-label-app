@@ -233,7 +233,6 @@ def health():
         "alpha": state.cost_model.alpha, 
         "beta": state.cost_model.beta,
         "mode": "Real Research",
-        "user_history": state.cost_model.user_history[-50:],
         "accuracy_history": getattr(state, 'accuracy_history', [])
     })
 
@@ -387,9 +386,9 @@ def predict():
     state.selected_task_lengths.append(t_len)
     
     if reading_pattern['pattern'] == 'fast_skimmer':
-        pattern_reasoning = f"velocity_profile='Fast Skimmer' (β={reading_pattern['beta']:.2f} < {reading_pattern['baseline_beta']}). Applied Log-Cost Penalty to Short Tasks. Optimization Target: Information/Sec."
+        pattern_reasoning = f"velocity_profile='Fast Skimmer' (β={reading_pattern['beta']:.2f} < {reading_pattern['baseline_beta']}). Length penalty reduced. Prioritizing longer, high-entropy tasks for maximum Information/Sec."
     elif reading_pattern['pattern'] == 'careful_reader':
-        pattern_reasoning = f"velocity_profile='Careful Reader' (β={reading_pattern['beta']:.2f} > {reading_pattern['baseline_beta']}). Prioritizing High-Entropy Tasks. Length Constraint: Relaxed to maximize Utility."
+        pattern_reasoning = f"velocity_profile='Careful Reader' (β={reading_pattern['beta']:.2f} > {reading_pattern['baseline_beta']}). Length penalty increased. Selecting shorter high-entropy tasks to maximize throughput."
     elif reading_pattern['pattern'] == 'balanced':
         pattern_reasoning = f"velocity_profile='Balanced' (β={reading_pattern['beta']:.2f} ≈ {reading_pattern['baseline_beta']}). Standard Entropy Sampling with Baseline Cost constraint."
     else:

@@ -55,6 +55,11 @@ const EvaluatorTour = ({ onComplete }) => {
             content: (
                 <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>Read the text at your <strong>natural pace</strong> and click Positive or Negative.</p>
+                    <div className="bg-slate-800/80 border border-slate-700 rounded-lg p-3 text-sm">
+                        <p className="font-bold text-blue-300 mb-1">⌨️ Keyboard Shortcuts</p>
+                        <p><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">1</kbd> — Negative &nbsp;&nbsp; <kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">2</kbd> — Positive</p>
+                        <p className="mt-1"><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">Space</kbd> — Toggle Guidelines Panel</p>
+                    </div>
                     <p>Please complete around <strong>15-20 annotations</strong> so the Cost Model has enough time to adapt to your style and prove the math!</p>
                 </div>
             )
