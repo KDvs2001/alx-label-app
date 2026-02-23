@@ -14,6 +14,8 @@ router.post('/save', async (req, res) => {
         const updateOps = {
             annotationCount: annotationCount || 0,
             labeledTaskIds: labeledTaskIds || [],
+            cumulativeTimeSaved: req.body.cumulativeTimeSaved || 0,
+            cumulativeEntropyCost: req.body.cumulativeEntropyCost || 0,
             lastUpdated: Date.now()
         };
 
@@ -35,6 +37,8 @@ router.post('/save', async (req, res) => {
                 contestantId: session.contestantId,
                 annotationCount: session.annotationCount,
                 labeledTaskIds: session.labeledTaskIds,
+                cumulativeTimeSaved: session.cumulativeTimeSaved,
+                cumulativeEntropyCost: session.cumulativeEntropyCost,
                 lastUpdated: session.lastUpdated
             }
         });
@@ -64,6 +68,8 @@ router.get('/load/:contestantId', async (req, res) => {
                 contestantId: session.contestantId,
                 annotationCount: session.annotationCount,
                 labeledTaskIds: session.labeledTaskIds,
+                cumulativeTimeSaved: session.cumulativeTimeSaved,
+                cumulativeEntropyCost: session.cumulativeEntropyCost,
                 annotations: session.annotations || [],
                 lastUpdated: session.lastUpdated
             }
@@ -84,6 +90,8 @@ router.post('/reset/:contestantId', async (req, res) => {
             {
                 annotationCount: 0,
                 labeledTaskIds: [],
+                cumulativeTimeSaved: 0,
+                cumulativeEntropyCost: 0,
                 annotations: [],
                 lastUpdated: Date.now()
             },

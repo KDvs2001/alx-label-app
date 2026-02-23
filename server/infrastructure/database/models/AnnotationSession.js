@@ -23,6 +23,14 @@ const AnnotationSessionSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    cumulativeTimeSaved: {
+        type: Number,
+        default: 0
+    },
+    cumulativeEntropyCost: {
+        type: Number,
+        default: 0
+    },
     labeledTaskIds: [{
         type: Number
     }],

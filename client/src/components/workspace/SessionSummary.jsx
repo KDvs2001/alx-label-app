@@ -3,7 +3,7 @@ import { Home, Download, CheckCircle, TrendingDown, Clock, Activity } from 'luci
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import EvaluatorFeedbackModal from './EvaluatorFeedbackModal';
 
-const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHome, onExport }) => {
+const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumulativeTimeSaved, cumulativeEntropyCost, onHome, onExport }) => {
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
     // Calculate Key Metrics
@@ -16,17 +16,14 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHo
     if (endBeta < 1.5) evaluatorType = "Fast Skimmer";
     if (endBeta > 3.0) evaluatorType = "Careful Reader";
 
-    // Calculate Savings (using Cumulative Costs if available, else Shadow Snapshot)
-    let timeSaved = 0;
+    // Calculate Savings using the backend-persisted cumulative totals
+    let timeSaved = cumulativeTimeSaved || 0;
     let percentSaved = 0;
 
-    if (metrics.cumulative_costs) {
-        const calLogCost = metrics.cumulative_costs.cal_log;
-        const entropyCost = metrics.cumulative_costs.entropy;
-        timeSaved = entropyCost - calLogCost;
-        percentSaved = (timeSaved / entropyCost) * 100;
+    if (cumulativeEntropyCost > 0) {
+        percentSaved = (timeSaved / cumulativeEntropyCost) * 100;
     } else if (shadowMetrics) {
-        // Fallback to snapshot estimation (extrapolated)
+        // Fallback to snapshot estimation (extrapolated) if no history yet
         const diffPerTask = shadowMetrics.entropy.estimated_cost - shadowMetrics.cal_log.estimated_cost;
         timeSaved = diffPerTask * annotationCount;
         percentSaved = (diffPerTask / shadowMetrics.entropy.estimated_cost) * 100;

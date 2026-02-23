@@ -36,6 +36,10 @@ const ResearchWorkspace = () => {
     // Full annotation log for data export & research analysis
     const [fullAnnotations, setFullAnnotations] = useState([]);
 
+    // Cumulative efficiency
+    const [cumulativeTimeSaved, setCumulativeTimeSaved] = useState(0);
+    const [cumulativeEntropyCost, setCumulativeEntropyCost] = useState(0);
+
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
 
@@ -228,6 +232,18 @@ const ResearchWorkspace = () => {
         const newCount = annotationCount + 1;
         setAnnotationCount(newCount);
 
+        // Compute incremental savings right away if we have shadow metrics for this task
+        let incrementalTimeSaved = 0;
+        let incrementalEntropyCost = 0;
+        if (shadowMetrics) {
+            const entropyCost = shadowMetrics.entropy_cost || 0;
+            const callogCost = shadowMetrics.callog_cost || 0;
+            incrementalTimeSaved = entropyCost - callogCost;
+            incrementalEntropyCost = entropyCost;
+            setCumulativeTimeSaved(prev => prev + incrementalTimeSaved);
+            setCumulativeEntropyCost(prev => prev + incrementalEntropyCost);
+        }
+
         // Log for Cost Model Inputs table
         const interaction = {
             text: taskText, label, time_taken: timeTaken,
@@ -307,7 +323,9 @@ const ResearchWorkspace = () => {
             const payload = {
                 contestantId,
                 annotationCount: count,
-                labeledTaskIds: ids
+                labeledTaskIds: ids,
+                cumulativeTimeSaved,
+                cumulativeEntropyCost
             };
             // Include full annotation data if provided
             if (newAnnotation) {
@@ -335,6 +353,8 @@ const ResearchWorkspace = () => {
                     setLabeledTaskIds(data.session.labeledTaskIds || []);
                     labeledIdsRef.current = data.session.labeledTaskIds || [];
                     setFullAnnotations(data.session.annotations || []);
+                    setCumulativeTimeSaved(data.session.cumulativeTimeSaved || 0);
+                    setCumulativeEntropyCost(data.session.cumulativeEntropyCost || 0);
                 }
             } catch (error) {
                 console.error('Failed to load session:', error);
@@ -345,6 +365,8 @@ const ResearchWorkspace = () => {
             setLabeledTaskIds([]);
             labeledIdsRef.current = [];
             setFullAnnotations([]);
+            setCumulativeTimeSaved(0);
+            setCumulativeEntropyCost(0);
             setHistory([]);
             setMetrics({ alpha: 5.0, beta: 3.0, step: 0 });
             setShadowMetrics(null);
@@ -437,6 +459,8 @@ const ResearchWorkspace = () => {
             history={history}
             shadowMetrics={shadowMetrics}
             annotationCount={annotationCount}
+            cumulativeTimeSaved={cumulativeTimeSaved}
+            cumulativeEntropyCost={cumulativeEntropyCost}
             onHome={() => window.location.href = '/'}
             onExport={exportSessionData}
         />;
