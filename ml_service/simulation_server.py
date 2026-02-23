@@ -401,7 +401,7 @@ def predict():
         "cost": top['transparency_report']['cost_analysis']['predicted_seconds'],
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta,
-        "reasoning": f"Score ({top['score']:.4f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s)",
+        "reasoning": f"Score ({top['score']:.3f}) = (Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s)) * Pattern Multiplier ({top['transparency_report']['math_proof'].get('pattern_length_modifier', 1.0):.2f})",
         "task_stats": {
             "length": t_len,
             "percentile": round(pct, 1),

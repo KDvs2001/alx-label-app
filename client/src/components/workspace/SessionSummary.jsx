@@ -109,12 +109,14 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHo
 
                         <div className="grid grid-cols-2 gap-4 border-t border-slate-700 pt-4">
                             <div>
-                                <div className="text-xs text-slate-500">History Steps</div>
+                                <div className="text-[10px] sm:text-xs text-slate-500 font-medium">History Steps</div>
                                 <div className="text-lg text-white font-mono">{history.length}</div>
+                                <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">Snapshots of your reading speed (β)</div>
                             </div>
                             <div>
-                                <div className="text-xs text-slate-500">Model Updates</div>
+                                <div className="text-[10px] sm:text-xs text-slate-500 font-medium">Model Updates</div>
                                 <div className="text-lg text-white font-mono">{Math.floor(annotationCount / 10)}</div>
+                                <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">Times the background models retrained</div>
                             </div>
                         </div>
                     </div>
@@ -155,12 +157,17 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHo
                         >
                             <Download size={18} /> Download Data
                         </button>
-                        <button
-                            onClick={() => setShowFeedbackModal(true)}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-bold shadow-lg shadow-blue-900/20"
-                        >
-                            <CheckCircle size={18} /> Evaluate System
-                        </button>
+                        <div className="flex flex-col items-end gap-2">
+                            <span className="text-sm font-bold text-red-400 animate-pulse flex items-center gap-1">
+                                <span>⚠️ Please complete this final step!</span>
+                            </span>
+                            <button
+                                onClick={() => setShowFeedbackModal(true)}
+                                className="flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition-all font-bold shadow-lg shadow-blue-500/50 hover:-translate-y-1 animate-pulse border-2 border-blue-400"
+                            >
+                                <CheckCircle size={18} /> Evaluate System
+                            </button>
+                        </div>
                     </div>
                 </div>
 

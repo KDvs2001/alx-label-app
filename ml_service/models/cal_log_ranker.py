@@ -73,6 +73,34 @@ class CALLogRanker:
         else:
             final_scores = scores
             penalties = np.ones(len(tasks))  # No penalty
+            
+        # --- NEW: Pattern-Based Length Enforcement ---
+        # Instead of relying solely on the natural math (which sometimes fails if a short task has massive entropy),
+        # we explicitly boost/penalize tasks based on length and the user's classified reading pattern.
+        reading_pattern = self.cost_model.get_reading_pattern()
+        pattern = reading_pattern.get('pattern', 'balanced')
+        
+        # Calculate lengths for the modifier
+        lengths = np.array([len(t.split()) for t in texts])
+        avg_len = np.mean(lengths) if len(lengths) > 0 else 1.0
+        
+        # Create a length multiplier array
+        length_multipliers = np.ones(len(tasks))
+        
+        if pattern == 'fast_skimmer':
+            # Fast Skimmer: Boost LONG tasks, penalize short tasks
+            # Multiplier > 1.0 for tasks longer than average, < 1.0 for shorter
+            length_multipliers = 1.0 + (0.5 * ((lengths - avg_len) / avg_len))
+        elif pattern == 'careful_reader':
+            # Careful Reader: Boost SHORT tasks, penalize long tasks
+            # Multiplier > 1.0 for tasks shorter than average, < 1.0 for longer
+            length_multipliers = 1.0 - (0.5 * ((lengths - avg_len) / avg_len))
+            
+        # Clamp multipliers to prevent crazy extremes (e.g. 0.1x to 3.0x max range)
+        length_multipliers = np.clip(length_multipliers, 0.1, 3.0)
+        
+        # Apply the enforcement modifier to the final scores
+        final_scores = final_scores * length_multipliers
         
         # Sort by descending score
         sorted_indices = np.argsort(final_scores)[::-1]
@@ -101,7 +129,9 @@ class CALLogRanker:
                     "math_proof": {
                         "entropy": float(entropy[idx]),
                         "redundancy_penalty": float(penalties[idx]),
-                        "cal_log_score": float(scores[idx])
+                        "pattern_length_modifier": float(length_multipliers[idx]),
+                        "cal_log_score": float(scores[idx]),
+                        "final_adjusted_score": float(final_scores[idx])
                     }
                 }
             }
