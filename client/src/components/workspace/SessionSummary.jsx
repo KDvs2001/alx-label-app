@@ -145,21 +145,21 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, onHo
                 <div className="bg-slate-900 border-t border-slate-700 p-6 flex justify-between items-center">
                     <button
                         onClick={onHome}
-                        className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors font-bold"
+                        className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors font-bold border-2 border-transparent"
                     >
                         <Home size={18} /> Back to Home
                     </button>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 items-center">
                         <button
                             onClick={onExport}
-                            className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors font-bold shadow-lg"
+                            className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors font-bold shadow-lg border-2 border-transparent"
                         >
                             <Download size={18} /> Download Data
                         </button>
-                        <div className="flex flex-col items-end gap-2">
-                            <span className="text-sm font-bold text-red-400 animate-pulse flex items-center gap-1">
-                                <span>⚠️ Please complete this final step!</span>
+                        <div className="relative">
+                            <span className="absolute -top-7 right-0 text-sm font-bold text-red-400 animate-pulse whitespace-nowrap">
+                                ⚠️ Please complete this final step!
                             </span>
                             <button
                                 onClick={() => setShowFeedbackModal(true)}

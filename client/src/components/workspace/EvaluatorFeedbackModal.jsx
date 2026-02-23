@@ -17,7 +17,6 @@ const EvaluatorFeedbackModal = ({
         ratingSystemAdaptationVisible: 0,
         ratingTrustSystem: 0,
         ratingInterfaceClear: 0,
-        noticeChangeAtAnnotation: '',
         mostSurprising: '',
         mostConfusing: '',
         strengthenSubmission: ''
@@ -40,11 +39,6 @@ const EvaluatorFeedbackModal = ({
         setStatus('loading');
         try {
             const payload = { ...formData, ...sessionData };
-
-            // Convert to numbers where required
-            if (payload.noticeChangeAtAnnotation) {
-                payload.noticeChangeAtAnnotation = parseInt(payload.noticeChangeAtAnnotation, 10);
-            }
 
             const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "http://localhost:5001").replace(/\/$/, "");
             const res = await fetch(`${SERVER_URL}/api/feedback`, {
@@ -171,21 +165,16 @@ const EvaluatorFeedbackModal = ({
                             <div className="p-5 bg-slate-800/40 rounded-xl border border-slate-700/50 space-y-2">
                                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700 pb-2 mb-4">3. System Experience (1-5)</h3>
 
-                                {renderLikert('ratingDocumentSelection', 'The document selection felt meaningfully different from random order')}
-                                {renderLikert('ratingMathUnderstandable', 'The cost/entropy math in the Spy window was understandable')}
-                                {renderLikert('ratingSystemAdaptationVisible', 'I could visibly see the system adapting to my reading speed')}
-                                {renderLikert('ratingTrustSystem', 'I would trust this system to budget time in a real annotation project')}
-                                {renderLikert('ratingInterfaceClear', 'The annotation interface was clear and easy to use')}
+                                {renderLikert('ratingDocumentSelection', 'The simulation effectively demonstrated how CAL-Log selects tasks based on user behavior')}
+                                {renderLikert('ratingMathUnderstandable', 'The connection between the mathematical score (Entropy/Cost) and task selection was evident')}
+                                {renderLikert('ratingSystemAdaptationVisible', 'I could visibly see the system adjusting task lengths according to the displayed reading profile')}
+                                {renderLikert('ratingTrustSystem', 'The Spy Window provided useful insight into the model\'s internal decision-making process')}
+                                {renderLikert('ratingInterfaceClear', 'Overall, the tool successfully simulated an adaptive active learning scenario')}
                             </div>
 
                             {/* Section 4 */}
                             <div className="p-5 bg-slate-800/40 rounded-xl border border-slate-700/50 space-y-4">
                                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700 pb-2 mb-4">4. Final Thoughts</h3>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-1">At what annotation number (approx) did you first notice the system adapt?</label>
-                                    <input type="number" name="noticeChangeAtAnnotation" value={formData.noticeChangeAtAnnotation} onChange={handleChange} placeholder="e.g. 15" className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 transition-colors" />
-                                </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-300 mb-1">What did you find most surprising or interesting?</label>
