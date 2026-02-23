@@ -5,6 +5,20 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
     const [contestantId, setContestantId] = React.useState('');
     const [showResumePrompt, setShowResumePrompt] = React.useState(false);
     const [isChecking, setIsChecking] = React.useState(false);
+    const [mlReady, setMlReady] = React.useState(false);
+
+    // WARMUP: Ping the ML service as soon as the modal opens to wake HF Spaces
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
+        const warmup = async () => {
+            try {
+                const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(45000) });
+                if (res.ok) setMlReady(true);
+            } catch { /* Space still waking — will be ready by /predict time */ }
+        };
+        warmup();
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

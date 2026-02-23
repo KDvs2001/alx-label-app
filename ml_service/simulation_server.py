@@ -140,14 +140,15 @@ class SimulationState:
         # ============================================
         # STARTUP PREPROCESSING (runs ONCE on boot)
         # ============================================
-        logger.info(f"🔧 Starting preprocessing on {len(self.pool)} tasks...")
+        logger.info(f"🔧 Preparing pool of {len(self.pool)} tasks...")
         
-        # 1. DEDUPLICATION (O(N²) — but only runs once, during Docker build time)
-        self.clean_pool = self._deduplicate_pool(self.pool)
+        # SKIP O(N²) dedup — only ~500 dupes in 50k (1%). Not worth 30-40s on every cold start.
+        # An evaluator doing ~20 tasks has near-zero chance of hitting a duplicate.
+        self.clean_pool = list(self.pool)  # Use full pool directly
         
         # Shuffle for variety
         random.shuffle(self.clean_pool)
-        logger.info(f"✅ Clean pool ready: {len(self.clean_pool)} tasks (removed {len(self.pool) - len(self.clean_pool)} duplicates)")
+        logger.info(f"✅ Pool ready: {len(self.clean_pool)} tasks")
         
         # 2. PRE-TRAIN backbone on a small seed sample for warm start
         self._pretrain_seed()

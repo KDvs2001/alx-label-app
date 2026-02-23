@@ -20,6 +20,7 @@ const ResearchWorkspace = () => {
     const [metrics, setMetrics] = useState({ alpha: 5.0, beta: 3.0, step: 0 });
     const [shadowMetrics, setShadowMetrics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loadingStage, setLoadingStage] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [showGuidelines, setShowGuidelines] = useState(false);
     const [showAlphaBetaPanel, setShowAlphaBetaPanel] = useState(false);
@@ -141,17 +142,29 @@ const ResearchWorkspace = () => {
     }, [currentTask]);
 
 
-    const fetchNextBatch = async () => {
+    const fetchNextBatch = async (retryCount = 0) => {
         setLoading(true);
+        setLoadingStage(0);
+
+        // Progressive loading messages
+        const stageTimer = setInterval(() => {
+            setLoadingStage(prev => Math.min(prev + 1, 3));
+        }, 5000);
+
         try {
             // Use ref for always-fresh labeled IDs (avoids stale closure)
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 25000);
+
             const rankRes = await fetch(`${API_URL}/predict`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     labeled_task_ids: labeledIdsRef.current
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeout);
             const data = await rankRes.json();
             const ranked = Array.isArray(data) ? data : (data.tasks || []);
             const shadows = Array.isArray(data) ? null : data.shadow_metrics;
@@ -166,8 +179,14 @@ const ResearchWorkspace = () => {
             }
         } catch (e) {
             console.error("Failed to fetch tasks from ML service", e);
+            if (retryCount < 2) {
+                setLoadingStage(2);
+                setTimeout(() => fetchNextBatch(retryCount + 1), 3000);
+                return;
+            }
             setToast({ message: "ML service unavailable. Please wait for it to start.", type: "error" });
         }
+        clearInterval(stageTimer);
         setLoading(false);
     };
 
@@ -505,8 +524,18 @@ const ResearchWorkspace = () => {
             {loading && !showContestantModal && (
                 <div className="absolute inset-0 z-40 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center text-blue-400 gap-4">
                     <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <div className="text-2xl font-bold animate-pulse text-white">AI Agent is Ranking Tasks...</div>
-                    <div className="text-sm text-slate-400">Comparing Random vs Entropy vs CAL-Log cost models</div>
+                    <div className="text-2xl font-bold animate-pulse text-white">
+                        {loadingStage === 0 && "Waking up ML Service..."}
+                        {loadingStage === 1 && "Loading AI Models..."}
+                        {loadingStage === 2 && "Retrying connection..."}
+                        {loadingStage >= 3 && "Almost ready..."}
+                    </div>
+                    <div className="text-sm text-slate-400">
+                        {loadingStage === 0 && "The server may need a moment to start up"}
+                        {loadingStage === 1 && "Preparing task ranking pipeline"}
+                        {loadingStage === 2 && "Reconnecting to ML service"}
+                        {loadingStage >= 3 && "Ranking tasks by information value"}
+                    </div>
                 </div>
             )}
 
