@@ -3,7 +3,7 @@ import { Home, Download, CheckCircle, TrendingDown, Clock, Activity } from 'luci
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import EvaluatorFeedbackModal from './EvaluatorFeedbackModal';
 
-const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumulativeTimeSaved, cumulativeEntropyCost, onHome, onExport }) => {
+const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumulativeTimeSaved, cumulativeEntropyCost, cumulativeRandomCost, cumulativeCalLogCost, annotations, contestantId, onHome, onExport }) => {
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
     // Calculate Key Metrics
@@ -173,12 +173,21 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                 isOpen={showFeedbackModal}
                 onClose={() => setShowFeedbackModal(false)}
                 sessionData={{
-                    sessionId: "SESS-" + Date.now(), // Generate a unique session ID for evaluation tracking
+                    sessionId: "SESS-" + Date.now(),
+                    contestantId: contestantId || 'unknown',
                     annotationsCompleted: annotationCount,
                     startingBeta: startBeta,
                     endingBeta: endBeta,
                     avgTimeSavedVsEntropy: (timeSaved / Math.max(1, annotationCount)) || 0,
-                    systemReadingProfile: evaluatorType
+                    avgTimeSavedVsRandom: ((cumulativeRandomCost || 0) - (cumulativeCalLogCost || 0)) / Math.max(1, annotationCount) || 0,
+                    systemReadingProfile: evaluatorType,
+                    tasksReceived: (annotations || []).map(a => a.taskId).filter(Boolean),
+                    avgTaskLength: (annotations || []).length > 0
+                        ? (annotations.reduce((sum, a) => sum + (a.wordCount || 0), 0) / annotations.length)
+                        : 0,
+                    sessionDurationSeconds: (annotations || []).length > 1
+                        ? ((new Date(annotations[annotations.length - 1]?.timestamp) - new Date(annotations[0]?.timestamp)) / 1000)
+                        : 0
                 }}
             />
         </div>

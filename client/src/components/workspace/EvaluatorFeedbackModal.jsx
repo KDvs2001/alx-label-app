@@ -5,7 +5,9 @@ const EvaluatorFeedbackModal = ({
     isOpen,
     onClose,
     sessionData,
-    // expects: sessionId, annotationsCompleted, startingBeta, endingBeta, avgTimeSavedVsEntropy, systemReadingProfile 
+    // expects: sessionId, contestantId, annotationsCompleted, startingBeta, endingBeta,
+    //          avgTimeSavedVsEntropy, avgTimeSavedVsRandom, systemReadingProfile,
+    //          tasksReceived, avgTaskLength, sessionDurationSeconds
 }) => {
     const [formData, setFormData] = useState({
         role: '',
@@ -105,7 +107,8 @@ const EvaluatorFeedbackModal = ({
                             <p className="text-sm text-slate-400 leading-relaxed">
                                 Thank you for testing CAL-Log! The system auto-captured your stats:
                                 <span className="text-blue-400 font-mono text-xs ml-2 bg-blue-900/30 px-2 py-1 rounded">β: {sessionData.endingBeta?.toFixed(2)}</span>
-                                <span className="text-green-400 font-mono text-xs ml-2 bg-green-900/30 px-2 py-1 rounded">Saved: {sessionData.avgTimeSavedVsEntropy?.toFixed(1)}s</span>
+                                <span className="text-green-400 font-mono text-xs ml-2 bg-green-900/30 px-2 py-1 rounded">vs Entropy: {sessionData.avgTimeSavedVsEntropy?.toFixed(2)}s</span>
+                                <span className="text-purple-400 font-mono text-xs ml-2 bg-purple-900/30 px-2 py-1 rounded">vs Random: {sessionData.avgTimeSavedVsRandom?.toFixed(2)}s</span>
                             </p>
                         </div>
 

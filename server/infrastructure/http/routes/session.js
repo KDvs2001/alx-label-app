@@ -16,6 +16,8 @@ router.post('/save', async (req, res) => {
             labeledTaskIds: labeledTaskIds || [],
             cumulativeTimeSaved: req.body.cumulativeTimeSaved || 0,
             cumulativeEntropyCost: req.body.cumulativeEntropyCost || 0,
+            cumulativeRandomCost: req.body.cumulativeRandomCost || 0,
+            cumulativeCalLogCost: req.body.cumulativeCalLogCost || 0,
             lastUpdated: Date.now()
         };
 
@@ -39,6 +41,8 @@ router.post('/save', async (req, res) => {
                 labeledTaskIds: session.labeledTaskIds,
                 cumulativeTimeSaved: session.cumulativeTimeSaved,
                 cumulativeEntropyCost: session.cumulativeEntropyCost,
+                cumulativeRandomCost: session.cumulativeRandomCost || 0,
+                cumulativeCalLogCost: session.cumulativeCalLogCost || 0,
                 lastUpdated: session.lastUpdated
             }
         });
@@ -70,6 +74,8 @@ router.get('/load/:contestantId', async (req, res) => {
                 labeledTaskIds: session.labeledTaskIds,
                 cumulativeTimeSaved: session.cumulativeTimeSaved,
                 cumulativeEntropyCost: session.cumulativeEntropyCost,
+                cumulativeRandomCost: session.cumulativeRandomCost || 0,
+                cumulativeCalLogCost: session.cumulativeCalLogCost || 0,
                 annotations: session.annotations || [],
                 lastUpdated: session.lastUpdated
             }
@@ -93,6 +99,8 @@ router.post('/reset/:contestantId', async (req, res) => {
                     labeledTaskIds: [],
                     cumulativeTimeSaved: 0,
                     cumulativeEntropyCost: 0,
+                    cumulativeRandomCost: 0,
+                    cumulativeCalLogCost: 0,
                     annotations: [],
                     lastUpdated: Date.now()
                 }

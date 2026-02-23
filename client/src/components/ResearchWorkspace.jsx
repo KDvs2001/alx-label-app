@@ -39,6 +39,8 @@ const ResearchWorkspace = () => {
     // Cumulative efficiency
     const [cumulativeTimeSaved, setCumulativeTimeSaved] = useState(0);
     const [cumulativeEntropyCost, setCumulativeEntropyCost] = useState(0);
+    const [cumulativeRandomCost, setCumulativeRandomCost] = useState(0);
+    const [cumulativeCalLogCost, setCumulativeCalLogCost] = useState(0);
 
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
@@ -238,13 +240,16 @@ const ResearchWorkspace = () => {
         // Compute incremental savings right away if we have shadow metrics for this task
         let incrementalTimeSaved = 0;
         let incrementalEntropyCost = 0;
-        if (shadowMetrics && shadowMetrics.entropy && shadowMetrics.cal_log) {
+        if (shadowMetrics && shadowMetrics.entropy && shadowMetrics.cal_log && shadowMetrics.random) {
             const entropyCost = shadowMetrics.entropy.estimated_cost || 0;
             const callogCost = shadowMetrics.cal_log.estimated_cost || 0;
+            const randomCost = shadowMetrics.random.estimated_cost || 0;
             incrementalTimeSaved = entropyCost - callogCost;
             incrementalEntropyCost = entropyCost;
             setCumulativeTimeSaved(prev => prev + incrementalTimeSaved);
             setCumulativeEntropyCost(prev => prev + incrementalEntropyCost);
+            setCumulativeRandomCost(prev => prev + randomCost);
+            setCumulativeCalLogCost(prev => prev + callogCost);
         }
 
         // Log for Cost Model Inputs table
@@ -323,12 +328,15 @@ const ResearchWorkspace = () => {
     const saveSession = async (count = annotationCount, ids = labeledTaskIds, newAnnotation = null) => {
         if (!contestantId) return;
         try {
+            // Use functional getters to avoid stale closure
             const payload = {
                 contestantId,
                 annotationCount: count,
                 labeledTaskIds: ids,
                 cumulativeTimeSaved,
-                cumulativeEntropyCost
+                cumulativeEntropyCost,
+                cumulativeRandomCost,
+                cumulativeCalLogCost
             };
             // Include full annotation data if provided
             if (newAnnotation) {
@@ -358,6 +366,8 @@ const ResearchWorkspace = () => {
                     setFullAnnotations(data.session.annotations || []);
                     setCumulativeTimeSaved(data.session.cumulativeTimeSaved || 0);
                     setCumulativeEntropyCost(data.session.cumulativeEntropyCost || 0);
+                    setCumulativeRandomCost(data.session.cumulativeRandomCost || 0);
+                    setCumulativeCalLogCost(data.session.cumulativeCalLogCost || 0);
                 }
             } catch (error) {
                 console.error('Failed to load session:', error);
@@ -370,6 +380,8 @@ const ResearchWorkspace = () => {
             setFullAnnotations([]);
             setCumulativeTimeSaved(0);
             setCumulativeEntropyCost(0);
+            setCumulativeRandomCost(0);
+            setCumulativeCalLogCost(0);
             setHistory([]);
             setMetrics({ alpha: 5.0, beta: 3.0, step: 0 });
             setShadowMetrics(null);
@@ -464,6 +476,10 @@ const ResearchWorkspace = () => {
             annotationCount={annotationCount}
             cumulativeTimeSaved={cumulativeTimeSaved}
             cumulativeEntropyCost={cumulativeEntropyCost}
+            cumulativeRandomCost={cumulativeRandomCost}
+            cumulativeCalLogCost={cumulativeCalLogCost}
+            annotations={fullAnnotations}
+            contestantId={contestantId}
             onHome={() => window.location.href = '/'}
             onExport={exportSessionData}
         />;
