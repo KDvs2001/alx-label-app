@@ -7,7 +7,7 @@ const ParameterImpactExplainer = lazy(() => import('../components/ParameterImpac
 
 const ImpactDashboard = () => {
     const [experimentData, setExperimentData] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false); // Don't block page — stats are hardcoded
     const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
 
     useEffect(() => {
@@ -18,10 +18,8 @@ const ImpactDashboard = () => {
         try {
             const response = await axios.get(`${SERVER_URL}/api/experiments`);
             setExperimentData(response.data);
-            setLoading(false);
         } catch (error) {
-            console.warn('Backend unavailable (likely sleeping on cold start):', error.message);
-            setLoading(false);
+            console.warn('Backend unavailable:', error.message);
         }
     };
 

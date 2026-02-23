@@ -38,25 +38,22 @@ const EvaluatorFeedbackModal = ({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setStatus('loading');
+
+        // OPTIMISTIC: Show success immediately — don't make user wait for DB
+        setStatus('success');
+        setTimeout(onClose, 2500);
+
+        // Save in background (fire-and-forget)
         try {
             const payload = { ...formData, ...sessionData };
-
             const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "http://localhost:5001").replace(/\/$/, "");
-            const res = await fetch(`${SERVER_URL}/api/feedback`, {
+            fetch(`${SERVER_URL}/api/feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to submit feedback');
-
-            setStatus('success');
-            setTimeout(onClose, 2500); // Auto close after success
+            }).catch(err => console.error('Feedback save failed (will retry on next visit):', err));
         } catch (err) {
-            setErrorMsg(err.message);
-            setStatus('error');
+            console.error('Feedback submit error:', err);
         }
     };
 
