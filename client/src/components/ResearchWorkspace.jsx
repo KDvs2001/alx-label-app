@@ -46,6 +46,10 @@ const ResearchWorkspace = () => {
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
 
+    // Ref for the current in-flight fetch AbortController
+    // This ensures we can cancel stale fetches on re-render, unmount, or new requests
+    const fetchControllerRef = useRef(null);
+
     // Evaluator Tour State
     const [tourActive, setTourActive] = useState(!localStorage.getItem('cal_log_tour_seen'));
 
@@ -82,7 +86,14 @@ const ResearchWorkspace = () => {
         if (contestantId) {
             fetchNextBatch();
             const interval = setInterval(pollMetrics, 2000); // Poll graphs every 2s
-            return () => clearInterval(interval);
+            return () => {
+                clearInterval(interval);
+                // Cancel any in-flight fetch when effect cleans up
+                if (fetchControllerRef.current) {
+                    fetchControllerRef.current.abort();
+                    fetchControllerRef.current = null;
+                }
+            };
         }
     }, [contestantId]);
 
@@ -152,8 +163,15 @@ const ResearchWorkspace = () => {
         }, 5000);
 
         try {
-            // Use ref for always-fresh labeled IDs (avoids stale closure)
+            // Abort any previous in-flight fetch before starting a new one
+            if (fetchControllerRef.current) {
+                fetchControllerRef.current.abort();
+            }
+
             const controller = new AbortController();
+            fetchControllerRef.current = controller;
+
+            // Timeout: abort if ML service doesn't respond in 25s
             const timeout = setTimeout(() => controller.abort(), 25000);
 
             const rankRes = await fetch(`${API_URL}/predict`, {
@@ -165,6 +183,13 @@ const ResearchWorkspace = () => {
                 signal: controller.signal
             });
             clearTimeout(timeout);
+
+            // If this controller was superseded by a newer request, discard results
+            if (fetchControllerRef.current !== controller) {
+                clearInterval(stageTimer);
+                return;
+            }
+
             const data = await rankRes.json();
             const ranked = Array.isArray(data) ? data : (data.tasks || []);
             const shadows = Array.isArray(data) ? null : data.shadow_metrics;
@@ -178,6 +203,15 @@ const ResearchWorkspace = () => {
                 setToast({ message: "All tasks have been labeled! 🎉", type: "success" });
             }
         } catch (e) {
+            // Silently ignore AbortErrors — these are expected when:
+            // - A new fetchNextBatch call supersedes an old one
+            // - The component unmounts or the effect re-runs (e.g. tab reactivation)
+            // - The 25s timeout fires on an idle/slow service
+            if (e.name === 'AbortError') {
+                clearInterval(stageTimer);
+                return; // Don't retry, don't show errors — this is intentional cancellation
+            }
+
             console.error("Failed to fetch tasks from ML service", e);
             if (retryCount < 2) {
                 setLoadingStage(2);
