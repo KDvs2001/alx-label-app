@@ -47,6 +47,14 @@ app.get("/", (req, res) => {
   res.send("Research Tool API is Running...");
 });
 
+// Loader.io verification endpoint
+app.get("/loaderio-f966d5f9ea44275362b21b0760059373/", (req, res) => {
+  res.send("loaderio-f966d5f9ea44275362b21b0760059373");
+});
+app.get("/loaderio-f966d5f9ea44275362b21b0760059373.txt", (req, res) => {
+  res.send("loaderio-f966d5f9ea44275362b21b0760059373");
+});
+
 const PORT = process.env.PORT || 5001;
 if (require.main === module) {
   server.listen(PORT, () => {
