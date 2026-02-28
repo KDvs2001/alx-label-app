@@ -24,9 +24,20 @@ const ShadowAuditModal = ({ isOpen, onClose, metrics }) => {
                     </div>
                 ))}
             </div>
-            <div className="mt-4 pt-4 border-t border-white/10 text-center">
-                <div className="text-[10px] uppercase text-slate-400">Total Cost</div>
-                <div className="text-xl font-bold font-mono">{(data.estimated_cost * 3).toFixed(0)}s</div>
+            <div className="mt-4 pt-4 border-t border-white/10 text-center space-y-2">
+                <div>
+                    <div className="text-[10px] uppercase text-slate-400">Avg Cost</div>
+                    <div className="text-lg font-bold font-mono">{data.estimated_cost}s</div>
+                </div>
+                <div>
+                    <div className="text-[10px] uppercase text-slate-400">Avg Entropy</div>
+                    <div className="text-sm font-bold font-mono">{(data.avg_entropy || 0).toFixed(4)}</div>
+                </div>
+                <div>
+                    <div className="text-[10px] uppercase text-green-400">Info Efficiency</div>
+                    <div className="text-sm font-bold font-mono text-green-300">{(data.info_efficiency || 0).toFixed(4)}</div>
+                    <div className="text-[8px] text-slate-600">bits/sec</div>
+                </div>
             </div>
         </div>
     );

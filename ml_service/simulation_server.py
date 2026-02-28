@@ -322,12 +322,15 @@ def predict():
     def calc_metrics(picks):
         avg_len = 0
         avg_cost = 0
+        avg_entropy = 0
         audit_data = []
         n_picks = max(1, len(picks))
         
         for p in picks:
             length = len(p['text'].split())
             avg_len += length
+            entropy_val = p['transparency_report']['math_proof']['entropy']
+            avg_entropy += entropy_val
             
             # Use cached cost instead of recalculating if available
             if 'cost_analysis' in p['transparency_report']:
@@ -339,14 +342,21 @@ def predict():
             
             audit_data.append({
                 'id': p['id'],
-                'text': p['text'][:40] + "...", # Shorter text snippet to reduce JSON payload size
+                'text': p['text'][:40] + "...",
                 'len': length,
-                'entropy': p['transparency_report']['math_proof']['entropy']
+                'entropy': entropy_val
             })
+        
+        final_avg_cost = avg_cost / n_picks
+        final_avg_entropy = avg_entropy / n_picks
+        # Information Efficiency: how much uncertainty is resolved per second
+        info_efficiency = round(final_avg_entropy / max(final_avg_cost, 0.1), 4)
             
         return {
             "avg_len": round(avg_len / n_picks, 1),
-            "estimated_cost": round(avg_cost / n_picks, 1),
+            "estimated_cost": round(final_avg_cost, 1),
+            "avg_entropy": round(final_avg_entropy, 4),
+            "info_efficiency": info_efficiency,
             "selected_ids": [p['id'] for p in picks],
             "audit_trail": audit_data
         }

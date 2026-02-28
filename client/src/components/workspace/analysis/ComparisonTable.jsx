@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { TrendingDown, Eye } from 'lucide-react';
+import { TrendingUp, Eye, Zap, Clock, BarChart3 } from 'lucide-react';
 import ShadowAuditModal from './ShadowAuditModal';
 
 const ComparisonTable = ({ shadowMetrics }) => {
@@ -8,18 +8,50 @@ const ComparisonTable = ({ shadowMetrics }) => {
 
     if (!shadowMetrics) return null;
 
-    const savings = {
-        time: (shadowMetrics.entropy.estimated_cost - shadowMetrics.cal_log.estimated_cost).toFixed(1),
-        words: (shadowMetrics.entropy.avg_len - shadowMetrics.cal_log.avg_len).toFixed(0)
-    };
+    // Information Efficiency = Entropy / Cost (higher = better)
+    const calLogEff = shadowMetrics.cal_log.info_efficiency || 0;
+    const entropyEff = shadowMetrics.entropy.info_efficiency || 0;
+    const randomEff = shadowMetrics.random.info_efficiency || 0;
+
+    // Percentage improvement of CAL-Log over entropy
+    const vsEntropyPct = entropyEff > 0
+        ? (((calLogEff - entropyEff) / entropyEff) * 100).toFixed(1)
+        : '0.0';
+    const vsRandomPct = randomEff > 0
+        ? (((calLogEff - randomEff) / randomEff) * 100).toFixed(1)
+        : '0.0';
+
+    // Determine if CAL-Log is winning
+    const isWinningVsEntropy = calLogEff > entropyEff;
+    const isWinningVsRandom = calLogEff > randomEff;
+
+    const renderStrategyCard = (name, efficiency, entropy, cost, color, borderColor, isHighlighted) => (
+        <div className={`p-3 rounded-lg border ${isHighlighted ? `${borderColor} shadow-[0_0_15px_rgba(59,130,246,0.1)]` : 'border-slate-700/50'} ${isHighlighted ? 'bg-blue-900/20' : 'bg-slate-900/50'}`}>
+            <div className={`text-[10px] uppercase tracking-widest mb-2 font-bold ${color}`}>{name}</div>
+            <div className={`text-lg font-bold font-mono ${color}`}>
+                {efficiency.toFixed(4)}
+            </div>
+            <div className="text-[9px] text-slate-500 mt-1">bits/sec</div>
+            <div className="mt-2 pt-2 border-t border-white/5 grid grid-cols-2 gap-1">
+                <div>
+                    <div className="text-[9px] text-slate-600">Entropy</div>
+                    <div className="text-[10px] font-mono text-slate-400">{(entropy || 0).toFixed(3)}</div>
+                </div>
+                <div>
+                    <div className="text-[9px] text-slate-600">Cost</div>
+                    <div className="text-[10px] font-mono text-slate-400">{cost}s</div>
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <>
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
                 <div className="flex justify-between items-start mb-4">
                     <h3 className="text-white font-bold flex items-center gap-2">
-                        <TrendingDown size={18} className="text-green-400" />
-                        EFFICIENCY SAVINGS
+                        <Zap size={18} className="text-blue-400" />
+                        INFORMATION EFFICIENCY
                     </h3>
                     <button
                         onClick={() => setShowAudit(true)}
@@ -29,32 +61,56 @@ const ComparisonTable = ({ shadowMetrics }) => {
                     </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-center mb-4">
-                    <div className="p-2 bg-slate-900/50 rounded border border-slate-700/50">
-                        <div className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Random</div>
-                        <div className="text-sm font-mono text-slate-300">Avg: {shadowMetrics.random.estimated_cost}s</div>
-                        <div className="text-[10px] text-slate-600">Avg: {shadowMetrics.random.avg_len} words</div>
-                    </div>
-                    <div className="p-2 bg-slate-900/50 rounded border border-yellow-900/20">
-                        <div className="text-[10px] text-yellow-600 uppercase tracking-widest mb-1">Entropy</div>
-                        <div className="text-sm font-mono text-yellow-500">Avg: {shadowMetrics.entropy.estimated_cost}s</div>
-                        <div className="text-[10px] text-slate-600">Avg: {shadowMetrics.entropy.avg_len} words</div>
-                    </div>
-                    <div className="p-2 bg-blue-900/20 rounded border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
-                        <div className="text-[10px] text-blue-400 uppercase tracking-widest mb-1">CAL-Log</div>
-                        <div className="text-lg font-bold font-mono text-blue-300">Avg: {shadowMetrics.cal_log.estimated_cost}s</div>
-                        <div className="text-[10px] text-blue-400/60">Avg: {shadowMetrics.cal_log.avg_len} words</div>
-                    </div>
+                {/* Metric Explanation */}
+                <div className="text-[9px] text-slate-500 mb-3 flex items-center gap-1">
+                    <BarChart3 size={10} />
+                    <span>Entropy &divide; Cost = bits of information resolved per second of annotation</span>
                 </div>
 
-                {/* Savings Banner */}
-                <div className="bg-green-900/20 border border-green-900/50 rounded-lg p-3 text-center">
-                    <div className="text-[10px] text-green-400/80 mb-1 uppercase tracking-wider font-bold">Average Difference per Task</div>
-                    <div className="text-sm font-bold text-white">
-                        Saved <span className="text-green-300">{savings.words} words</span> & <span className="text-green-300">{savings.time}s</span>
+                {/* Strategy Cards */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                    {renderStrategyCard(
+                        'Random', randomEff,
+                        shadowMetrics.random.avg_entropy,
+                        shadowMetrics.random.estimated_cost,
+                        'text-slate-300', 'border-slate-600', false
+                    )}
+                    {renderStrategyCard(
+                        'Entropy', entropyEff,
+                        shadowMetrics.entropy.avg_entropy,
+                        shadowMetrics.entropy.estimated_cost,
+                        'text-yellow-500', 'border-yellow-700', false
+                    )}
+                    {renderStrategyCard(
+                        'CAL-Log', calLogEff,
+                        shadowMetrics.cal_log.avg_entropy,
+                        shadowMetrics.cal_log.estimated_cost,
+                        'text-blue-300', 'border-blue-500/30', true
+                    )}
+                </div>
+
+                {/* CAL-Log Advantage Banner */}
+                <div className={`rounded-lg p-3 text-center border ${isWinningVsEntropy ? 'bg-green-900/20 border-green-900/50' : 'bg-slate-800/50 border-slate-700/50'}`}>
+                    <div className={`text-[10px] mb-1 uppercase tracking-wider font-bold ${isWinningVsEntropy ? 'text-green-400/80' : 'text-slate-400'}`}>
+                        CAL-Log vs Baselines
+                    </div>
+                    <div className="flex justify-center gap-6 text-sm font-bold">
+                        <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-slate-500">vs Entropy:</span>
+                            <span className={isWinningVsEntropy ? 'text-green-300' : 'text-slate-400'}>
+                                {isWinningVsEntropy ? '+' : ''}{vsEntropyPct}%
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <span className="text-[10px] text-slate-500">vs Random:</span>
+                            <span className={isWinningVsRandom ? 'text-green-300' : 'text-slate-400'}>
+                                {isWinningVsRandom ? '+' : ''}{vsRandomPct}%
+                            </span>
+                        </div>
                     </div>
                     <div className="text-[9px] text-slate-500 mt-2 italic leading-tight max-w-[90%] mx-auto">
-                        Note: Spy Window metrics compare the average of the top 3 tasks for each strategy. The specific task card below shows the exact cost for only that one task.
+                        Higher information efficiency = more uncertainty resolved per second of annotation time.
+                        CAL-Log optimises Entropy &divide; Cost, while Entropy ignores cost entirely.
                     </div>
                 </div>
             </div>
