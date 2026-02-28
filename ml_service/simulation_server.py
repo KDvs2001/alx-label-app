@@ -402,7 +402,7 @@ def predict():
         "cost": top['transparency_report']['cost_analysis']['predicted_seconds'],
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta,
-        "reasoning": f"Score ({top['score']:.3f}) = (Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s)) * Pattern Multiplier ({top['transparency_report']['math_proof'].get('pattern_length_modifier', 1.0):.2f})",
+        "reasoning": f"Score ({top['score']:.3f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s) — where Cost = α({state.cost_model.alpha:.1f}) + β({state.cost_model.beta:.2f}) × log(1+L)",
         "task_stats": {
             "length": t_len,
             "percentile": round(pct, 1),
@@ -519,15 +519,16 @@ def annotate():
     state.steps_since_update += 1
     state.steps_since_train += 1
     
-    # Update Cost Model (Every 10 annotations)
+    # Update Cost Model (Every 5 annotations — fast adaptation)
     interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
-    state.interaction_buffer.append(interaction)  # Accumulate interactions
+    state.interaction_buffer.append(interaction)  # Rolling history (never cleared)
     
-    if state.steps_since_update >= 10:
-        logger.info(f"📉 Updating Cost Model with {len(state.interaction_buffer)} interactions...")
-        state.cost_model.update(state.interaction_buffer)  # Pass ALL accumulated interactions
+    if state.steps_since_update >= 5:
+        logger.info(f"📉 Updating Cost Model with {len(state.interaction_buffer)} interactions (rolling)...")
+        state.cost_model.update(state.interaction_buffer)  # Pass full rolling history
         state.steps_since_update = 0
-        state.interaction_buffer = []  # Clear buffer after update
+        # NOTE: Do NOT clear interaction_buffer — cost_engine uses a rolling window
+        # of the last 5 internally. Keeping the full buffer ensures continuity.
         logger.info(f"✅ Cost Model Updated - Current values: α={state.cost_model.alpha:.2f}, β={state.cost_model.beta:.2f}")
         try:
             state.history.append({"step": state.step, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta})
@@ -551,9 +552,9 @@ def annotate():
     label_int = 1 if label == 'Positive' else 0
     state.pending_labels_cal_log = getattr(state, 'pending_labels_cal_log', []) + [(text, label_int)]
 
-    # Retrain Cycle (Every 10 - SYNCED with Alpha/Beta updates)
+    # Retrain Cycle (Every 5 - SYNCED with Alpha/Beta updates)
     trained = False
-    if state.steps_since_train >= 10:
+    if state.steps_since_train >= 5:
         logger.info("🧠 Retraining ALL Models...")
         
         # Helper to train

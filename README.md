@@ -37,11 +37,11 @@ Cost(x)  = α + β · log(1 + Length(x))
 
 | Parameter | Meaning | Adaptation |
 |-----------|---------|------------|
-| **α** (alpha) | Task-switching overhead (seconds) | Fixed at 5.0s (KLM-GOMS) |
-| **β** (beta)  | Reading effort per log-unit of text | Updated every 20 annotations from user timing data |
+| **α** (alpha) | Task-switching overhead (seconds) | Adaptive via OLS regression every 5 annotations |
+| **β** (beta)  | Reading effort per log-unit of text | Adaptive via OLS regression every 5 annotations |
 
-**β < 1.5** → Fast Skimmer → CAL-Log selects longer, model-confusing tasks  
-**β > 3.0** → Careful Reader → CAL-Log selects shorter, model-confusing tasks
+**β < 1.5** → Fast Skimmer → Cost formula naturally favours longer, high-entropy tasks  
+**β > 3.0** → Careful Reader → Cost formula naturally favours shorter, high-entropy tasks
 
 ## Prerequisites
 
@@ -142,10 +142,10 @@ When you open the Spy Window (`/spy`), you will see:
 
 ### What to Watch For
 
-- **After 20 annotations**: The model retrains and α/β parameters update
+- **After 5 annotations**: The model retrains and α/β parameters update via OLS regression
 - **Selection Logic card**: Shows whether CAL-Log classified you as a Fast Skimmer, Balanced, or Careful Reader
 - **Efficiency Savings**: Compare CAL-Log's task selections against Random and Entropy baselines
-- **Parameter Graphs**: Watch β decrease (fast reader) or increase (slow reader)
+- **Parameter Graphs**: Watch α and β adapt as the system learns your reading speed
 
 ## Research Context
 

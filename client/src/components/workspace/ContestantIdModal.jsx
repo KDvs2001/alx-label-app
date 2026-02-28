@@ -6,19 +6,35 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
     const [showResumePrompt, setShowResumePrompt] = React.useState(false);
     const [isChecking, setIsChecking] = React.useState(false);
     const [mlReady, setMlReady] = React.useState(false);
+    const [warmupAttempts, setWarmupAttempts] = React.useState(0);
 
-    // WARMUP: Ping the ML service as soon as the modal opens to wake HF Spaces
+    // WARMUP: Aggressively poll the ML service to wake HF Spaces while user types their ID
     React.useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen || mlReady) return;
         const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
-        const warmup = async () => {
-            try {
-                const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(45000) });
-                if (res.ok) setMlReady(true);
-            } catch { /* Space still waking — will be ready by /predict time */ }
+        let cancelled = false;
+
+        const pollWarmup = async () => {
+            while (!cancelled) {
+                try {
+                    const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(15000) });
+                    if (res.ok && !cancelled) {
+                        setMlReady(true);
+                        return; // Service is alive, stop polling
+                    }
+                } catch {
+                    // Space still waking — retry
+                }
+                if (!cancelled) {
+                    setWarmupAttempts(prev => prev + 1);
+                    await new Promise(r => setTimeout(r, 5000)); // Wait 5s before next ping
+                }
+            }
         };
-        warmup();
-    }, [isOpen]);
+        pollWarmup();
+
+        return () => { cancelled = true; };
+    }, [isOpen, mlReady]);
 
     if (!isOpen) return null;
 
@@ -147,6 +163,26 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
                 <p className="text-xs text-slate-500 mt-4 text-center">
                     Your progress will be automatically saved
                 </p>
+
+                {/* ML Service Warmup Status Indicator */}
+                <div className={`mt-3 flex items-center justify-center gap-2 text-xs transition-all duration-500 ${mlReady ? 'text-green-400' : 'text-amber-400'}`}>
+                    {mlReady ? (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-green-400" />
+                            <span>ML Service Ready ✓</span>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                            <span>
+                                {warmupAttempts === 0
+                                    ? 'Connecting to ML Service...'
+                                    : `Waking up ML Service... (attempt ${warmupAttempts + 1})`
+                                }
+                            </span>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

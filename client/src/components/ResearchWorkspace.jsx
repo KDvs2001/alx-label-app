@@ -157,10 +157,10 @@ const ResearchWorkspace = () => {
         setLoading(true);
         setLoadingStage(0);
 
-        // Progressive loading messages
+        // Progressive loading messages (advance every 15s to cover 90s cold-start)
         const stageTimer = setInterval(() => {
-            setLoadingStage(prev => Math.min(prev + 1, 3));
-        }, 5000);
+            setLoadingStage(prev => Math.min(prev + 1, 4));
+        }, 15000);
 
         try {
             // Abort any previous in-flight fetch before starting a new one
@@ -171,8 +171,8 @@ const ResearchWorkspace = () => {
             const controller = new AbortController();
             fetchControllerRef.current = controller;
 
-            // Timeout: abort if ML service doesn't respond in 25s
-            const timeout = setTimeout(() => controller.abort(), 25000);
+            // Timeout: 90s to cover full HF Spaces cold boot (typically 60-90s)
+            const timeout = setTimeout(() => controller.abort(), 90000);
 
             const rankRes = await fetch(`${API_URL}/predict`, {
                 method: 'POST',
@@ -213,12 +213,14 @@ const ResearchWorkspace = () => {
             }
 
             console.error("Failed to fetch tasks from ML service", e);
-            if (retryCount < 2) {
-                setLoadingStage(2);
-                setTimeout(() => fetchNextBatch(retryCount + 1), 3000);
+            // 4 retries with exponential backoff: 3s, 6s, 12s, 20s
+            if (retryCount < 4) {
+                const backoffDelays = [3000, 6000, 12000, 20000];
+                setLoadingStage(retryCount < 2 ? 2 : 3);
+                setTimeout(() => fetchNextBatch(retryCount + 1), backoffDelays[retryCount]);
                 return;
             }
-            setToast({ message: "ML service unavailable. Please wait for it to start.", type: "error" });
+            setToast({ message: "ML service unavailable. Please try refreshing the page.", type: "error" });
         }
         clearInterval(stageTimer);
         setLoading(false);
@@ -562,13 +564,15 @@ const ResearchWorkspace = () => {
                         {loadingStage === 0 && "Waking up ML Service..."}
                         {loadingStage === 1 && "Loading AI Models..."}
                         {loadingStage === 2 && "Retrying connection..."}
-                        {loadingStage >= 3 && "Almost ready..."}
+                        {loadingStage === 3 && "Cold-starting server..."}
+                        {loadingStage >= 4 && "Almost ready..."}
                     </div>
                     <div className="text-sm text-slate-400">
                         {loadingStage === 0 && "The server may need a moment to start up"}
                         {loadingStage === 1 && "Preparing task ranking pipeline"}
                         {loadingStage === 2 && "Reconnecting to ML service"}
-                        {loadingStage >= 3 && "Ranking tasks by information value"}
+                        {loadingStage === 3 && "Server is booting up — this can take up to 90 seconds"}
+                        {loadingStage >= 4 && "Ranking tasks by information value"}
                     </div>
                 </div>
             )}

@@ -64,7 +64,11 @@ class CALLogRanker:
         entropy = self.calculate_entropy(probabilities)
         costs = self.calculate_costs(texts)
         
-        # CAL-Log formula
+        # CAL-Log formula: Score = Entropy / Cost
+        # This NATURALLY handles user adaptation:
+        #   - Low β (fast reader) → low cost for long texts → long high-entropy tasks score higher
+        #   - High β (slow reader) → high cost for long texts → short high-entropy tasks score higher
+        # No hardcoded pattern multipliers needed — the math does the work.
         scores = entropy / costs
         
         # Apply deduplication penalties if provided
@@ -73,34 +77,6 @@ class CALLogRanker:
         else:
             final_scores = scores
             penalties = np.ones(len(tasks))  # No penalty
-            
-        # --- NEW: Pattern-Based Length Enforcement ---
-        # Instead of relying solely on the natural math (which sometimes fails if a short task has massive entropy),
-        # we explicitly boost/penalize tasks based on length and the user's classified reading pattern.
-        reading_pattern = self.cost_model.get_reading_pattern()
-        pattern = reading_pattern.get('pattern', 'balanced')
-        
-        # Calculate lengths for the modifier
-        lengths = np.array([len(t.split()) for t in texts])
-        avg_len = np.mean(lengths) if len(lengths) > 0 else 1.0
-        
-        # Create a length multiplier array
-        length_multipliers = np.ones(len(tasks))
-        
-        if pattern == 'fast_skimmer':
-            # Fast Skimmer: Boost LONG tasks, severely penalize short tasks
-            # Multiplier > 1.0 for tasks longer than average, < 1.0 for shorter
-            length_multipliers = 1.0 + (5.0 * ((lengths - avg_len) / avg_len))
-        elif pattern == 'careful_reader':
-            # Careful Reader: Boost SHORT tasks, severely penalize long tasks
-            # Multiplier > 1.0 for tasks shorter than average, < 1.0 for longer
-            length_multipliers = 1.0 - (5.0 * ((lengths - avg_len) / avg_len))
-            
-        # Clamp multipliers to prevent negative scores or extreme infinity (0.01x to 10.0x max range)
-        length_multipliers = np.clip(length_multipliers, 0.01, 10.0)
-        
-        # Apply the enforcement modifier to the final scores
-        final_scores = final_scores * length_multipliers
         
         # Sort by descending score
         sorted_indices = np.argsort(final_scores)[::-1]
@@ -129,7 +105,6 @@ class CALLogRanker:
                     "math_proof": {
                         "entropy": float(entropy[idx]),
                         "redundancy_penalty": float(penalties[idx]),
-                        "pattern_length_modifier": float(length_multipliers[idx]),
                         "cal_log_score": float(scores[idx]),
                         "final_adjusted_score": float(final_scores[idx])
                     }
