@@ -23,7 +23,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
                         return; // Service is alive, stop polling
                     }
                 } catch {
-                    // Space still waking — retry
+                    // Space still waking - retry
                 }
                 if (!cancelled) {
                     setWarmupAttempts(prev => prev + 1);

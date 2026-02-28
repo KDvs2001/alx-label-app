@@ -7,23 +7,23 @@ class AdaptiveCostModel:
     """
     Adaptive Cost Model for CAL-Log.
     
-    Cost formula: C(x) = α + β × log(1 + L(x))
+    Cost formula: C(x) = alpha + beta * log(1 + L(x))
     
     FULLY ADAPTIVE APPROACH:
-    - α (intercept) and β (slope) are BOTH estimated via OLS regression
-    - Cold-start defaults: α=5.0, β=3.0
+    - alpha (intercept) and beta (slope) are BOTH estimated via OLS regression
+    - Cold-start defaults: alpha=5.0, beta=3.0
     - Updates every 5 annotations using a rolling window of the last 5 interactions
-    - α represents fixed overhead in seconds (click, read prompt, decide)
-    - β represents reading speed multiplier (higher = slower reader)
+    - alpha represents fixed overhead in seconds (click, read prompt, decide)
+    - beta represents reading speed multiplier (higher = slower reader)
     """
     
     def __init__(self):
-        self.alpha = 5.0  # Cold start (mutable — will be overwritten by regression)
-        self.beta = 3.0   # Cold start (mutable — will be overwritten by regression)
+        self.alpha = 5.0  # Cold start (mutable, will be overwritten by regression)
+        self.beta = 3.0   # Cold start (mutable, will be overwritten by regression)
         self.user_history = []
 
     def _heuristic_cost(self, log_length: float) -> float:
-        """Calculate cost: C(x) = α + β × log(1 + L(x))"""
+        """Calculate cost: C(x) = alpha + beta * log(1 + L(x))"""
         return self.alpha + (self.beta * log_length)
 
     def predict(self, text_lengths: list) -> np.ndarray:
@@ -34,10 +34,10 @@ class AdaptiveCostModel:
 
     def update(self, new_interaction_logs: list):
         """
-        Update α AND β based on user's annotation speed using OLS regression.
+        Update alpha and beta based on user's annotation speed using OLS regression.
         
-        Fits: time = α + β × log(1 + length) via least-squares.
-        Both parameters are derived purely from the data — no hardcoded values
+        Fits: time = alpha + beta * log(1 + length) via least-squares.
+        Both parameters are derived purely from the data, no hardcoded values
         after the first update.
         
         Uses a rolling window of the last 5 interactions for fast adaptation.
@@ -49,7 +49,7 @@ class AdaptiveCostModel:
             if y_target < 300:  # Filter outliers (> 5 min)
                 self.user_history.append([x_feat, y_target])
 
-        # Rolling window of 5 — adapts quickly to behavior changes
+        # Rolling window of 5, adapts quickly to behavior changes
         WINDOW_SIZE = 5
         history_to_use = self.user_history[-WINDOW_SIZE:]
 
@@ -61,11 +61,11 @@ class AdaptiveCostModel:
             old_alpha = self.alpha
             old_beta = self.beta
             
-            # OLS Regression: time = α + β × log_length
+            # OLS Regression: time = alpha + beta * log_length
             # Design matrix: [1, log_length] for each sample
             A = np.column_stack([np.ones(len(log_lengths)), log_lengths])
             
-            # Solve via least squares: min ||A @ [α, β] - times||²
+            # Solve via least squares: min ||A @ [alpha, beta] - times||^2
             result, _, _, _ = np.linalg.lstsq(A, times, rcond=None)
             new_alpha, new_beta = result[0], result[1]
             
@@ -76,14 +76,14 @@ class AdaptiveCostModel:
             self.alpha = new_alpha
             self.beta = new_beta
             
-            logger.info(f"📊 Cost Model Update (OLS Regression):")
+            logger.info(f"Cost Model Update (OLS Regression):")
             logger.info(f"   Window: last {len(history_to_use)} interactions")
-            logger.info(f"   α: {old_alpha:.2f} → {new_alpha:.2f} (fixed overhead)")
-            logger.info(f"   β: {old_beta:.2f} → {new_beta:.2f} (reading speed)")
+            logger.info(f"   alpha: {old_alpha:.2f} -> {new_alpha:.2f} (fixed overhead)")
+            logger.info(f"   beta: {old_beta:.2f} -> {new_beta:.2f} (reading speed)")
             logger.info(f"   Classification: {self._get_speed_label()}")
 
     def _get_speed_label(self) -> str:
-        """Derive speed label from current β value."""
+        """Derive speed label from current beta value."""
         if self.beta < 1.5:
             return "FAST SKIMMER"
         elif self.beta > 3.0:
@@ -92,7 +92,7 @@ class AdaptiveCostModel:
             return "BALANCED"
 
     def get_reading_pattern(self):
-        """Analyze user's reading pattern based on current α and β."""
+        """Analyze user's reading pattern based on current alpha and beta."""
         WINDOW_SIZE = 5
         recent_history = self.user_history[-WINDOW_SIZE:]
         
@@ -107,17 +107,17 @@ class AdaptiveCostModel:
         
         avg_time = np.mean([h[1] for h in recent_history])
         
-        # Classification is derived from β — which is itself derived from
+        # Classification is derived from beta, which is itself derived from
         # data via regression. No hardcoded conditions on task selection.
         if self.beta < 1.5:
             pattern = "fast_skimmer"
-            description = "Fast reader — low β means cost formula naturally favors longer high-entropy tasks"
+            description = "Fast reader - low beta means cost formula naturally favors longer high-entropy tasks"
         elif self.beta > 3.0:
             pattern = "careful_reader"
-            description = "Careful reader — high β means cost formula naturally favors shorter high-entropy tasks"
+            description = "Careful reader - high beta means cost formula naturally favors shorter high-entropy tasks"
         else:
             pattern = "balanced"
-            description = "Balanced pace — cost formula optimizes entropy/cost ratio normally"
+            description = "Balanced pace - cost formula optimizes entropy/cost ratio normally"
         
         return {
             "pattern": pattern,

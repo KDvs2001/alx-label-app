@@ -12,16 +12,16 @@ def main():
     parser.add_argument("--output", default="pretrained_backbone.pkl", help="Output filename")
     args = parser.parse_args()
 
-    print(f"🚀 Starting Pre-training on {args.dataset} ({args.samples} samples)...")
+    print(f"Starting Pre-training on {args.dataset} ({args.samples} samples)...")
 
     # Load Dataset
     try:
         ds = load_dataset(args.dataset, split=f"train[:{args.samples}]")
         texts = ds['text']
         labels = ds['label']
-        print(f"✅ Loaded {len(texts)} samples.")
+        print(f"Loaded {len(texts)} samples.")
     except Exception as e:
-        print(f"❌ Failed to load dataset: {e}")
+        print(f"Failed to load dataset: {e}")
         return
 
     # Train
@@ -30,7 +30,7 @@ def main():
     
     # Save
     bb.save_model(args.output)
-    print(f"🎉 Pre-training complete. Saved to {args.output}")
+    print(f"Pre-training complete. Saved to {args.output}")
 
 if __name__ == "__main__":
     main()

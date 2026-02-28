@@ -39,7 +39,7 @@ const EvaluatorFeedbackModal = ({
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // OPTIMISTIC: Show success immediately — don't make user wait for DB
+        // OPTIMISTIC: Show success immediately - don't make user wait for DB
         setStatus('success');
         setTimeout(onClose, 2500);
 

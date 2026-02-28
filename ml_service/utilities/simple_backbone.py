@@ -42,7 +42,7 @@ class SimpleBackbone:
         dummy_y = [0]
         self.classifier.partial_fit(dummy_X, dummy_y, classes=self.classes_)
         self.is_fitted = True
-        logger.info("✅ SimpleBackbone (TF-IDF/Hash) initialized ready.")
+        logger.info("SimpleBackbone (TF-IDF/Hash) initialized ready.")
 
     def predict_proba(self, texts):
         X = self.vectorizer.transform(texts)
@@ -53,14 +53,14 @@ class SimpleBackbone:
         # Check if we have at least 2 different classes
         unique_labels = set(labels)
         if len(unique_labels) < 2:
-            logger.warning(f"⚠️ Training with only {len(unique_labels)} class: {unique_labels}")
+            logger.warning(f"Training with only {len(unique_labels)} class: {unique_labels}")
             logger.warning(f"   Model may not learn decision boundary well until both classes are seen")
             logger.warning(f"   Total samples: {len(labels)}, Labels: {labels}")
             # Continue training anyway - model can still update weights
         
         X = self.vectorizer.transform(texts)
         self.classifier.partial_fit(X, labels, classes=self.classes_)
-        logger.info(f"✅ Model updated with {len(texts)} samples, unique labels: {unique_labels}")
+        logger.info(f"Model updated with {len(texts)} samples, unique labels: {unique_labels}")
         return {"status": "success"}
 
 

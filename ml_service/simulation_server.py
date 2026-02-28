@@ -62,21 +62,21 @@ class SimulationState:
             from utilities.pretrain_model import StandardBackbone
             
             if os.path.exists(MODEL_DIR):
-                logger.info(f"📂 Found Offline Model at {MODEL_DIR}")
+                logger.info(f"Found Offline Model at {MODEL_DIR}")
                 self.backbone = StandardBackbone(model_name=MODEL_DIR, num_labels=2)
             else:
-                logger.info("☁️ Connecting to Hugging Face Hub...")
+                logger.info("Connecting to Hugging Face Hub...")
                 self.backbone = StandardBackbone(num_labels=2, token=token)
                 
         except (ImportError, MemoryError, OSError) as e:
-            logger.error(f"❌ Heavy Model Failed to Load (Low Memory?): {e}")
-            logger.info("⚠️ FAST FAILBACK: Switching to 'SimpleBackbone' (Valid Scikit-Learn Model).")
-            logger.info("✅ This runs 100% Offline. No downloads needed.")
+            logger.error(f"Heavy Model Failed to Load (Low Memory?): {e}")
+            logger.info("FAST FAILBACK: Switching to 'SimpleBackbone' (Valid Scikit-Learn Model).")
+            logger.info("This runs 100% Offline. No downloads needed.")
             self.backbone = SimpleBackbone(num_labels=2)
             
         # Load Pre-trained weights if available
         if os.path.exists("pretrained_backbone.pkl") and not isinstance(self.backbone, SimpleBackbone):
-            logger.info("💾 Loading saved weights...")
+            logger.info("Loading saved weights...")
             try:
                 self.backbone.load_model("pretrained_backbone.pkl")
             except Exception as e:
@@ -96,7 +96,7 @@ class SimulationState:
         self._init_files()
 
         # 3. ORACLE SETUP (Ghost Models)
-        logger.info("🔮 Initializing Oracle (Comparison Models)...")
+        logger.info("Initializing Oracle (Comparison Models)...")
         self.models = {
             'cal_log': self.backbone, 
             'random': SimpleBackbone(num_labels=2),
@@ -140,21 +140,21 @@ class SimulationState:
         # ============================================
         # STARTUP PREPROCESSING (runs ONCE on boot)
         # ============================================
-        logger.info(f"🔧 Preparing pool of {len(self.pool)} tasks...")
+        logger.info(f"Preparing pool of {len(self.pool)} tasks...")
         
-        # SKIP O(N²) dedup — only ~500 dupes in 50k (1%). Not worth 30-40s on every cold start.
+        # Skip O(N^2) dedup - only ~500 dupes in 50k (1%). Not worth 30-40s on every cold start.
         # An evaluator doing ~20 tasks has near-zero chance of hitting a duplicate.
         self.clean_pool = list(self.pool)  # Use full pool directly
         
         # Shuffle for variety
         random.shuffle(self.clean_pool)
-        logger.info(f"✅ Pool ready: {len(self.clean_pool)} tasks")
+        logger.info(f"Pool ready: {len(self.clean_pool)} tasks")
         
         # 2. PRE-TRAIN backbone on a small seed sample for warm start
         self._pretrain_seed()
 
     def _deduplicate_pool(self, pool):
-        """Run O(N²) dedup ONCE on startup. Results cached for entire session."""
+        """Run O(N^2) dedup ONCE on startup. Results cached for entire session."""
         if len(pool) < 2:
             return pool
         try:
@@ -201,7 +201,7 @@ class SimulationState:
                 for name, model in self.models.items():
                     model.partial_fit(X, y)
                     logger.info(f"  Pre-trained '{name}' on {seed_size} samples")
-                logger.info(f"✅ All models pre-trained on {seed_size} seed samples")
+                logger.info(f"All models pre-trained on {seed_size} seed samples")
             else:
                 logger.warning("Seed sample has only one class, skipping pre-train")
         except Exception as e:
@@ -214,7 +214,7 @@ class SimulationState:
             with open(HISTORY_PATH, "w") as f: 
                 json.dump(initial_history, f)
             self.history = initial_history.copy()
-            logger.info("✅ History reset to initial values (α=5.0, β=3.0)")
+            logger.info("History reset to initial values (alpha=5.0, beta=3.0)")
             
             if not os.path.exists(SELECTION_PATH):
                 with open(SELECTION_PATH, "w") as f: json.dump({}, f)
@@ -387,11 +387,11 @@ def predict():
     state.selected_task_lengths.append(t_len)
     
     if reading_pattern['pattern'] == 'fast_skimmer':
-        pattern_reasoning = f"velocity_profile='Fast Skimmer' (β={reading_pattern['beta']:.2f} < {reading_pattern['baseline_beta']}). Length penalty reduced. Prioritizing longer, high-entropy tasks for maximum Information/Sec."
+        pattern_reasoning = f"velocity_profile='Fast Skimmer' (beta={reading_pattern['beta']:.2f} < {reading_pattern['baseline_beta']}). Length penalty reduced. Prioritizing longer, high-entropy tasks for maximum Information/Sec."
     elif reading_pattern['pattern'] == 'careful_reader':
-        pattern_reasoning = f"velocity_profile='Careful Reader' (β={reading_pattern['beta']:.2f} > {reading_pattern['baseline_beta']}). Length penalty increased. Selecting shorter high-entropy tasks to maximize throughput."
+        pattern_reasoning = f"velocity_profile='Careful Reader' (beta={reading_pattern['beta']:.2f} > {reading_pattern['baseline_beta']}). Length penalty increased. Selecting shorter high-entropy tasks to maximize throughput."
     elif reading_pattern['pattern'] == 'balanced':
-        pattern_reasoning = f"velocity_profile='Balanced' (β={reading_pattern['beta']:.2f} ≈ {reading_pattern['baseline_beta']}). Standard Entropy Sampling with Baseline Cost constraint."
+        pattern_reasoning = f"velocity_profile='Balanced' (beta={reading_pattern['beta']:.2f} ~ {reading_pattern['baseline_beta']}). Standard Entropy Sampling with Baseline Cost constraint."
     else:
         pattern_reasoning = "Acquiring velocity profile..."
     
@@ -402,7 +402,7 @@ def predict():
         "cost": top['transparency_report']['cost_analysis']['predicted_seconds'],
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta,
-        "reasoning": f"Score ({top['score']:.3f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s) — where Cost = α({state.cost_model.alpha:.1f}) + β({state.cost_model.beta:.2f}) × log(1+L)",
+        "reasoning": f"Score ({top['score']:.3f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s) - where Cost = alpha({state.cost_model.alpha:.1f}) + beta({state.cost_model.beta:.2f}) * log(1+L)",
         "task_stats": {
             "length": t_len,
             "percentile": round(pct, 1),
@@ -519,17 +519,17 @@ def annotate():
     state.steps_since_update += 1
     state.steps_since_train += 1
     
-    # Update Cost Model (Every 5 annotations — fast adaptation)
+    # Update Cost Model (Every 5 annotations, fast adaptation)
     interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
     state.interaction_buffer.append(interaction)  # Rolling history (never cleared)
     
     if state.steps_since_update >= 5:
-        logger.info(f"📉 Updating Cost Model with {len(state.interaction_buffer)} interactions (rolling)...")
+        logger.info(f"Updating Cost Model with {len(state.interaction_buffer)} interactions (rolling)...")
         state.cost_model.update(state.interaction_buffer)  # Pass full rolling history
         state.steps_since_update = 0
-        # NOTE: Do NOT clear interaction_buffer — cost_engine uses a rolling window
+        # Do not clear interaction_buffer, cost_engine uses a rolling window
         # of the last 5 internally. Keeping the full buffer ensures continuity.
-        logger.info(f"✅ Cost Model Updated - Current values: α={state.cost_model.alpha:.2f}, β={state.cost_model.beta:.2f}")
+        logger.info(f"Cost Model Updated - Current values: alpha={state.cost_model.alpha:.2f}, beta={state.cost_model.beta:.2f}")
         try:
             state.history.append({"step": state.step, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta})
             with open(HISTORY_PATH, "w") as f: json.dump(state.history, f)
@@ -555,13 +555,13 @@ def annotate():
     # Retrain Cycle (Every 5 - SYNCED with Alpha/Beta updates)
     trained = False
     if state.steps_since_train >= 5:
-        logger.info("🧠 Retraining ALL Models...")
+        logger.info("Retraining ALL Models...")
         
         # Helper to train
         def commit_train(name, buffer_name):
             data = getattr(state, buffer_name, [])
             if not data:
-                logger.warning(f"   ⚠️ No data for {name} model")
+                logger.warning(f"   No data for {name} model")
                 return
             X = [d[0] for d in data]
             y = [d[1] for d in data]
@@ -575,9 +575,9 @@ def annotate():
             commit_train('random', 'pending_labels_random')
             commit_train('entropy', 'pending_labels_entropy')
             trained = True
-            logger.info("✅ All models retrained successfully")
+            logger.info("All models retrained successfully")
         except Exception as e:
-            logger.error(f"❌ Training failed: {e}")
+            logger.error(f"Training failed: {e}")
             import traceback
             logger.error(traceback.format_exc())
 
@@ -608,7 +608,7 @@ def annotate():
             }
             with open(METRICS_PATH, "w") as f:
                 json.dump(metrics_data, f)
-            logger.info(f"📊 Metrics written to file: step={state.step}, α={state.cost_model.alpha:.2f}, β={state.cost_model.beta:.2f}")
+            logger.info(f"Metrics written to file: step={state.step}, alpha={state.cost_model.alpha:.2f}, beta={state.cost_model.beta:.2f}")
         except Exception as e:
             logger.error(f"Failed to write metrics: {e}")
         
@@ -624,7 +624,7 @@ def annotate():
 
 @app.route('/reset', methods=['POST'])
 def reset_session():
-    """Reset ALL state for a new contestant — complete fresh start."""
+    """Reset ALL state for a new contestant, complete fresh start."""
     try:
         # 1. Reset cost model to cold-start defaults
         state.cost_model = AdaptiveCostModel()
@@ -681,7 +681,7 @@ def reset_session():
         import random
         random.shuffle(state.clean_pool)
         
-        logger.info("🔄 FULL SESSION RESET — fresh backbone, cost model, shuffled pool, and history for new contestant")
+        logger.info("FULL SESSION RESET: fresh backbone, cost model, shuffled pool, and history for new contestant")
         
         return jsonify({
             "status": "ok",
@@ -696,5 +696,5 @@ def reset_session():
 if __name__ == "__main__":
     # Use PORT env var for Cloud deployment (HF Spaces uses 7860)
     port = int(os.environ.get("PORT", 9090))
-    logger.info(f"🚀 Simulation Server starting on port {port}...")
+    logger.info(f"Simulation Server starting on port {port}...")
     app.run(host='0.0.0.0', port=port)

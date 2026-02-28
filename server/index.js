@@ -3,7 +3,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
-// const { Server } = require("socket.io"); // Unused
 
 const connectDB = require("./config/db");
 
@@ -35,8 +34,6 @@ app.use((req, res, next) => {
 
 // Database Connection
 connectDB();
-
-// Socket.io removed (Unused)
 
 // Routes
 app.use("/api/experiments", require("./infrastructure/http/routes/experiment"));

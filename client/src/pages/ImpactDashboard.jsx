@@ -7,7 +7,7 @@ const ParameterImpactExplainer = lazy(() => import('../components/ParameterImpac
 
 const ImpactDashboard = () => {
     const [experimentData, setExperimentData] = useState([]);
-    const [loading, setLoading] = useState(false); // Don't block page — stats are hardcoded
+    const [loading, setLoading] = useState(false); // Don't block page - stats are hardcoded
     const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
 
     useEffect(() => {

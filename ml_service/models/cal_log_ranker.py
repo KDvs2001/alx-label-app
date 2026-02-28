@@ -66,9 +66,9 @@ class CALLogRanker:
         
         # CAL-Log formula: Score = Entropy / Cost
         # This NATURALLY handles user adaptation:
-        #   - Low β (fast reader) → low cost for long texts → long high-entropy tasks score higher
-        #   - High β (slow reader) → high cost for long texts → short high-entropy tasks score higher
-        # No hardcoded pattern multipliers needed — the math does the work.
+        #   - Low beta (fast reader) -> low cost for long texts -> long high-entropy tasks score higher
+        #   - High beta (slow reader) -> high cost for long texts -> short high-entropy tasks score higher
+        # No hardcoded pattern multipliers needed, the math does the work.
         scores = entropy / costs
         
         # Apply deduplication penalties if provided

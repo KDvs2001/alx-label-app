@@ -7,13 +7,13 @@ const SelectionCard = ({ selectionLogic }) => {
     const getPatternStyle = (pattern) => {
         switch (pattern) {
             case 'fast_skimmer':
-                return { icon: '🏃', color: 'text-green-400', bgColor: 'bg-green-900/30', borderColor: 'border-green-700' };
+                return { icon: '', color: 'text-green-400', bgColor: 'bg-green-900/30', borderColor: 'border-green-700' };
             case 'careful_reader':
-                return { icon: '📚', color: 'text-blue-400', bgColor: 'bg-blue-900/30', borderColor: 'border-blue-700' };
+                return { icon: '', color: 'text-blue-400', bgColor: 'bg-blue-900/30', borderColor: 'border-blue-700' };
             case 'balanced':
-                return { icon: '⚖️', color: 'text-purple-400', bgColor: 'bg-purple-900/30', borderColor: 'border-purple-700' };
+                return { icon: '', color: 'text-purple-400', bgColor: 'bg-purple-900/30', borderColor: 'border-purple-700' };
             default:
-                return { icon: '📊', color: 'text-slate-400', bgColor: 'bg-slate-800', borderColor: 'border-slate-700' };
+                return { icon: '', color: 'text-slate-400', bgColor: 'bg-slate-800', borderColor: 'border-slate-700' };
         }
     };
 
@@ -47,10 +47,10 @@ const SelectionCard = ({ selectionLogic }) => {
                         <div className={`p-3 rounded-lg border ${getPatternStyle(selectionLogic.reading_pattern.pattern).bgColor} ${getPatternStyle(selectionLogic.reading_pattern.pattern).borderColor}`}>
                             <div className="flex items-center gap-2 mb-2">
                                 <Gauge size={16} className={getPatternStyle(selectionLogic.reading_pattern.pattern).color} />
-                                <div className="text-xs text-slate-400">Reading Pattern (Last 20 Annotations)</div>
+                                <div className="text-xs text-slate-400">Reading Pattern (Last 5 Annotations)</div>
                             </div>
                             <div className={`font-bold ${getPatternStyle(selectionLogic.reading_pattern.pattern).color} text-sm`}>
-                                {getPatternStyle(selectionLogic.reading_pattern.pattern).icon} {selectionLogic.reading_pattern.pattern.replace('_', ' ').toUpperCase()}
+                                {selectionLogic.reading_pattern.pattern.replace('_', ' ').toUpperCase()}
                             </div>
                         </div>
                     )}
@@ -103,7 +103,7 @@ const SelectionCard = ({ selectionLogic }) => {
 
                     <div className="flex items-center gap-2 text-xs text-slate-400">
                         <ArrowRight size={14} />
-                        <span>CAL-Log adapts to your reading behavior every 20 annotations.</span>
+                        <span>CAL-Log adapts to your reading behavior every 5 annotations.</span>
                     </div>
                 </div>
             ) : (

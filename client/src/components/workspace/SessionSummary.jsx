@@ -112,7 +112,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                             </div>
                             <div>
                                 <div className="text-[10px] sm:text-xs text-slate-500 font-medium">Model Updates</div>
-                                <div className="text-lg text-white font-mono">{Math.floor(annotationCount / 10)}</div>
+                                <div className="text-lg text-white font-mono">{Math.floor(annotationCount / 5)}</div>
                                 <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">Times the background models retrained</div>
                             </div>
                         </div>
@@ -156,7 +156,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                         </button>
                         <div className="relative">
                             <span className="absolute -top-7 right-0 text-sm font-bold text-red-400 animate-pulse whitespace-nowrap">
-                                ⚠️ Please complete this final step!
+                                Please complete this final step!
                             </span>
                             <button
                                 onClick={() => setShowFeedbackModal(true)}

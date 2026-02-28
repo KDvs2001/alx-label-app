@@ -62,7 +62,7 @@ const ResearchWorkspace = () => {
     // Session Summary
     const [showSummary, setShowSummary] = useState(false);
 
-    // Debug: Cost Model Inputs
+    // Cost Model Inputs
     const [interactionLog, setInteractionLog] = useState([]);
 
     // Task Timer
@@ -200,16 +200,16 @@ const ResearchWorkspace = () => {
                 setShadowMetrics(shadows);
                 fetchSpySelection();
             } else {
-                setToast({ message: "All tasks have been labeled! 🎉", type: "success" });
+                setToast({ message: "All tasks have been labeled!", type: "success" });
             }
         } catch (e) {
-            // Silently ignore AbortErrors — these are expected when:
+            // Silently ignore AbortErrors, these are expected when:
             // - A new fetchNextBatch call supersedes an old one
             // - The component unmounts or the effect re-runs (e.g. tab reactivation)
             // - The 25s timeout fires on an idle/slow service
             if (e.name === 'AbortError') {
                 clearInterval(stageTimer);
-                return; // Don't retry, don't show errors — this is intentional cancellation
+                return; // Don't retry, don't show errors, this is intentional cancellation
             }
 
             console.error("Failed to fetch tasks from ML service", e);
@@ -277,7 +277,7 @@ const ResearchWorkspace = () => {
         const taskText = currentTask.data?.text || currentTask.text;
         const textLength = taskText.split(" ").length;
 
-        // ── 1. INSTANT UI UPDATE (optimistic) ──
+        // 1. INSTANT UI UPDATE (optimistic)
         // Move to next task IMMEDIATELY so the user sees no delay
         const nextTasks = tasks.slice(1);
         if (nextTasks.length > 0) {
@@ -334,7 +334,7 @@ const ResearchWorkspace = () => {
         // Re-enable button IMMEDIATELY after optimistic UI update
         setSubmitting(false);
 
-        // ── 2. ASYNC WORK (non-blocking) ──
+        // 2. ASYNC WORK (non-blocking)
         try {
             const response = await fetch(`${API_URL}/annotate`, {
                 method: 'POST',
@@ -345,7 +345,7 @@ const ResearchWorkspace = () => {
 
             // Check if model was retrained
             if (data.trained) {
-                setToast({ message: "🧠 Model Retrained! Fetching new tasks...", type: "success" });
+                setToast({ message: "Model Retrained! Fetching new tasks...", type: "success" });
                 pollMetrics();  // Non-blocking refresh
                 fetchNextBatch();  // Uses labeledIdsRef (always fresh)
             }
@@ -462,7 +462,7 @@ const ResearchWorkspace = () => {
                 await fetch(`${API_URL}/reset`, {
                     method: 'POST'
                 });
-                console.log('✅ ML service state reset for new annotator');
+                // ML service state reset for new annotator
             } catch (error) {
                 console.error('Failed to reset ML service:', error);
             }
@@ -475,7 +475,7 @@ const ResearchWorkspace = () => {
 
     const handleSaveAndExit = async () => {
         await saveSession();
-        setToast({ message: "✅ Progress saved successfully!", type: "success" });
+        setToast({ message: "Progress saved successfully!", type: "success" });
         setTimeout(() => {
             window.location.href = '/';
         }, 1500);
@@ -493,7 +493,7 @@ const ResearchWorkspace = () => {
         setShowContestantModal(true);
     };
 
-    // Data Export for evaluators — downloads full session as JSON
+    // Data Export for evaluators - downloads full session as JSON
     const exportSessionData = () => {
         const report = {
             meta: {
@@ -508,7 +508,7 @@ const ResearchWorkspace = () => {
             costModel: {
                 currentAlpha: metrics.alpha,
                 currentBeta: metrics.beta,
-                formula: 'C(x) = α + β × log(1 + wordCount)'
+                formula: 'C(x) = alpha + beta * log(1 + wordCount)'
             },
             annotations: fullAnnotations,
             shadowComparison: shadowMetrics || null
@@ -520,7 +520,7 @@ const ResearchWorkspace = () => {
         a.download = `callog_session_${contestantId}_${Date.now()}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        setToast({ message: '📥 Session data exported!', type: 'success' });
+        setToast({ message: 'Session data exported!', type: 'success' });
     };
 
     if (showSummary) {
@@ -546,7 +546,7 @@ const ResearchWorkspace = () => {
             {/* Toast Notification */}
             {toast && (
                 <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-2 animate-bounce">
-                    <span>✨</span> {toast.message}
+                    <span></span> {toast.message}
                 </div>
             )}
 
@@ -571,7 +571,7 @@ const ResearchWorkspace = () => {
                         {loadingStage === 0 && "The server may need a moment to start up"}
                         {loadingStage === 1 && "Preparing task ranking pipeline"}
                         {loadingStage === 2 && "Reconnecting to ML service"}
-                        {loadingStage === 3 && "Server is booting up — this can take up to 90 seconds"}
+                        {loadingStage === 3 && "Server is booting up - this can take up to 90 seconds"}
                         {loadingStage >= 4 && "Ranking tasks by information value"}
                     </div>
                 </div>

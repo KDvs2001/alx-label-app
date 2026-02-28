@@ -28,7 +28,7 @@ const EvaluatorTour = ({ onComplete }) => {
             target: 'body',
             placement: 'center',
             disableBeacon: true,
-            title: <div className="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-pulse">Welcome to CAL-Log 👋</div>,
+            title: <div className="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-pulse">Welcome to CAL-Log</div>,
             content: (
                 <div className="text-base text-slate-300 space-y-3 mt-4 leading-relaxed">
                     <p>CAL-Log is an Adaptive Active Learning system. It learns <strong>how fast you read</strong> and adjusts its mathematics in real-time.</p>
@@ -39,7 +39,7 @@ const EvaluatorTour = ({ onComplete }) => {
         {
             target: '.tour-step-spy-window',
             placement: 'left',
-            title: <div className="text-2xl font-bold text-purple-400 font-mono flex items-center gap-2">THE SPY WINDOW 👁️</div>,
+            title: <div className="text-2xl font-bold text-purple-400 font-mono flex items-center gap-2">THE SPY WINDOW</div>,
             content: (
                 <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>This panel shows the AI's internal thought process.</p>
@@ -56,9 +56,9 @@ const EvaluatorTour = ({ onComplete }) => {
                 <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>Read the text at your <strong>natural pace</strong> and click Positive or Negative.</p>
                     <div className="bg-slate-800/80 border border-slate-700 rounded-lg p-3 text-sm">
-                        <p className="font-bold text-blue-300 mb-1">⌨️ Keyboard Shortcuts</p>
-                        <p><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">1</kbd> — Negative &nbsp;&nbsp; <kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">2</kbd> — Positive</p>
-                        <p className="mt-1"><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">Space</kbd> — Toggle Guidelines Panel</p>
+                        <p className="font-bold text-blue-300 mb-1">Keyboard Shortcuts</p>
+                        <p><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">1</kbd> - Negative &nbsp;&nbsp; <kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">2</kbd> - Positive</p>
+                        <p className="mt-1"><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">Space</kbd> - Toggle Guidelines Panel</p>
                     </div>
                     <p>Please complete around <strong>15-20 annotations</strong> so the Cost Model has enough time to adapt to your style and prove the math!</p>
                 </div>
@@ -130,7 +130,7 @@ const EvaluatorTour = ({ onComplete }) => {
                 }
             }}
             locale={{
-                last: "Let's Begin 🚀",
+                last: "Let's Begin",
                 skip: "Skip Tour"
             }}
         />

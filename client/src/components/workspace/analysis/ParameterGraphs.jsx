@@ -37,7 +37,7 @@ const ParameterGraphs = ({ metrics, history }) => {
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
                 <h4 className="text-xs text-slate-500 mb-1 flex justify-between">
                     <span>Cumulative Annotation Cost (per Strategy)</span>
-                    <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better 📉</span>
+                    <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better</span>
                 </h4>
                 {metrics.cumulative_costs?.history?.length > 0 ? (
                     <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>

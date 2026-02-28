@@ -53,9 +53,9 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                             {alpha.toFixed(2)}
                         </div>
                         <p className="text-sm text-slate-300">
-                            {alphaImpact === 'high' && '⚡ High overhead - significant context-switching penalty'}
-                            {alphaImpact === 'medium' && '⚖️ Balanced - moderate task-switching cost'}
-                            {alphaImpact === 'low' && '🎯 Low overhead - minimal context-switching time'}
+                            {alphaImpact === 'high' && 'High overhead - significant context-switching penalty'}
+                            {alphaImpact === 'medium' && 'Balanced - moderate task-switching cost'}
+                            {alphaImpact === 'low' && 'Low overhead - minimal context-switching time'}
                         </p>
                     </div>
 
@@ -68,9 +68,9 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                             {beta.toFixed(2)}
                         </div>
                         <p className="text-sm text-slate-300">
-                            {betaImpact === 'high' && '🐌 Slow skimmer - heavily penalizes long texts'}
-                            {betaImpact === 'medium' && '👤 Average skimmer - moderate length sensitivity'}
-                            {betaImpact === 'low' && '⚡ Fast skimmer - can handle long texts quickly'}
+                            {betaImpact === 'high' && 'Slow skimmer - heavily penalizes long texts'}
+                            {betaImpact === 'medium' && 'Average skimmer - moderate length sensitivity'}
+                            {betaImpact === 'low' && 'Fast skimmer - can handle long texts quickly'}
                         </p>
                     </div>
                 </div>
@@ -80,7 +80,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                     <h3 className="text-xl font-bold text-white mb-4">How This Affects Task Selection</h3>
                     <div className="space-y-3 text-slate-300">
                         <div className="flex items-start gap-3">
-                            <div className="text-blue-400 font-bold text-lg">📊</div>
+                            <div className="text-blue-400 font-bold text-lg">1.</div>
                             <p>
                                 <strong className="text-white">CAL-Log Score = Uncertainty / Cost</strong>
                                 <br />
@@ -88,7 +88,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                             </p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="text-green-400 font-bold text-lg">⏱️</div>
+                            <div className="text-green-400 font-bold text-lg">2.</div>
                             <p>
                                 <strong className="text-white">Cost = α + β × log(text length)</strong>
                                 <br />
@@ -96,7 +96,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                             </p>
                         </div>
                         <div className="flex items-start gap-3">
-                            <div className="text-purple-400 font-bold text-lg">🎯</div>
+                            <div className="text-purple-400 font-bold text-lg">3.</div>
                             <p>
                                 <strong className="text-white">Result:</strong> The system learns your reading speed and picks tasks that maximize learning while minimizing your time
                             </p>

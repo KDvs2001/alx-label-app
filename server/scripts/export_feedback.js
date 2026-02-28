@@ -21,7 +21,7 @@ async function exportFeedback() {
         const outputPath = path.join(__dirname, "../../evaluator_feedback_export.json");
         fs.writeFileSync(outputPath, JSON.stringify(feedback, null, 2));
 
-        console.log(`✅ Successfully exported ${feedback.length} feedback records to:`);
+        console.log(`Successfully exported ${feedback.length} feedback records to:`);
         console.log(outputPath);
 
     } catch (error) {
