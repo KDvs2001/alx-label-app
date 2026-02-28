@@ -61,13 +61,29 @@ class AdaptiveCostModel:
             old_alpha = self.alpha
             old_beta = self.beta
             
-            # OLS Regression: time = alpha + beta * log_length
-            # Design matrix: [1, log_length] for each sample
-            A = np.column_stack([np.ones(len(log_lengths)), log_lengths])
+            # Check if text lengths have enough variance for OLS to work.
+            # When all texts are similar length, OLS can't separate alpha from
+            # beta and tends to absorb all time into alpha (high alpha, near-zero
+            # beta), causing incorrect speed classification.
+            length_variance = np.std(log_lengths)
             
-            # Solve via least squares: min ||A @ [alpha, beta] - times||^2
-            result, _, _, _ = np.linalg.lstsq(A, times, rcond=None)
-            new_alpha, new_beta = result[0], result[1]
+            if length_variance < 0.3:
+                # LOW VARIANCE FALLBACK: Direct speed estimation.
+                # With similar-length texts, attribute a small fraction to
+                # fixed overhead (alpha) and derive beta from actual reading speed.
+                avg_time = np.mean(times)
+                avg_log_len = np.mean(log_lengths)
+                new_alpha = max(1.0, min(avg_time * 0.2, 5.0))
+                new_beta = (avg_time - new_alpha) / max(avg_log_len, 0.1)
+                logger.info(f"Low text-length variance ({length_variance:.2f}), using direct speed estimation")
+            else:
+                # OLS Regression: time = alpha + beta * log_length
+                # Design matrix: [1, log_length] for each sample
+                A = np.column_stack([np.ones(len(log_lengths)), log_lengths])
+                
+                # Solve via least squares: min ||A @ [alpha, beta] - times||^2
+                result, _, _, _ = np.linalg.lstsq(A, times, rcond=None)
+                new_alpha, new_beta = result[0], result[1]
             
             # Clamp to reasonable ranges
             new_alpha = max(1.0, min(15.0, new_alpha))  # 1-15 seconds overhead
