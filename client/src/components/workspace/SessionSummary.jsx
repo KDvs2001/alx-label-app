@@ -1,33 +1,52 @@
 import React, { useState } from 'react';
-import { Home, Download, CheckCircle, TrendingDown, Clock, Activity } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Home, Download, CheckCircle, Zap, Clock, Activity, TrendingUp, ArrowRight } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import EvaluatorFeedbackModal from './EvaluatorFeedbackModal';
 
 const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumulativeTimeSaved, cumulativeEntropyCost, cumulativeRandomCost, cumulativeCalLogCost, annotations, contestantId, onHome, onExport }) => {
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
-    // Calculate Key Metrics
-    const startBeta = 3.0; // Fixed start
+    // Cost Model Parameters
+    const startAlpha = 5.0;
+    const startBeta = 3.0;
+    const endAlpha = metrics.alpha;
     const endBeta = metrics.beta;
-    const betaChange = ((endBeta - startBeta) / startBeta) * 100;
 
     // Determine Evaluator Type
     let evaluatorType = "Balanced Reader";
-    if (endBeta < 1.5) evaluatorType = "Fast Skimmer";
-    if (endBeta > 3.0) evaluatorType = "Careful Reader";
+    let evaluatorDescription = "You read at a moderate pace. CAL-Log optimised tasks for a balanced information gain.";
+    let evaluatorColor = "text-purple-400";
+    let evaluatorBgColor = "from-purple-900/30 to-purple-900/10";
+    let evaluatorBorderColor = "border-purple-500/30";
 
-    // Calculate Savings using the backend-persisted cumulative totals
-    let timeSaved = cumulativeTimeSaved || 0;
-    let percentSaved = 0;
-
-    if (cumulativeEntropyCost > 0) {
-        percentSaved = (timeSaved / cumulativeEntropyCost) * 100;
-    } else if (shadowMetrics) {
-        // Fallback to snapshot estimation (extrapolated) if no history yet
-        const diffPerTask = shadowMetrics.entropy.estimated_cost - shadowMetrics.cal_log.estimated_cost;
-        timeSaved = diffPerTask * annotationCount;
-        percentSaved = (diffPerTask / shadowMetrics.entropy.estimated_cost) * 100;
+    if (endBeta < 1.5) {
+        evaluatorType = "Fast Skimmer";
+        evaluatorDescription = "You annotate quickly. CAL-Log gave you longer, more informative tasks to maximise information gained per session.";
+        evaluatorColor = "text-green-400";
+        evaluatorBgColor = "from-green-900/30 to-green-900/10";
+        evaluatorBorderColor = "border-green-500/30";
+    } else if (endBeta > 3.0) {
+        evaluatorType = "Careful Reader";
+        evaluatorDescription = "You read thoroughly. CAL-Log gave you shorter, high-uncertainty tasks to maximise your throughput.";
+        evaluatorColor = "text-blue-400";
+        evaluatorBgColor = "from-blue-900/30 to-blue-900/10";
+        evaluatorBorderColor = "border-blue-500/30";
     }
+
+    // Information Efficiency from shadow metrics
+    const calLogEfficiency = shadowMetrics?.cal_log?.info_efficiency || 0;
+    const entropyEfficiency = shadowMetrics?.entropy?.info_efficiency || 0;
+    const randomEfficiency = shadowMetrics?.random?.info_efficiency || 0;
+
+    const vsEntropyPct = entropyEfficiency > 0
+        ? (((calLogEfficiency - entropyEfficiency) / entropyEfficiency) * 100)
+        : 0;
+    const vsRandomPct = randomEfficiency > 0
+        ? (((calLogEfficiency - randomEfficiency) / randomEfficiency) * 100)
+        : 0;
+
+    const isWinningVsEntropy = calLogEfficiency > entropyEfficiency;
+    const isWinningVsRandom = calLogEfficiency > randomEfficiency;
 
     return (
         <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -39,99 +58,146 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                         <CheckCircle size={32} className="text-green-400" />
                     </div>
                     <h1 className="text-3xl font-bold text-white mb-2">Session Complete</h1>
-                    <p className="text-slate-400">Here is how CAL-Log adapted to your reading style.</p>
+                    <p className="text-slate-400">Here is how CAL-Log adapted to your annotation behavior.</p>
                 </div>
 
-                <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-8 space-y-6">
 
-                    {/* Card 1: Adaptation Profile */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                    {/* Card 1: Your Reading Profile - Full Width Hero */}
+                    <div className={`bg-gradient-to-r ${evaluatorBgColor} rounded-xl p-6 border ${evaluatorBorderColor}`}>
                         <div className="flex items-center gap-3 mb-4">
-                            <Activity className="text-blue-400" />
-                            <h3 className="text-slate-300 font-bold">Adaptation Profile</h3>
+                            <Activity className={evaluatorColor} />
+                            <h3 className="text-slate-300 font-bold">Your Reading Profile</h3>
                         </div>
-                        <div className="text-4xl font-bold text-white mb-2">{evaluatorType}</div>
-                        <div className="text-sm text-slate-400 mb-6">
-                            Based on your final reading factor (β).
-                        </div>
-
-                        <div className="flex justify-between items-end border-t border-slate-700 pt-4">
-                            <div>
-                                <div className="text-xs text-slate-500 uppercase">Start Beta</div>
-                                <div className="text-xl font-mono text-slate-400">3.00</div>
+                        <div className="flex items-start gap-8">
+                            <div className="flex-1">
+                                <div className={`text-4xl font-bold ${evaluatorColor} mb-2`}>{evaluatorType}</div>
+                                <div className="text-sm text-slate-400 mb-4">
+                                    {evaluatorDescription}
+                                </div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-xs text-slate-500 uppercase">End Beta</div>
-                                <div className={`text-2xl font-mono font-bold ${endBeta < 3.0 ? 'text-green-400' : 'text-orange-400'}`}>
-                                    {endBeta.toFixed(2)}
+                            {/* Parameter Changes: Alpha and Beta */}
+                            <div className="grid grid-cols-2 gap-6 bg-slate-900/50 rounded-lg p-4 border border-white/5">
+                                <div className="text-center">
+                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Alpha (Overhead)</div>
+                                    <div className="flex items-center gap-2 justify-center">
+                                        <span className="text-sm font-mono text-slate-500">{startAlpha.toFixed(1)}</span>
+                                        <ArrowRight size={12} className="text-slate-600" />
+                                        <span className={`text-xl font-mono font-bold ${evaluatorColor}`}>{endAlpha.toFixed(2)}</span>
+                                    </div>
+                                    <div className="text-[9px] text-slate-600 mt-1">Fixed time per task (seconds)</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Beta (Reading Speed)</div>
+                                    <div className="flex items-center gap-2 justify-center">
+                                        <span className="text-sm font-mono text-slate-500">{startBeta.toFixed(1)}</span>
+                                        <ArrowRight size={12} className="text-slate-600" />
+                                        <span className={`text-xl font-mono font-bold ${evaluatorColor}`}>{endBeta.toFixed(2)}</span>
+                                    </div>
+                                    <div className="text-[9px] text-slate-600 mt-1">Time scaling with text length</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Card 2: Efficiency Savings */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                        <div className="flex items-center gap-3 mb-4">
-                            <TrendingDown className="text-green-400" />
-                            <h3 className="text-slate-300 font-bold">Efficiency Gains</h3>
-                        </div>
-                        <div className="text-4xl font-bold text-green-400 mb-2">
-                            {timeSaved > 0 ? `-${timeSaved.toFixed(0)}s` : "0s"}
-                        </div>
-                        <div className="text-sm text-slate-400 mb-6">
-                            Total time saved compared to Entropy Sampling.
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        {/* Card 2: Information Efficiency - CAL-Log Advantage */}
+                        <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                            <div className="flex items-center gap-3 mb-4">
+                                <Zap className="text-blue-400" />
+                                <h3 className="text-slate-300 font-bold">CAL-Log Advantage</h3>
+                            </div>
+
+                            <div className="text-[10px] text-slate-500 mb-3">
+                                Information Efficiency = Entropy &divide; Cost (bits of uncertainty resolved per second)
+                            </div>
+
+                            {/* Strategy Comparison */}
+                            <div className="space-y-3 mb-4">
+                                {/* CAL-Log (highlighted) */}
+                                <div className="bg-blue-900/20 rounded-lg p-3 border border-blue-500/30">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-blue-300 uppercase tracking-wide">CAL-Log</span>
+                                        <span className="text-lg font-bold font-mono text-blue-300">{calLogEfficiency.toFixed(4)}</span>
+                                    </div>
+                                    <div className="text-[9px] text-blue-400/60 mt-1">bits/sec &mdash; Entropy &divide; Predicted Annotation Cost</div>
+                                </div>
+                                {/* Entropy */}
+                                <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-yellow-500 uppercase tracking-wide">Entropy Sampling</span>
+                                        <span className="text-sm font-mono text-yellow-500/80">{entropyEfficiency.toFixed(4)}</span>
+                                    </div>
+                                </div>
+                                {/* Random */}
+                                <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Random</span>
+                                        <span className="text-sm font-mono text-slate-400/80">{randomEfficiency.toFixed(4)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Improvement Percentages */}
+                            <div className={`rounded-lg p-3 text-center border ${isWinningVsEntropy ? 'bg-green-900/20 border-green-900/50' : 'bg-slate-800/50 border-slate-700/50'}`}>
+                                <div className="flex justify-center gap-6 text-sm font-bold">
+                                    <div>
+                                        <span className="text-[10px] text-slate-500 block mb-1">vs Entropy</span>
+                                        <span className={isWinningVsEntropy ? 'text-green-300' : 'text-slate-400'}>
+                                            {isWinningVsEntropy ? '+' : ''}{vsEntropyPct.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] text-slate-500 block mb-1">vs Random</span>
+                                        <span className={isWinningVsRandom ? 'text-green-300' : 'text-slate-400'}>
+                                            {isWinningVsRandom ? '+' : ''}{vsRandomPct.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
-                            <div
-                                className="bg-green-500 h-full transition-all"
-                                style={{ width: `${Math.min(percentSaved, 100)}%` }}
-                            />
-                        </div>
-                        <div className="text-right text-xs text-green-400 mt-2 font-bold">
-                            {percentSaved.toFixed(1)}% More Efficient
+                        {/* Card 3: Session Statistics */}
+                        <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+                            <div className="flex items-center gap-3 mb-4">
+                                <Clock className="text-purple-400" />
+                                <h3 className="text-slate-300 font-bold">Session Statistics</h3>
+                            </div>
+                            <div className="text-4xl font-bold text-white mb-2">{annotationCount}</div>
+                            <div className="text-sm text-slate-400 mb-6">
+                                Total tasks annotated in this session.
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 border-t border-slate-700 pt-4">
+                                <div>
+                                    <div className="text-[10px] sm:text-xs text-slate-500 font-medium">Cost Model Updates</div>
+                                    <div className="text-lg text-white font-mono">{history.length}</div>
+                                    <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">Alpha &amp; Beta recalculated</div>
+                                </div>
+                                <div>
+                                    <div className="text-[10px] sm:text-xs text-slate-500 font-medium">Model Retrains</div>
+                                    <div className="text-lg text-white font-mono">{Math.floor(annotationCount / 5)}</div>
+                                    <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">All 3 models retrained every 5 tasks</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Card 3: Production Stats */}
-                    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                        <div className="flex items-center gap-3 mb-4">
-                            <Clock className="text-purple-400" />
-                            <h3 className="text-slate-300 font-bold">Throughput</h3>
-                        </div>
-                        <div className="text-4xl font-bold text-white mb-2">{annotationCount}</div>
-                        <div className="text-sm text-slate-400 mb-6">
-                            Total tasks annotated in this session.
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 border-t border-slate-700 pt-4">
-                            <div>
-                                <div className="text-[10px] sm:text-xs text-slate-500 font-medium">History Steps</div>
-                                <div className="text-lg text-white font-mono">{history.length}</div>
-                                <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">Snapshots of your reading speed (β)</div>
-                            </div>
-                            <div>
-                                <div className="text-[10px] sm:text-xs text-slate-500 font-medium">Model Updates</div>
-                                <div className="text-lg text-white font-mono">{Math.floor(annotationCount / 5)}</div>
-                                <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">Times the background models retrained</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Chart Section */}
-                <div className="px-8 pb-8">
+                    {/* Chart Section */}
                     <div className="bg-slate-950 rounded-xl border border-slate-800 p-4">
-                        <h4 className="text-slate-500 text-xs font-bold uppercase mb-4">Parameter Convergence (System Learning)</h4>
+                        <h4 className="text-slate-500 text-xs font-bold uppercase mb-1">How CAL-Log Learned Your Reading Style</h4>
+                        <p className="text-[10px] text-slate-600 mb-4">Alpha (grey dashed) = fixed overhead per task. Beta (orange) = how long text length affects annotation time. Both evolve as you annotate.</p>
                         <div className="h-48 w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={history}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                                    <XAxis dataKey="step" stroke="#64748b" fontSize={10} />
-                                    <YAxis stroke="#64748b" fontSize={10} />
-                                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }} />
-                                    <Line type="monotone" dataKey="beta" stroke="#f97316" strokeWidth={3} dot={false} name="Beta (Reading Factor)" />
-                                    <Line type="monotone" dataKey="alpha" stroke="#64748b" strokeWidth={1} strokeDasharray="5 5" dot={false} name="Alpha (Fixed)" />
+                                    <XAxis dataKey="step" stroke="#64748b" fontSize={10} label={{ value: 'Annotations', position: 'insideBottomRight', offset: -5, style: { fontSize: 9, fill: '#64748b' } }} />
+                                    <YAxis stroke="#64748b" fontSize={10} label={{ value: 'Seconds', angle: -90, position: 'insideLeft', style: { fontSize: 9, fill: '#64748b' } }} />
+                                    <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '12px' }} />
+                                    <Legend verticalAlign="top" height={24} iconSize={10} wrapperStyle={{ fontSize: '10px' }} />
+                                    <Line type="monotone" dataKey="beta" stroke="#f97316" strokeWidth={3} dot={false} name="Beta (Reading Speed)" />
+                                    <Line type="monotone" dataKey="alpha" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Alpha (Fixed Overhead)" />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
@@ -176,10 +242,15 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                     sessionId: "SESS-" + Date.now(),
                     contestantId: contestantId || 'unknown',
                     annotationsCompleted: annotationCount,
+                    startingAlpha: startAlpha,
+                    endingAlpha: endAlpha,
                     startingBeta: startBeta,
                     endingBeta: endBeta,
-                    avgTimeSavedVsEntropy: (timeSaved / Math.max(1, annotationCount)) || 0,
-                    avgTimeSavedVsRandom: ((cumulativeRandomCost || 0) - (cumulativeCalLogCost || 0)) / Math.max(1, annotationCount) || 0,
+                    calLogEfficiency,
+                    entropyEfficiency,
+                    randomEfficiency,
+                    vsEntropyPct: vsEntropyPct.toFixed(1),
+                    vsRandomPct: vsRandomPct.toFixed(1),
                     systemReadingProfile: evaluatorType,
                     tasksReceived: (annotations || []).map(a => a.taskId).filter(Boolean),
                     avgTaskLength: (annotations || []).length > 0

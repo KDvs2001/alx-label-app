@@ -103,9 +103,9 @@ const EvaluatorFeedbackModal = ({
                             <h2 className="text-2xl font-bold text-white mb-2">Evaluator Feedback</h2>
                             <p className="text-sm text-slate-400 leading-relaxed">
                                 Thank you for testing CAL-Log! The system auto-captured your stats:
-                                <span className="text-blue-400 font-mono text-xs ml-2 bg-blue-900/30 px-2 py-1 rounded">β: {sessionData.endingBeta?.toFixed(2)}</span>
-                                <span className="text-green-400 font-mono text-xs ml-2 bg-green-900/30 px-2 py-1 rounded">vs Entropy: {sessionData.avgTimeSavedVsEntropy?.toFixed(2)}s</span>
-                                <span className="text-purple-400 font-mono text-xs ml-2 bg-purple-900/30 px-2 py-1 rounded">vs Random: {sessionData.avgTimeSavedVsRandom?.toFixed(2)}s</span>
+                                <span className="text-blue-400 font-mono text-xs ml-2 bg-blue-900/30 px-2 py-1 rounded">α: {sessionData.endingAlpha?.toFixed(2)} β: {sessionData.endingBeta?.toFixed(2)}</span>
+                                <span className="text-green-400 font-mono text-xs ml-2 bg-green-900/30 px-2 py-1 rounded">vs Entropy: {sessionData.vsEntropyPct}%</span>
+                                <span className="text-purple-400 font-mono text-xs ml-2 bg-purple-900/30 px-2 py-1 rounded">vs Random: {sessionData.vsRandomPct}%</span>
                             </p>
                         </div>
 
