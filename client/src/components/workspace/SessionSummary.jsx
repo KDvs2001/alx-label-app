@@ -249,6 +249,8 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                     calLogEfficiency,
                     entropyEfficiency,
                     randomEfficiency,
+                    avgTimeSavedVsEntropy: parseFloat(vsEntropyPct.toFixed(1)),
+                    avgTimeSavedVsRandom: parseFloat(vsRandomPct.toFixed(1)),
                     vsEntropyPct: vsEntropyPct.toFixed(1),
                     vsRandomPct: vsRandomPct.toFixed(1),
                     systemReadingProfile: evaluatorType,
