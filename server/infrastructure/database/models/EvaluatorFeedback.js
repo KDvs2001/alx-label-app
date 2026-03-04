@@ -11,15 +11,24 @@ const EvaluatorFeedbackSchema = new mongoose.Schema({
     // Quantitative (Auto-captured)
     contestantId: { type: String },
     annotationsCompleted: { type: Number, required: true },
+    startingAlpha: { type: Number, default: 5.0 },
+    endingAlpha: { type: Number, default: 0 },
     startingBeta: { type: Number, required: true },
     endingBeta: { type: Number, required: true },
     avgTimeSavedVsEntropy: { type: Number, required: true },
     avgTimeSavedVsRandom: { type: Number, default: 0 },
+    vsEntropyPct: { type: String, default: '0' },
+    vsRandomPct: { type: String, default: '0' },
     tasksReceived: [{ type: Number }],
     avgTaskLength: { type: Number, default: 0 },
     sessionDurationSeconds: { type: Number, default: 0 },
-    systemReadingProfile: { type: String, required: true }, // The classification the system gave
+    systemReadingProfile: { type: String, required: true },
     systemClassificationMatch: { type: String, enum: ['Yes, it matched exactly', 'Partially matched', 'No, it was the opposite', "I didn't notice / couldn't tell"], required: true },
+
+    // Strategy Efficiencies (Auto-captured)
+    calLogEfficiency: { type: Number, default: 0 },
+    entropyEfficiency: { type: Number, default: 0 },
+    randomEfficiency: { type: Number, default: 0 },
 
     // Qualitative (Likert 1-5 where applicable)
     ratingDocumentSelection: { type: Number, min: 1, max: 5 },
@@ -32,7 +41,7 @@ const EvaluatorFeedbackSchema = new mongoose.Schema({
     noticeChangeAtAnnotation: { type: Number },
     mostSurprising: { type: String },
     mostConfusing: { type: String },
-    strengthenSubmission: { type: String }, // Optional depending on NLP familiarity
+    strengthenSubmission: { type: String },
 
 }, { timestamps: true });
 
