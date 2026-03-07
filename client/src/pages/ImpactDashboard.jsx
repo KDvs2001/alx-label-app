@@ -144,6 +144,14 @@ const ImpactDashboard = () => {
                         </Suspense>
                     </div>
                 </section>
+
+                {/* SurveyCircle Note */}
+                <div className="border-t border-slate-800 pt-6 pb-4 text-center">
+                    <p className="text-sm text-slate-500 italic">
+                        PS: SurveyCircle users receive points for their participation, which can be used to recruit free survey participants at{' '}
+                        <a href="https://www.surveycircle.com" target="_blank" rel="noopener noreferrer" className="text-blue-400/70 underline hover:text-blue-400 transition-colors">SurveyCircle.com</a>.
+                    </p>
+                </div>
             </div>
         </div>
     );

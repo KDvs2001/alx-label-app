@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Send, CheckCircle, AlertCircle, X, Copy, ExternalLink } from 'lucide-react';
 
 const EvaluatorFeedbackModal = ({
     isOpen,
@@ -26,6 +26,7 @@ const EvaluatorFeedbackModal = ({
 
     const [status, setStatus] = useState('idle'); // idle, loading, success, error
     const [errorMsg, setErrorMsg] = useState('');
+    const [copied, setCopied] = useState(false);
 
     if (!isOpen) return null;
 
@@ -41,7 +42,6 @@ const EvaluatorFeedbackModal = ({
 
         // OPTIMISTIC: Show success immediately - don't make user wait for DB
         setStatus('success');
-        setTimeout(onClose, 2500);
 
         // Save in background (fire-and-forget)
         try {
@@ -90,12 +90,56 @@ const EvaluatorFeedbackModal = ({
                 </button>
 
                 {status === 'success' ? (
-                    <div className="p-12 text-center flex flex-col items-center">
+                    <div className="p-8 md:p-10 text-center flex flex-col items-center">
                         <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-4">
                             <CheckCircle size={32} />
                         </div>
                         <h2 className="text-2xl font-bold text-white mb-2">Thank You!</h2>
-                        <p className="text-slate-400">Your feedback is incredibly valuable for our research.<br />We appreciate your time.</p>
+                        <p className="text-slate-400 mb-8">Your feedback is incredibly valuable for our research.<br />We appreciate your time.</p>
+
+                        {/* SurveyCircle Validation Section */}
+                        <div className="w-full max-w-md bg-slate-800/60 border border-slate-700 rounded-xl p-6 text-left space-y-4">
+                            <p className="text-sm text-slate-300 leading-relaxed">
+                                Redeem the following Survey Code at{' '}
+                                <a href="https://www.surveycircle.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300 transition-colors">surveycircle.com</a>{' '}
+                                and get free survey participants through SurveyCircle.
+                            </p>
+
+                            {/* Survey Code with Copy Button */}
+                            <div className="flex items-center gap-2 bg-slate-900 border border-slate-600 rounded-lg px-4 py-3">
+                                <code className="flex-1 text-lg font-mono font-bold text-green-400 tracking-wider select-all">
+                                    8J2N-SGKQ-QQ38-QTCG
+                                </code>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText('8J2N-SGKQ-QQ38-QTCG');
+                                        setCopied(true);
+                                        setTimeout(() => setCopied(false), 2000);
+                                    }}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied
+                                            ? 'bg-green-600 text-white'
+                                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white'
+                                        }`}
+                                >
+                                    {copied ? (
+                                        <><CheckCircle size={14} /> Copied!</>
+                                    ) : (
+                                        <><Copy size={14} /> Copy</>
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Redemption Link Button */}
+                            <a
+                                href="https://www.surveycircle.com/8J2N-SGKQ-QQ38-QTCG/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-900/40 hover:-translate-y-0.5"
+                            >
+                                Redeem on SurveyCircle <ExternalLink size={16} />
+                            </a>
+                        </div>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="p-6 md:p-8">
