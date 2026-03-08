@@ -1,10 +1,14 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
 
+/**
+ * AlphaBetaImpactPanel Component
+ * Explains the (Score = Uncertainty / Cost) math to evaluators to build trust.
+ */
 const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
     if (!isOpen) return null;
 
-    // Calculate impact indicators
+    // Translates raw variables into simple impact bands (Low/Medium/High)
     const alphaImpact = alpha > 5 ? 'high' : alpha > 3 ? 'medium' : 'low';
     const betaImpact = beta > 3 ? 'high' : beta > 2 ? 'medium' : 'low';
 
@@ -42,7 +46,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                     </button>
                 </div>
 
-                {/* Current Values Display */}
+                {/* Visualizes current Alpha/Beta values as impact bands */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     <div className={`p-6 rounded-xl border ${getImpactBg(alphaImpact)}`}>
                         <div className="flex items-center justify-between mb-3">
@@ -75,7 +79,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                     </div>
                 </div>
 
-                {/* Simple Explanation */}
+                {/* Simplifies the log-length formula for non-technical users */}
                 <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
                     <h3 className="text-xl font-bold text-white mb-4">How This Affects Task Selection</h3>
                     <div className="space-y-3 text-slate-300">

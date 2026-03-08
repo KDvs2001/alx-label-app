@@ -1,6 +1,10 @@
 import React from 'react';
 import { X, User, AlertCircle, ArrowLeft } from 'lucide-react';
 
+/**
+ * ContestantIdModal Component
+ * Session entry point. Masks ML cold-start latency during typing.
+ */
 const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
     const [contestantId, setContestantId] = React.useState('');
     const [showResumePrompt, setShowResumePrompt] = React.useState(false);
@@ -8,7 +12,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
     const [mlReady, setMlReady] = React.useState(false);
     const [warmupAttempts, setWarmupAttempts] = React.useState(0);
 
-    // WARMUP: Aggressively poll the ML service to wake HF Spaces while user types their ID
+    // Wakes up the HF Space early so the user doesn't wait
     React.useEffect(() => {
         if (!isOpen || mlReady) return;
         const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
@@ -43,7 +47,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
         if (!contestantId.trim() || isChecking) return;
 
         setIsChecking(true);
-        // Check if session exists
+        // Validates contestant IDs in MongoDB to handle session resuming
         try {
             const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
             const response = await fetch(`${SERVER_URL}/api/session/load/${contestantId}`);

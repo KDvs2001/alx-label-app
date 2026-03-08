@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle, AlertCircle, X, Copy, ExternalLink } from 'lucide-react';
 
+/**
+ * EvaluatorFeedbackModal Component
+ * Post-evaluation survey. Captures user metrics and attaches ML params for analysis.
+ */
 const EvaluatorFeedbackModal = ({
     isOpen,
     onClose,
-    sessionData,
-    // expects: sessionId, contestantId, annotationsCompleted, startingBeta, endingBeta,
-    //          avgTimeSavedVsEntropy, avgTimeSavedVsRandom, systemReadingProfile,
-    //          tasksReceived, avgTaskLength, sessionDurationSeconds
+    sessionData /* Attaches ML metadata (Alpha/Beta) for correlation */
 }) => {
     const [formData, setFormData] = useState({
         role: '',
@@ -40,7 +41,7 @@ const EvaluatorFeedbackModal = ({
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // OPTIMISTIC: Show success immediately - don't make user wait for DB
+        // Closes the modal immediately to feel fast, then saves in background
         setStatus('success');
 
         // Save in background (fire-and-forget)
@@ -57,6 +58,7 @@ const EvaluatorFeedbackModal = ({
         }
     };
 
+    // Renders Likert scales (1-5) for quantitative UX metrics
     const renderLikert = (name, label) => (
         <div className="mb-4">
             <label className="block text-sm font-medium text-slate-300 mb-2">{label}</label>
@@ -97,7 +99,7 @@ const EvaluatorFeedbackModal = ({
                         <h2 className="text-2xl font-bold text-white mb-2">Thank You!</h2>
                         <p className="text-slate-400 mb-8">Your feedback is incredibly valuable for our research.<br />We appreciate your time.</p>
 
-                        {/* SurveyCircle Validation Section */}
+                        {/* Reveals incentive code only after a successful feedback submission */}
                         <div className="w-full max-w-md bg-slate-800/60 border border-slate-700 rounded-xl p-6 text-left space-y-4">
                             <p className="text-sm text-slate-300 leading-relaxed">
                                 Redeem the following Survey Code at{' '}

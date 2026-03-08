@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Joyride, { STATUS } from 'react-joyride';
 
+/**
+ * EvaluatorTour Component
+ * Guided onboarding using react-joyride to explain the Active Learning UI.
+ */
 const EvaluatorTour = ({ onComplete }) => {
     const [run, setRun] = useState(false);
 
     useEffect(() => {
-        // Run once for the user based on localStorage
+        // Uses localStorage so the tour only runs once per browser
         const hasSeenTour = localStorage.getItem('cal_log_tour_seen');
         if (!hasSeenTour) {
             setRun(true);
@@ -23,6 +27,7 @@ const EvaluatorTour = ({ onComplete }) => {
         }
     };
 
+    // Steps highlight the "Spy Window" to prove the math is adapting
     const steps = [
         {
             target: 'body',
@@ -77,6 +82,7 @@ const EvaluatorTour = ({ onComplete }) => {
         }
     ];
 
+    // Uses react-joyride to visually guide the user through the interface elements
     return (
         <Joyride
             steps={steps}
