@@ -1,6 +1,10 @@
 import React from 'react';
 import { Coffee, Play, PauseCircle } from 'lucide-react';
 
+/**
+ * FatigueTrackerModal Component
+ * Pauses the annotation timer to prevent skewed cost-model calculations when the user is idle.
+ */
 const FatigueTrackerModal = ({ isOpen, onResume }) => {
     if (!isOpen) return null;
 
@@ -19,7 +23,7 @@ const FatigueTrackerModal = ({ isOpen, onResume }) => {
                     </h2>
                 </div>
 
-                {/* Content */}
+                {/* Alerts user of pause to maintain experimental data integrity */}
                 <div className="p-6 space-y-4">
                     <p className="text-slate-300 text-lg leading-relaxed">
                         We noticed you've been on this single task much longer than your usual reading pace.
@@ -36,7 +40,7 @@ const FatigueTrackerModal = ({ isOpen, onResume }) => {
                     </div>
                 </div>
 
-                {/* Footer Buttons */}
+                {/* Resumes tracking ensuring active time accurately reflects task difficulty */}
                 <div className="bg-slate-950 p-6 flex justify-end gap-4 border-t border-slate-800">
                     <button
                         onClick={onResume}

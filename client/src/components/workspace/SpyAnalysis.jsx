@@ -3,20 +3,24 @@ import React from 'react';
 import SelectionCard from './analysis/SelectionCard';
 import ParameterGraphs from './analysis/ParameterGraphs';
 import CostMathDebug from './analysis/CostMathDebug';
-import ComparisonTable from './analysis/ComparisonTable'; // New
+import ComparisonTable from './analysis/ComparisonTable';
 import { HelpCircle } from 'lucide-react';
 
+/**
+ * SpyAnalysis Component
+ * The 'Spy Window' sidebar that hosts all real-time mathematical readouts and visual proofs.
+ */
 const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowMetrics, onShowAlphaBetaPanel }) => {
     return (
         <div className="flex flex-col gap-6 pb-8">
 
-            {/* 0. NEW COMPARISON TABLE (High Visibility) */}
+            {/* Real-time comparison dashboard of Information Efficiency */}
             <ComparisonTable shadowMetrics={shadowMetrics} />
 
-            {/* 1. SELECTION LOGIC (Why this task?) */}
+            {/* Translates selection math into intuitive UI metrics */}
             <SelectionCard selectionLogic={selectionLogic} />
 
-            {/* 2. GRAPHS (Alpha/Beta History) with Help Button */}
+            {/* Visualizes real-time convergence of cost parameters */}
             <div className="relative">
                 {onShowAlphaBetaPanel && (
                     <button
@@ -31,7 +35,7 @@ const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowM
                 <ParameterGraphs metrics={metrics} history={history} />
             </div>
 
-            {/* 3. DEBUG (Math Verification) */}
+            {/* Exposes raw calculation logs (Information Gain, Speed) for absolute transparency */}
             <CostMathDebug
                 selectionLogic={selectionLogic}
                 metrics={metrics}

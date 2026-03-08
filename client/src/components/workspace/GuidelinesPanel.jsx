@@ -2,6 +2,10 @@
 import React from 'react';
 import { BookOpen, X } from 'lucide-react';
 
+/**
+ * GuidelinesPanel Component
+ * Standardizes annotator behavior by defining strict sentiment edge-cases, ensuring high-quality labels.
+ */
 const GuidelinesPanel = ({ isOpen, onClose }) => {
     return (
         <div className={`fixed inset-y-0 right-0 w-96 bg-slate-900 shadow-2xl border-l border-slate-800 transform transition-transform duration-300 z-50 p-6 overflow-y-auto ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>

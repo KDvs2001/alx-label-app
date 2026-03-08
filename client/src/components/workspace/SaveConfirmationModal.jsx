@@ -1,6 +1,10 @@
 import React from 'react';
 import { Save, X, AlertTriangle } from 'lucide-react';
 
+/**
+ * SaveConfirmationModal Component
+ * Prevents accidental loss of behavioral metadata (Alpha/Beta state) during browser reloads.
+ */
 const SaveConfirmationModal = ({ isOpen, onSave, onDiscard }) => {
     if (!isOpen) return null;
 
