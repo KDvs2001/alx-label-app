@@ -1,7 +1,11 @@
-
 import React from 'react';
 import { Activity, ArrowRight, Gauge, Ruler } from 'lucide-react';
 
+/**
+ * SelectionCard Component
+ * Primary UI feedback loop exposing exactly *why* the AL engine selected the current batch.
+ * It translates background math (entropies, predicted costs) into human-readable visual indicators.
+ */
 const SelectionCard = ({ selectionLogic }) => {
     // Helper to get pattern icon and color
     const getPatternStyle = (pattern) => {
@@ -42,7 +46,12 @@ const SelectionCard = ({ selectionLogic }) => {
 
             {selectionLogic ? (
                 <div className="space-y-4">
-                    {/* Reading Pattern Indicator */}
+                    {/* 
+                     * Reading Pattern Feedback (Gauge Icon):
+                     * Breaks down the user's active reading profile (e.g., 'Fast Skimmer').
+                     * This demonstrates that the system doesn't just treat humans as static oracles,
+                     * but continuously adapts its cost predictions to their real-time behavior.
+                     */}
                     {selectionLogic.reading_pattern && selectionLogic.reading_pattern.pattern !== 'insufficient_data' && (
                         <div className={`p-3 rounded-lg border ${getPatternStyle(selectionLogic.reading_pattern.pattern).bgColor} ${getPatternStyle(selectionLogic.reading_pattern.pattern).borderColor}`}>
                             <div className="flex items-center gap-2 mb-2">
@@ -63,7 +72,12 @@ const SelectionCard = ({ selectionLogic }) => {
                         </div>
                     )}
 
-                    {/* Task Length Classification */}
+                    {/* 
+                     * Task Length Classification (Ruler Icon):
+                     * Shows how the task compares to the dataset distribution.
+                     * This is critical because length heavily dictates the predicted cost (via the Beta parameter),
+                     * and explicitly showing it justifies why a task was scored efficiently or inefficiently.
+                     */}
                     {selectionLogic.task_stats && selectionLogic.task_stats.length_class && (
                         <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                             <div className="flex items-center gap-2 mb-2">
@@ -87,7 +101,12 @@ const SelectionCard = ({ selectionLogic }) => {
                         </div>
                     )}
 
-                    {/* Original Selection Metrics */}
+                    {/* 
+                     * Raw Mathematics Panel: 
+                     * Displays the exact Entropy and Predicted Cost calculated for the batch.
+                     * Score (Information Efficiency) = Entropy / Cost.
+                     * This transparency makes the active learning engine's black-box decisions defensible.
+                     */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <div className="text-xs text-slate-500">Entropy Score</div>

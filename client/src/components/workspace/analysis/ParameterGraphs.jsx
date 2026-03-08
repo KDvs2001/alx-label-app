@@ -1,7 +1,11 @@
-
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+/**
+ * ParameterGraphs Component
+ * Displays the core evaluation metrics: the evolution of cost parameters (Alpha/Beta) 
+ * over time, and the cumulative annotation costs across different selection strategies.
+ */
 const ParameterGraphs = ({ metrics, history }) => {
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex-1 flex flex-col">
@@ -21,6 +25,13 @@ const ParameterGraphs = ({ metrics, history }) => {
 
             <div className="flex-1 w-full min-h-[150px]">
                 <h4 className="text-xs text-slate-500 mb-1">Parameter Trend (History)</h4>
+                {/* 
+                 * Parameter Trend History:
+                 * Visualizes how the system actively learns the annotator's profile.
+                 * Alpha shows the fixed cognitive overhead (context switching),
+                 * Beta shows the log-length speed (revealing if the user is skimming).
+                 * Wrapped in Recharts' ResponsiveContainer to ensure UI flexibility.
+                 */}
                 <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
                     <LineChart data={history}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -33,12 +44,19 @@ const ParameterGraphs = ({ metrics, history }) => {
                 </ResponsiveContainer>
             </div>
 
-            {/* 2. CUMULATIVE COST COMPARISON (Replaces misleading accuracy chart) */}
+            {/* Cumulative Cost Comparison across strategies */}
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
                 <h4 className="text-xs text-slate-500 mb-1 flex justify-between">
                     <span>Cumulative Annotation Cost (per Strategy)</span>
                     <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better</span>
                 </h4>
+                {/*
+                 * Cumulative Cost Comparison:
+                 * Crucial for defending the AL-X⁶ framework's efficiency.
+                 * Plots CAL-Log vs. Baselines (Random/Entropy) to visually prove that 
+                 * CAL-Log ultimately requires less annotation time (lower total cost) 
+                 * to achieve the same or better learning outcomes.
+                 */}
                 {metrics.cumulative_costs?.history?.length > 0 ? (
                     <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
                         <LineChart data={metrics.cumulative_costs.history}>
@@ -57,8 +75,6 @@ const ParameterGraphs = ({ metrics, history }) => {
                     </div>
                 )}
             </div>
-
-
 
         </div>
     );

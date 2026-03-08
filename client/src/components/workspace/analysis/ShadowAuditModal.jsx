@@ -1,7 +1,11 @@
-
 import React from 'react';
 import { X, Trophy, AlertTriangle, Dice5 } from 'lucide-react';
 
+/**
+ * ShadowAuditModal Component
+ * An interactive overlay providing full transparency into the theoretical selections
+ * that Random and Entropy-only baselines would have made, serving as direct evaluation proof.
+ */
 const ShadowAuditModal = ({ isOpen, onClose, metrics }) => {
     if (!isOpen || !metrics) return null;
 
@@ -61,7 +65,13 @@ const ShadowAuditModal = ({ isOpen, onClose, metrics }) => {
                     </button>
                 </div>
 
-                {/* Content */}
+                {/* 
+                 * Shadow Audit Content Layout:
+                 * Uses flexbox columns for a direct side-by-side comparison. 
+                 * This granular layout lets us defend CAL-Log by showing exactly *which* 
+                 * high-cost instances the Entropy-only model blindly selected, compared 
+                 * to CAL-Log's cost-efficient choices.
+                 */}
                 <div className="flex-1 overflow-y-auto">
                     <div className="flex h-full">
                         {renderStrategyColumn("Random", <Dice5 size={16} />, metrics.random, "text-slate-300")}
