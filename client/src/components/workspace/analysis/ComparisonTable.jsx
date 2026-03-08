@@ -1,19 +1,24 @@
-
 import React, { useState } from 'react';
 import { TrendingUp, Eye, Zap, Clock, BarChart3 } from 'lucide-react';
 import ShadowAuditModal from './ShadowAuditModal';
 
+/**
+ * ComparisonTable Component
+ * Live dashboard comparing CAL-Log against Random and Entropy-only baselines.
+ * Demonstrates the effectiveness of the cost-aware approach.
+ */
 const ComparisonTable = ({ shadowMetrics }) => {
     const [showAudit, setShowAudit] = useState(false);
 
     if (!shadowMetrics) return null;
 
-    // Information Efficiency = Entropy / Cost (higher = better)
+    // Primary metric: Information Efficiency (Bits per second).
+    // Calculated as: Entropy (bits resolved) / Cost (annotation time).
     const calLogEff = shadowMetrics.cal_log.info_efficiency || 0;
     const entropyEff = shadowMetrics.entropy.info_efficiency || 0;
     const randomEff = shadowMetrics.random.info_efficiency || 0;
 
-    // Percentage improvement of CAL-Log over entropy
+    // Percentage improvement of CAL-Log over baselines: ((New - Old) / Old) * 100
     const vsEntropyPct = entropyEff > 0
         ? (((calLogEff - entropyEff) / entropyEff) * 100).toFixed(1)
         : '0.0';
@@ -21,10 +26,15 @@ const ComparisonTable = ({ shadowMetrics }) => {
         ? (((calLogEff - randomEff) / randomEff) * 100).toFixed(1)
         : '0.0';
 
-    // Determine if CAL-Log is winning
+    // Determines if CAL-Log is currently outperforming the baselines to update UI states.
     const isWinningVsEntropy = calLogEff > entropyEff;
     const isWinningVsRandom = calLogEff > randomEff;
 
+    /**
+     * Renders strategy performance cards.
+     * Shows Efficiency, Entropy, and Cost to explain why a strategy wins 
+     * (e.g., slightly lower entropy but much lower cost).
+     */
     const renderStrategyCard = (name, efficiency, entropy, cost, color, borderColor, isHighlighted) => (
         <div className={`p-3 rounded-lg border ${isHighlighted ? `${borderColor} shadow-[0_0_15px_rgba(59,130,246,0.1)]` : 'border-slate-700/50'} ${isHighlighted ? 'bg-blue-900/20' : 'bg-slate-900/50'}`}>
             <div className={`text-[10px] uppercase tracking-widest mb-2 font-bold ${color}`}>{name}</div>
@@ -53,6 +63,7 @@ const ComparisonTable = ({ shadowMetrics }) => {
                         <Zap size={18} className="text-blue-400" />
                         INFORMATION EFFICIENCY
                     </h3>
+                    {/* Audit trail shows exact samples picked by each shadow strategy. */}
                     <button
                         onClick={() => setShowAudit(true)}
                         className="text-xs flex items-center gap-1 text-slate-400 hover:text-white transition px-2 py-1 rounded hover:bg-slate-700"
@@ -90,6 +101,7 @@ const ComparisonTable = ({ shadowMetrics }) => {
                 </div>
 
                 {/* CAL-Log Advantage Banner */}
+                {/* Highlights CAL-Log's advantage to validate the research hypothesis. */}
                 <div className={`rounded-lg p-3 text-center border ${isWinningVsEntropy ? 'bg-green-900/20 border-green-900/50' : 'bg-slate-800/50 border-slate-700/50'}`}>
                     <div className={`text-[10px] mb-1 uppercase tracking-wider font-bold ${isWinningVsEntropy ? 'text-green-400/80' : 'text-slate-400'}`}>
                         CAL-Log vs Baselines
@@ -108,6 +120,7 @@ const ComparisonTable = ({ shadowMetrics }) => {
                             </span>
                         </div>
                     </div>
+                    {/* Core thesis argument summarized in UI. */}
                     <div className="text-[9px] text-slate-500 mt-2 italic leading-tight max-w-[90%] mx-auto">
                         Higher information efficiency = more uncertainty resolved per second of annotation time.
                         CAL-Log optimises Entropy &divide; Cost, while Entropy ignores cost entirely.
