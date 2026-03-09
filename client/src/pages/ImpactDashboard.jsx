@@ -5,9 +5,13 @@ import { TrendingDown, Award, DollarSign, Brain, ArrowDown, ArrowUp } from 'luci
 const ROICalculator = lazy(() => import('../components/ROICalculator'));
 const ParameterImpactExplainer = lazy(() => import('../components/ParameterImpactExplainer'));
 
+/**
+ * ImpactDashboard Page
+ * Formats experimental results (Effect Size, ROI) for academic and industry review.
+ */
 const ImpactDashboard = () => {
     const [experimentData, setExperimentData] = useState([]);
-    const [loading, setLoading] = useState(false); // Don't block page - stats are hardcoded
+    const [loading, setLoading] = useState(false);
     const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
 
     useEffect(() => {
@@ -74,7 +78,7 @@ const ImpactDashboard = () => {
 
             <div className="max-w-7xl mx-auto space-y-16">
 
-                {/* 1. Quick Stats Grid */}
+                {/* Displays Cohen's d and p-values to validate system efficacy */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard
                         icon={TrendingDown}

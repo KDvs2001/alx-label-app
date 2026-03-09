@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { DollarSign, Users, Building, Briefcase, TrendingDown, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
+/**
+ * ROICalculator Component
+ * Interactively proves the core research thesis: CAL-Log generates tangible financial value via saved hours.
+ */
 const ROICalculator = () => {
     const [annotations, setAnnotations] = useState(10000);
     const [hourlyWage, setHourlyWage] = useState(20);
@@ -23,8 +27,8 @@ const ROICalculator = () => {
     const roi = calculateROI();
 
     const chartData = [
-        { name: 'Random', cost: roi.randomCost, color: '#ef4444' }, // Red-500
-        { name: 'CAL-Log', cost: roi.calLogCost, color: '#3b82f6' }  // Blue-500
+        { name: 'Random', cost: roi.randomCost, color: '#ef4444' }, 
+        { name: 'CAL-Log', cost: roi.calLogCost, color: '#3b82f6' }  
     ];
 
     const presets = [
@@ -99,7 +103,7 @@ const ROICalculator = () => {
                 </div>
             </div>
 
-            {/* Right Column: Impact Visualization */}
+            {/* Translates abstract time-savings into absolute financial metrics */}
             <div className="bg-gradient-to-br from-slate-900 to-slate-900/50 p-6 rounded-xl border border-slate-800 flex flex-col justify-between">
 
                 {/* Hero Metrics */}

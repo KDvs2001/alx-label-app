@@ -1,6 +1,10 @@
 import React from 'react';
 import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle } from 'lucide-react';
 
+/**
+ * WorkspaceHeader Component
+ * Global control strip. Enforces experimental timeline constraints and data export requirements.
+ */
 const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession }) => {
     return (
         <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
@@ -56,6 +60,7 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                         <Download size={14} /> Export Data
                     </button>
                 )}
+                {/* Real-time progression counter validates active learning throughput to the evaluator */}
                 <div className="text-right border-l border-slate-700 pl-4">
                     <div className="text-2xl font-mono font-bold text-blue-400">{historyCount}</div>
                     <div className="text-xs text-slate-500">Samples Annotated</div>

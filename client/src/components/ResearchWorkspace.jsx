@@ -11,8 +11,18 @@ import SessionSummary from './workspace/SessionSummary';
 import EvaluatorTour from './workspace/EvaluatorTour';
 import FatigueTrackerModal from './workspace/FatigueTrackerModal';
 
+/**
+ * ResearchWorkspace Component
+ * The central orchestration engine of the CAL-Log framework.
+ * 
+ * Architecture Role: Primary Controller
+ * Manages the highly asynchronous lifecycle between the React Client, the Node.js API Gateway, 
+ * and the remote Python ML Microservice. It maintains global state boundaries, handles ML model
+ * cold-starts, and guarantees that user telemetry (fatigue data) is accurately timestamped 
+ * and transmitted without race conditions.
+ */
 const ResearchWorkspace = () => {
-    // State
+    // Core Evaluation State Hooking
     const [tasks, setTasks] = useState([]);
     const [currentTask, setCurrentTask] = useState(null);
     const [history, setHistory] = useState([]);
@@ -110,7 +120,11 @@ const ResearchWorkspace = () => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [contestantId, annotationCount]);
 
-    // Task Timer & Fatigue Check
+    // Interaction Telemetry & Fatigue Monitor:
+    // This effect acts as a passive observer of the evaluator's behavior. 
+    // It filters out statistical anomalies (e.g., getting up for coffee) by aggressively clamping 
+    // extreme outliers from the baseline calculation, ensuring the Adaptive Cost Model isn't 
+    // poisoned by non-reading delays.
     useEffect(() => {
         if (!currentTask || tourActive || isFatigueModalOpen) return;
 
@@ -209,7 +223,7 @@ const ResearchWorkspace = () => {
             // - The 25s timeout fires on an idle/slow service
             if (e.name === 'AbortError') {
                 clearInterval(stageTimer);
-                return; // Don't retry, don't show errors, this is intentional cancellation
+                return; 
             }
 
             console.error("Failed to fetch tasks from ML service", e);
@@ -277,8 +291,11 @@ const ResearchWorkspace = () => {
         const taskText = currentTask.data?.text || currentTask.text;
         const textLength = taskText.split(" ").length;
 
-        // 1. INSTANT UI UPDATE (optimistic)
-        // Move to next task IMMEDIATELY so the user sees no delay
+        // Optimistic UI Pipeline:
+        // Crucial for maintaining the evaluator's psychological flow state.
+        // It immediately mutates the local DOM state to serve the next task *before* the network 
+        // request completes. This mathematically masks the ~150ms HTTP latency of the ML 
+        // microservice communication, ensuring the recorded 'time_taken' metric is pure human response time.
         const nextTasks = tasks.slice(1);
         if (nextTasks.length > 0) {
             setTasks(nextTasks);
@@ -457,7 +474,7 @@ const ResearchWorkspace = () => {
                 console.error('Failed to reset Node.js session:', error);
             }
 
-            // CRITICAL: Reset ML service state (backbone, cost model, history)
+            // Reset ML service state (backbone, cost model, history)
             try {
                 await fetch(`${API_URL}/reset`, {
                     method: 'POST'

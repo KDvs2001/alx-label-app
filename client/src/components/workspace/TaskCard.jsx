@@ -2,8 +2,19 @@
 import React from 'react';
 import { CheckCircle, AlertCircle, Activity, Clock } from 'lucide-react';
 
+/**
+ * TaskCard Component
+ * Core annotation interface for the CAL-Log framework.
+ * This component intentionally isolates the binary classification action from the broader statistical
+ * dashboards (Spy Window) to strictly minimize cognitive load and preserve the evaluator's "flow state".
+ * High signal-to-noise ratio is maintained to ensure the measured 'time_taken' accurately reflects 
+ * reading comprehension rather than UI navigation time.
+ */
 const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime }) => {
-    // Preprocess text for display (remove HTML tags, clean whitespace)
+    // Data Sanitization Pipeline:
+    // Strips HTML artifacts, malformed markup, and noise from the raw dataset.
+    // This ensures consistency in reading speed calculations by preventing visual formatting 
+    // anomalies from artificially inflating or deflating the evaluator's cognitive processing time.
     const cleanText = (text) => {
         if (!text) return "No Text Found";
 
@@ -63,7 +74,10 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
                 </p>
             </div>
 
-            {/* Action Buttons */}
+            {/* 
+              * Binary Classification Core 
+              * Buttons are tightly bound to keyboard shortcuts (1 and 2). 
+              */}
             <div className="grid grid-cols-2 gap-4">
                 <button
                     onClick={() => onAnnotate('Negative')}
