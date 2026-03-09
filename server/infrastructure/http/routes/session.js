@@ -1,8 +1,17 @@
+// CRUD routes for annotation sessions (save/load/reset per evaluator).
+/**
+ * INTERFACE LAYER: Session Router
+ * ARCHITECTURAL ROLE: Controller (REST API Surface)
+ * 
+ * Handles the communication between the React frontend and the MongoDB persistence layer.
+ * Manages session lifecycle: initialization, periodic state saves, and session resets.
+ */
 const express = require('express');
 const router = express.Router();
 const AnnotationSession = require('../../database/models/AnnotationSession');
 
-// Save or update session
+// POST /api/session/save — upsert the evaluator's running session.
+// Each annotation triggers this so we persist progress incrementally.
 router.post('/save', async (req, res) => {
     try {
         const { contestantId, annotationCount, labeledTaskIds, newAnnotation } = req.body;
@@ -21,12 +30,17 @@ router.post('/save', async (req, res) => {
             lastUpdated: Date.now()
         };
 
-        // Build update: set fields + push annotation if provided
+        // $set replaces scalar fields, $push appends to the annotations array.
+        // This keeps the update atomic — no read-modify-write race conditions.
+        // Ref: https://www.mongodb.com/docs/manual/reference/operator/update/push/
         const update = { $set: updateOps };
         if (newAnnotation) {
             update.$push = { annotations: newAnnotation };
         }
 
+        // upsert: true  — create doc if contestantId doesn't exist yet
+        // new: true      — return the updated document (not the old one)
+        // Ref: https://mongoosejs.com/docs/api/model.html#Model.findOneAndUpdate()
         const session = await AnnotationSession.findOneAndUpdate(
             { contestantId },
             update,
@@ -52,7 +66,9 @@ router.post('/save', async (req, res) => {
     }
 });
 
-// Load session by contestant ID
+// GET /api/session/load/:contestantId — retrieve a saved session.
+// Returns { exists: false } if no session found so the frontend knows
+// whether to resume or start fresh.
 router.get('/load/:contestantId', async (req, res) => {
     try {
         const { contestantId } = req.params;
@@ -86,7 +102,9 @@ router.get('/load/:contestantId', async (req, res) => {
     }
 });
 
-// Reset session
+// POST /api/session/reset/:contestantId — zero out all fields to start fresh.
+// We use $set to overwrite everything instead of deleting the document so
+// the contestantId record stays in the collection (preserves the evaluator row).
 router.post('/reset/:contestantId', async (req, res) => {
     try {
         const { contestantId } = req.params;

@@ -1,8 +1,10 @@
+// Route handler for experiment benchmark results.
 const express = require('express');
 const router = express.Router();
 const ExperimentResult = require('../../database/models/ExperimentResult');
 
-// GET all experiment results
+// GET /api/experiments — return all results sorted by dataset then strategy.
+// sort({ dataset: 1, strategy: 1 }) uses the compound index we created in the model.
 router.get('/', async (req, res) => {
     try {
         const results = await ExperimentResult.find().sort({ dataset: 1, strategy: 1 });
@@ -13,10 +15,12 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST seed sample data
+// POST /api/experiments/seed — wipe & re-insert baseline benchmark data.
+// This is a dev convenience route, not exposed to end-users.
+// deleteMany + insertMany is the simplest way to do an idempotent reseed.
+// Ref: https://mongoosejs.com/docs/api/model.html#Model.insertMany()
 router.post('/seed', async (req, res) => {
     try {
-        // Clear existing data
         await ExperimentResult.deleteMany({});
 
         const seedData = [

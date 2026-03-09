@@ -1,3 +1,5 @@
+// Schema for storing offline experiment benchmark results (pre-seeded data).
+// These records drive the comparison charts that show CAL-Log vs baselines.
 const mongoose = require("mongoose");
 
 const ExperimentResultSchema = new mongoose.Schema({
@@ -6,15 +8,16 @@ const ExperimentResultSchema = new mongoose.Schema({
     totalCost: { type: Number, required: true }, // Total annotation time in seconds
     f1Score: { type: Number, required: true }, // Model F1 score
     accuracy: { type: Number }, // Model accuracy (optional)
-    pValue: { type: Number }, // Statistical significance (Mann-Whitney U)
-    cohensD: { type: Number }, // Effect size
-    tasksAnnotated: { type: Number }, // Number of tasks completed
-    rounds: { type: Number, default: 10 }, // Number of AL rounds
-    metadata: mongoose.Schema.Types.Mixed, // Additional experiment details
+    pValue: { type: Number },            // statistical significance (Mann-Whitney U test)
+    cohensD: { type: Number },            // effect size for practical significance
+    tasksAnnotated: { type: Number },
+    rounds: { type: Number, default: 10 },
+    metadata: mongoose.Schema.Types.Mixed, // flexible bag for extra experiment details
     createdAt: { type: Date, default: Date.now }
 });
 
-// Index for fast querying
+// Compound index on (dataset, strategy) for fast filtered queries.
+// Ref: https://www.mongodb.com/docs/manual/core/indexes/index-types/index-compound/
 ExperimentResultSchema.index({ dataset: 1, strategy: 1 });
 
 module.exports = mongoose.model("ExperimentResult", ExperimentResultSchema);
