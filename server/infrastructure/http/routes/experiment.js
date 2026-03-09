@@ -1,10 +1,13 @@
-// Route handler for experiment benchmark results.
+// Routes for experiment benchmark results — GET all and POST seed.
 const express = require('express');
 const router = express.Router();
 const ExperimentResult = require('../../database/models/ExperimentResult');
 
-// GET /api/experiments — return all results sorted by dataset then strategy.
-// sort({ dataset: 1, strategy: 1 }) uses the compound index we created in the model.
+// GET /api/experiments — fetch every result, sorted by dataset then strategy.
+// the sort order matches the compound index in the model so Mongo skips in-memory sorting
+// CITATION: .sort() — order query results by one or more fields
+// SOURCE: Mongoosejs.com (n.d.). "Query.prototype.sort()"
+// URL: https://mongoosejs.com/docs/api/query.html#Query.prototype.sort()
 router.get('/', async (req, res) => {
     try {
         const results = await ExperimentResult.find().sort({ dataset: 1, strategy: 1 });
@@ -15,16 +18,23 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST /api/experiments/seed — wipe & re-insert baseline benchmark data.
-// This is a dev convenience route, not exposed to end-users.
-// deleteMany + insertMany is the simplest way to do an idempotent reseed.
-// Ref: https://mongoosejs.com/docs/api/model.html#Model.insertMany()
+// POST /api/experiments/seed — wipe and re-insert baseline benchmark data.
+// dev-only convenience route. deleteMany + insertMany keeps it idempotent —
+// you can hit this endpoint 10 times and still end up with the same 3 rows.
+// CITATION: Model.insertMany() — bulk insert documents in a single operation
+// SOURCE: Mongoosejs.com (n.d.). "Model.insertMany()"
+// URL: https://mongoosejs.com/docs/api/model.html#Model.insertMany()
 router.post('/seed', async (req, res) => {
     try {
+        // nuke everything first so repeated seeds don't stack duplicates
+        // CITATION: Model.deleteMany() — remove all documents matching a filter
+        // SOURCE: Mongoosejs.com (n.d.). "Model.deleteMany()"
+        // URL: https://mongoosejs.com/docs/api/model.html#Model.deleteMany()
         await ExperimentResult.deleteMany({});
 
+        // baseline benchmark numbers from the IMDB experiment runs
+        // pValue = statistical significance vs Random, cohensD = effect size
         const seedData = [
-            // IMDB Dataset
             {
                 dataset: 'imdb',
                 strategy: 'Random',
@@ -32,7 +42,7 @@ router.post('/seed', async (req, res) => {
                 f1Score: 0.82,
                 accuracy: 0.82,
                 tasksAnnotated: 800,
-                pValue: 1.0,
+                pValue: 1.0,       // baseline compared against itself
                 cohensD: 0.0
             },
             {
@@ -42,8 +52,8 @@ router.post('/seed', async (req, res) => {
                 f1Score: 0.84,
                 accuracy: 0.84,
                 tasksAnnotated: 450,
-                pValue: 0.001,
-                cohensD: 0.92
+                pValue: 0.001,     // significant at α = 0.05
+                cohensD: 0.92      // large effect (> 0.8)
             },
             {
                 dataset: 'imdb',
@@ -52,8 +62,8 @@ router.post('/seed', async (req, res) => {
                 f1Score: 0.83,
                 accuracy: 0.83,
                 tasksAnnotated: 600,
-                pValue: 0.10,
-                cohensD: 0.4
+                pValue: 0.10,      // not significant at α = 0.05
+                cohensD: 0.4       // small-to-medium effect
             }
         ];
 

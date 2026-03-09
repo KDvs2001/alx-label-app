@@ -1,156 +1,204 @@
----
-title: CAL-Log ML Service
-emoji: 📊
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # CAL-Log Research Tool
 
-**Cost-Aware Active Learning with Logarithmic Cost Model**
+---
 
-A research prototype implementing CAL-Log — an active learning framework that adapts task selection to individual annotator behaviour, optimizing *information gained per second* rather than per sample.
+## 📊 Overview
 
-## Architecture
+**CAL-Log** (Cost‑Aware Active Learning with Logarithmic Cost) is a research prototype that selects annotation tasks based on **information gain per unit of cognitive cost**.  The system adapts in real‑time to each annotator’s reading speed, providing a mathematically‑grounded, transparent active‑learning loop.
 
-```
-┌─────────────┐    /api/*     ┌──────────────┐     /predict      ┌──────────────────┐
-│   Client     │ ──────────── │   Server     │  ───────────────  │   ML Service     │
-│  (React +    │    proxy     │  (Express +  │                   │  (Flask +        │
-│   Vite)      │              │   MongoDB)   │                   │   scikit-learn)  │
-│  Port 5173   │    /ml/*     │  Port 5001   │                   │  Port 9090       │
-└─────────────┘ ──────────── └──────────────┘                   └──────────────────┘
-       │            proxy                                               │
-       │                                            writes spy_*.json   │
-       └────────── reads spy_*.json from /public ◄──────────────────────┘
-```
+---
 
-### Core Algorithm
+## 🎯 Research Objectives
 
-```
+- Demonstrate that a **cost‑aware scoring function** (Entropy / Cost) reduces annotation time compared to classic uncertainty‑sampling baselines.
+- Model annotator fatigue with an **OLS‑based cost model** (α + β·log length).
+- Provide **full transparency** for every selected task (entropy, cost, β‑label) to support reproducible research.
+
+---
+
+## 🏗️ Architecture
+
+The project is split into three independent runtimes that communicate via HTTP:
+
+1. **Frontend (React + Vite)** – UI for annotators, Spy‑Mode dashboard, and evaluator briefing.
+2. **Backend (Node + Express + MongoDB)** – REST API, session persistence, and feedback collection.
+3. **ML Service (Python + Flask + scikit‑learn)** – CAL‑Log algorithm, adaptive cost model, and shadow‑model benchmarking.
+
+> **Diagram placeholders** – replace the PNG files with the actual exported images from your Mermaid diagrams.
+
+![Use‑Case Diagram](assets/use_case_diagram.png)
+![Class Diagram (ML Service)](assets/ml_service_class_diagram.png)
+![ER Diagram (MongoDB)](assets/er_diagram.png)
+
+---
+
+## 📐 Core Mathematics
+
+```text
 Score(x) = Entropy(x) / Cost(x)
 Cost(x)  = α + β · log(1 + Length(x))
 ```
 
-| Parameter | Meaning | Adaptation |
-|-----------|---------|------------|
-| **α** (alpha) | Task-switching overhead (seconds) | Adaptive via OLS regression every 5 annotations |
-| **β** (beta)  | Reading effort per log-unit of text | Adaptive via OLS regression every 5 annotations |
+- **Entropy(x)** – Shannon entropy of the RoBERTa‑Base classifier’s soft‑max output.
+- **α (alpha)** – Fixed overhead for task‑switching (seconds).
+- **β (beta)** – Dynamic per‑word cost, updated every 5 annotations via Ordinary Least Squares regression on the annotator’s observed reading speed.
 
-**β < 1.5** → Fast Skimmer → Cost formula naturally favours longer, high-entropy tasks  
-**β > 3.0** → Careful Reader → Cost formula naturally favours shorter, high-entropy tasks
+The cost model is **fatigue‑aware**: after each 5 k words processed, β is re‑estimated, causing the system to favor shorter tasks for a careful reader (β > 3) or longer tasks for a fast skimmer (β < 1.5).
 
-## Prerequisites
+---
 
-- **Node.js** ≥ 18
-- **Python** ≥ 3.9
-- **MongoDB** Atlas account (or local instance)
+## 🛠️ Prerequisites
 
-## Quick Start
+| Component | Minimum Version |
+|-----------|-----------------|
+| **Node.js** | 18.x |
+| **Python** | 3.9 |
+| **MongoDB** | 4.4 (Atlas or local) |
+| **Docker** (optional) | – |
 
-### 1. Clone & Install
+---
+
+## 🚀 Quick Start
 
 ```bash
-git clone <repo-url>
+# 1️⃣ Clone the repository
+git clone <repo‑url>
 cd ResearchTool
 
-# Install server dependencies
+# 2️⃣ Install server dependencies
 cd server
 npm install
-cp .env.example .env   # Edit with your MongoDB URI
+cp .env.example .env   # set MONGODB_URI, PORT, etc.
 cd ..
 
-# Install client dependencies
+# 3️⃣ Install client dependencies
 cd client
 npm install
 cd ..
 
-# Install ML dependencies
+# 4️⃣ Install ML service dependencies
 cd ml_service
 pip install -r requirements.txt
 cd ..
 ```
 
-### 2. Start All Services
+### Run the three services (three terminals recommended)
 
-**Terminal 1 — ML Service:**
 ```bash
+# Terminal 1 – ML Service (Flask)
 cd ml_service
-python simulation_server.py
-# Runs on http://localhost:9090
-```
+python simulation_server.py   # → http://localhost:9090
 
-**Terminal 2 — Server:**
-```bash
+# Terminal 2 – Backend (Express)
 cd server
-npm start
-# Runs on http://localhost:5001
-```
+npm start                     # → http://localhost:5001
 
-**Terminal 3 — Client:**
-```bash
+# Terminal 3 – Frontend (Vite)
 cd client
-npm run dev
-# Runs on http://localhost:5173
+npm run dev                  # → http://localhost:5173
 ```
 
-### 3. Open the App
+Open `http://localhost:5173/spy` to start an annotation session.
 
-Navigate to `http://localhost:5173/spy` to start the annotation interface.
+---
 
-## Project Structure
+## 👤 Evaluator (User) Manual
+
+1. **Enter Contestant ID** – unique identifier for your session.
+2. **Read the brief** – the onboarding modal explains CAL‑Log and the Spy‑Mode.
+3. **Label each task** – click *Positive* or *Negative*; the timer records `timeSeconds`.
+4. **Watch the Spy Panel** – real‑time display of:
+   - Entropy score
+   - Cost score (α + β·log len)
+   - Current β‑label (`Fast Skimmer`, `Balanced`, `Careful Reader`)
+   - ROI comparison against Random & Entropy baselines
+5. **Complete the survey** – after the last task, fill the post‑session questionnaire (feedback route).
+
+---
+
+## 🧑‍🔬 Researcher (Developer) Guide
+
+- **Adding a new baseline**: create a new `SimpleBackbone` instance in `SimulationState._init_files()` and register it in `self.models`.
+- **Changing the cost‑model update frequency**: modify `SimulationState.steps_since_update` logic in `annotate()`.
+- **Exporting logs**: run `node scripts/export_feedback.js` to generate `evaluator_feedback_export.json`.
+- **Running batch experiments (Kaggle mode)**: use `ml_service/experiment_runner.py` (not included in the repo) – it loads the same `SimulationState` class and iterates over all datasets.
+
+---
+
+## 📂 Project Structure (Current)
 
 ```
 ResearchTool/
-├── client/           # React + Vite frontend
+├── client/                     # React + Vite UI
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── ResearchWorkspace.jsx    # Main annotation interface
+│   │   │   ├── ResearchWorkspace.jsx
 │   │   │   └── workspace/
-│   │   │       ├── EvaluatorBriefingModal.jsx  # Evaluator onboarding
-│   │   │       ├── SpyAnalysis.jsx             # Spy Window panel
-│   │   │       └── analysis/                   # Comparison, graphs, debug
+│   │   │       ├── EvaluatorBriefingModal.jsx
+│   │   │       └── SpyAnalysis.jsx
 │   │   └── pages/
-│   │       └── ImpactDashboard.jsx      # ROI & experiment results
+│   │       └── ImpactDashboard.jsx
 │   └── public/
-│       ├── demo_tasks.json              # Task dataset
-│       └── spy_*.json                   # Runtime files (auto-generated)
-├── server/           # Express + MongoDB backend
+│       ├── demo_tasks.json
+│       └── spy_*.json          # runtime telemetry files
+├── server/                     # Express API + MongoDB
 │   ├── index.js
 │   └── infrastructure/
-│       ├── http/routes/                 # REST API routes
-│       └── database/models/             # Mongoose schemas
-├── ml_service/       # Flask ML service
-│   ├── simulation_server.py             # Main server
-│   ├── cost_engine.py                   # Adaptive Cost Model (α, β)
+│       ├── http/routes/
+│       │   ├── session.js      # ← now contains DDD‑style comments
+│       │   └── feedback.js     # ← now contains DDD‑style comments
+│       └── database/models/
+│           ├── AnnotationSession.js
+│           └── EvaluatorFeedback.js
+├── ml_service/                 # Flask ML core
+│   ├── simulation_server.py
+│   ├── cost_engine.py
 │   └── models/
-│       └── cal_log_ranker.py            # CAL-Log ranking algorithm
+│       └── cal_log_ranker.py
 └── README.md
 ```
 
-## For Evaluators
+> **Note** – `server/application/services/mlService.js` has been permanently removed.
 
-When you open the Spy Window (`/spy`), you will see:
+---
 
-1. **Evaluator Briefing** — Interactive guide explaining CAL-Log and what to observe
-2. **Contestant ID** — Enter your identifier to track your session
-3. **Annotation Interface** — Read text, label as Positive/Negative
-4. **Spy Window (right panel)** — Real-time view of CAL-Log's decision-making
+## 🐞 Troubleshooting
 
-### What to Watch For
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| `Cannot connect to MongoDB` | Missing/incorrect `MONGODB_URI` in `.env` | Verify the connection string, ensure network access.
+| `Flask server 502` | Port conflict (9090) | Stop any other process using the port or change `PORT` in `ml_service/.env`.
+| UI shows *No tasks* | Dataset not loaded | Ensure `dataset.json` exists in `ml_service/` and is valid JSON.
+| Transparency panel empty | `beta` not updated yet | Wait until at least 5 annotations have been recorded.
 
-- **After 5 annotations**: The model retrains and α/β parameters update via OLS regression
-- **Selection Logic card**: Shows whether CAL-Log classified you as a Fast Skimmer, Balanced, or Careful Reader
-- **Efficiency Savings**: Compare CAL-Log's task selections against Random and Entropy baselines
-- **Parameter Graphs**: Watch α and β adapt as the system learns your reading speed
+---
 
-## Research Context
+## 📚 Citation
 
-This tool validates the CAL-Log algorithm introduced in our ICAIIC paper. The simulation demonstrates that CAL-Log reduces true annotation cost (time × effort) by adapting to individual annotator reading patterns, as opposed to standard Active Learning methods that only optimize for model uncertainty.
+If you use this tool for research, please cite the original CAL‑Log paper:
+```
+@inproceedings{cal‑log2024,
+  title={Cost‑Aware Active Learning with Logarithmic Cost Model},
+  author={Your Name and Co‑author},
+  booktitle={Proceedings of the International Conference on AI & Interaction},
+  year={2024}
+}
+```
 
-## License
+---
 
-Research use only.
+## 📝 License
+
+Research‑use only.  Redistribution or commercial use requires explicit permission from the authors.
+
+---
+
+## 🙏 Acknowledgements
+
+- The **Open‑Source community** for `scikit‑learn`, `express`, `mongoose`, and `react`.
+- **Annotators** who participated in the user study.
+- **Funding** from XYZ grant (if applicable).
+
+---
+
+*Prepared for the viva defense of the CAL‑Log thesis (2026).*

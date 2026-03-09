@@ -1,17 +1,21 @@
-// CRUD routes for annotation sessions (save/load/reset per evaluator).
+// CRUD routes for annotation sessions — save, load, and reset per evaluator.
+// Each evaluator gets one session doc keyed by their contestantId.
 /**
  * INTERFACE LAYER: Session Router
  * ARCHITECTURAL ROLE: Controller (REST API Surface)
- * 
- * Handles the communication between the React frontend and the MongoDB persistence layer.
- * Manages session lifecycle: initialization, periodic state saves, and session resets.
+ *
+ * Handles communication between the React frontend and MongoDB.
+ * Manages session lifecycle: create/resume, periodic state saves, and full reset.
  */
 const express = require('express');
 const router = express.Router();
 const AnnotationSession = require('../../database/models/AnnotationSession');
 
 // POST /api/session/save — upsert the evaluator's running session.
-// Each annotation triggers this so we persist progress incrementally.
+// fires after each annotation so progress is never lost if the browser dies.
+// CITATION: findOneAndUpdate() — atomic find-and-modify with upsert support
+// SOURCE: Mongoosejs.com (n.d.). "Model.findOneAndUpdate()"
+// URL: https://mongoosejs.com/docs/api/model.html#Model.findOneAndUpdate()
 router.post('/save', async (req, res) => {
     try {
         const { contestantId, annotationCount, labeledTaskIds, newAnnotation } = req.body;
@@ -20,6 +24,7 @@ router.post('/save', async (req, res) => {
             return res.status(400).json({ error: 'Contestant ID is required' });
         }
 
+        // scalar fields we overwrite on every save
         const updateOps = {
             annotationCount: annotationCount || 0,
             labeledTaskIds: labeledTaskIds || [],
@@ -31,22 +36,24 @@ router.post('/save', async (req, res) => {
         };
 
         // $set replaces scalar fields, $push appends to the annotations array.
-        // This keeps the update atomic — no read-modify-write race conditions.
-        // Ref: https://www.mongodb.com/docs/manual/reference/operator/update/push/
+        // doing both in one call makes it atomic — no read-modify-write race conditions
+        // CITATION: $push — append an element to an array field in a single atomic update
+        // SOURCE: MongoDB Inc. (n.d.). "$push"
+        // URL: https://www.mongodb.com/docs/manual/reference/operator/update/push/
         const update = { $set: updateOps };
         if (newAnnotation) {
             update.$push = { annotations: newAnnotation };
         }
 
-        // upsert: true  — create doc if contestantId doesn't exist yet
-        // new: true      — return the updated document (not the old one)
-        // Ref: https://mongoosejs.com/docs/api/model.html#Model.findOneAndUpdate()
+        // upsert: true  → creates a new doc if this contestantId hasn't saved before
+        // new: true     → gives us back the updated doc, not the stale one
         const session = await AnnotationSession.findOneAndUpdate(
             { contestantId },
             update,
             { upsert: true, new: true }
         );
 
+        // only send the fields the frontend actually needs
         res.json({
             success: true,
             session: {
@@ -66,13 +73,16 @@ router.post('/save', async (req, res) => {
     }
 });
 
-// GET /api/session/load/:contestantId — retrieve a saved session.
-// Returns { exists: false } if no session found so the frontend knows
-// whether to resume or start fresh.
+// GET /api/session/load/:contestantId — pull up a saved session.
+// sends { exists: false } when there's nothing, so the frontend
+// knows whether to resume or start fresh.
 router.get('/load/:contestantId', async (req, res) => {
     try {
         const { contestantId } = req.params;
 
+        // CITATION: findOne() — return the first document that matches a query
+        // SOURCE: Mongoosejs.com (n.d.). "Model.findOne()"
+        // URL: https://mongoosejs.com/docs/api/model.html#Model.findOne()
         const session = await AnnotationSession.findOne({ contestantId });
 
         if (!session) {
@@ -102,9 +112,12 @@ router.get('/load/:contestantId', async (req, res) => {
     }
 });
 
-// POST /api/session/reset/:contestantId — zero out all fields to start fresh.
-// We use $set to overwrite everything instead of deleting the document so
-// the contestantId record stays in the collection (preserves the evaluator row).
+// POST /api/session/reset/:contestantId — zero everything out for a fresh start.
+// we $set fields to empty instead of deleting the doc so the evaluator's
+// row stays in the collection — handy for tracking who actually participated.
+// CITATION: $set — replace the value of a field in a document
+// SOURCE: MongoDB Inc. (n.d.). "$set"
+// URL: https://www.mongodb.com/docs/manual/reference/operator/update/set/
 router.post('/reset/:contestantId', async (req, res) => {
     try {
         const { contestantId } = req.params;
