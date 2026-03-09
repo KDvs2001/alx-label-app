@@ -46,41 +46,17 @@ METRICS_PATH = os.path.join(_BASE_DIR, "spy_metrics.json")
 HISTORY_PATH = os.path.join(_BASE_DIR, "spy_history.json")
 SELECTION_PATH = os.path.join(_BASE_DIR, "spy_selection.json")
 TASK_LOG_PATH = os.path.join(_BASE_DIR, "spy_task_log.json")
-MODEL_DIR = os.path.join(_BASE_DIR, "models", "all-MiniLM-L6-v2")
 
 class SimulationState:
     def __init__(self):
         self.cost_model = AdaptiveCostModel()
         
         # 1. Initialize Backbone
-        # Priority: Local Path -> HuggingFace (with optional Token)
-        # HF Token: set HF_TOKEN environment variable if using HuggingFace models
-        token = os.environ.get("HF_TOKEN", "")
-        
-        try:
-             # LAZY IMPORT to prevent OOM if libraries are heavy
-            from utilities.pretrain_model import StandardBackbone
-            
-            if os.path.exists(MODEL_DIR):
-                logger.info(f"Found Offline Model at {MODEL_DIR}")
-                self.backbone = StandardBackbone(model_name=MODEL_DIR, num_labels=2)
-            else:
-                logger.info("Connecting to Hugging Face Hub...")
-                self.backbone = StandardBackbone(num_labels=2, token=token)
-                
-        except (ImportError, MemoryError, OSError) as e:
-            logger.error(f"Heavy Model Failed to Load (Low Memory?): {e}")
-            logger.info("FAST FAILBACK: Switching to 'SimpleBackbone' (Valid Scikit-Learn Model).")
-            logger.info("This runs 100% Offline. No downloads needed.")
-            self.backbone = SimpleBackbone(num_labels=2)
-            
-        # Load Pre-trained weights if available
-        if os.path.exists("pretrained_backbone.pkl") and not isinstance(self.backbone, SimpleBackbone):
-            logger.info("Loading saved weights...")
-            try:
-                self.backbone.load_model("pretrained_backbone.pkl")
-            except Exception as e:
-                logger.error(f"Failed to load weights: {e}")
+        # We exclusively use SimpleBackbone (TF-IDF + SGD) for the active learning simulation loop.
+        # This approach ensures zero cold-start downloads, 100% offline capability, 
+        # and eliminates the risk of Out-Of-Memory (OOM) crashes on constrained infrastructure.
+        self.backbone = SimpleBackbone(num_labels=2)
+        logger.info("Initialized SimpleBackbone (TF-IDF Hashing + SGD) as primary ML model.")
 
         # 2. Initialize Ranker
         self.ranker = CALLogRanker(self.cost_model)

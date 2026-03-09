@@ -7,14 +7,27 @@ from typing import List, Dict, Any
 
 
 class CALLogRanker:
-    """Ranks tasks by information value per unit of annotation cost."""
+    """
+    The main CAL-Log ranking engine.
+    
+    Standard active learning (Uncertainty Sampling) just picks the most uncertain items,
+    which often ends up feeding the user massive, exhausting paragraphs. 
+    This class implements the CAL-Log formula to fix that by dividing the 
+    Information Gain (Entropy) by our predicted cognitive cost constraint.
+    
+    Core formula: Score = Entropy(x) / (Alpha + Beta * log(Length(x)))
+    """
     
     def __init__(self, cost_model):
         self.cost_model = cost_model
     
     def calculate_entropy(self, probabilities: np.ndarray) -> np.ndarray:
         """
-        Calculate Shannon entropy for each prediction.
+        Calculates Shannon entropy for the model's predictions.
+        
+        A raw [0.5, 0.5] output from the model means it's completely guessing (max entropy = 1.0).
+        We want to find these highly uncertain items because they give us the most bang for our buck 
+        when we retrain the model.
         
         Args:
             probabilities: Shape (n_tasks, n_classes)
@@ -22,7 +35,7 @@ class CALLogRanker:
         Returns:
             entropy: Shape (n_tasks,) - Higher = more uncertain/informative
         """
-        # Avoid log(0) with small epsilon
+        # Epsilon prevents MathDomainError (log(0)) in edge cases of 100% confidence
         epsilon = 1e-9
         entropy = -np.sum(probabilities * np.log(probabilities + epsilon), axis=1)
         return entropy
@@ -64,11 +77,10 @@ class CALLogRanker:
         entropy = self.calculate_entropy(probabilities)
         costs = self.calculate_costs(texts)
         
-        # CAL-Log formula: Score = Entropy / Cost
-        # This NATURALLY handles user adaptation:
-        #   - Low beta (fast reader) -> low cost for long texts -> long high-entropy tasks score higher
-        #   - High beta (slow reader) -> high cost for long texts -> short high-entropy tasks score higher
-        # No hardcoded pattern multipliers needed, the math does the work.
+        # Apply the main formula: Score = Uncertainty / Expected Time.
+        # The beauty of doing it this way is it naturally adapts to the user's fatigue.
+        # If the user slows down (beta goes up), the cost of long texts skyrockets,
+        # naturally pushing shorter, punchier tasks to the top of the queue without needing any hardcoded rules.
         scores = entropy / costs
         
         # Apply deduplication penalties if provided

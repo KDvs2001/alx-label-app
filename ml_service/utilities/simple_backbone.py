@@ -8,13 +8,15 @@ logger = logging.getLogger("SimpleBackbone")
 
 class SimpleBackbone:
     """
-    A lightweight, offline-first ML backbone.
-    Uses HashingVectorizer (stateless, fixed-dim text features) + SGDClassifier.
+    A fast, offline-first fallback model.
     
-    Scientific Validity:
-    - This is a standard 'Bag of Words' approach.
-    - Widely used as a strong baseline in Active Learning research.
-    - ZERO downloads required. Works locally immediately.
+    Why HashingVectorizer? 
+    Standard TF-IDF blows up memory because it has to keep a massive vocabulary dictionary. 
+    Using the hashing trick maps text directly to a fixed-size matrix, which keeps memory usage flat and 
+    prevents OOM crashes when deployed on constrained cloud environments (like HuggingFace free tier).
+    
+    We pair this with an SGD classifier using log-loss so we can do true incremental learning 
+    via `partial_fit` every time the user clicks a label.
     """
     def __init__(self, num_labels=2):
         self.num_labels = num_labels
