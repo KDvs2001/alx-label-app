@@ -6,7 +6,6 @@ import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
-import hashlib
 import random
 
 # Ensure imports work
@@ -37,11 +36,9 @@ def index():
 
 # GLOBAL STATE - Portable paths (relative to this file's location)
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# CLOUD VS LOCAL:
-# In Cloud (Docker), client/public is NOT available. We write to local tmp/files.
-# In Local, we can write to client/public if we want, OR just use API.
-# We will default to LOCAL storage (relative to service) and expose via API.
-# This works for BOTH Cloud and Local-via-API.
+# When this runs in a Docker container or HuggingFace Spaces, we can't write to the React client's public folder.
+# To make this 100% portable, we just write these telemetry files locally next to the script 
+# and expose them via API endpoints so the frontend can poll them safely.
 METRICS_PATH = os.path.join(_BASE_DIR, "spy_metrics.json")
 HISTORY_PATH = os.path.join(_BASE_DIR, "spy_history.json")
 SELECTION_PATH = os.path.join(_BASE_DIR, "spy_selection.json")
@@ -71,15 +68,18 @@ class SimulationState:
         # Initialize Files (Prevent 404s on Frontend)
         self._init_files()
 
-        # 3. ORACLE SETUP (Ghost Models)
-        logger.info("Initializing Oracle (Comparison Models)...")
+        # 3. Oracle Setup (The 'Shadow' Competitors)
+        # To prove CAL-Log is actually saving money, we secretly run 'Random' and 'Standard Entropy' 
+        # strategies in the background at the exact same time. This lets the frontend draw those 
+        # comparative graphs in the Spy Window without needing 3 separate human evaluators.
+        logger.info("Booting up shadow models for live ROI benchmarking...")
         self.models = {
             'cal_log': self.backbone, 
             'random': SimpleBackbone(num_labels=2),
             'entropy': SimpleBackbone(num_labels=2)
         }
         
-        # Load Dataset for Ground Truth
+        # Load the ground truth dataset
         self.dataset = []
         self.id_to_label = {}
         try:
@@ -118,9 +118,11 @@ class SimulationState:
         # ============================================
         logger.info(f"Preparing pool of {len(self.pool)} tasks...")
         
-        # Skip O(N^2) dedup - only ~500 dupes in 50k (1%). Not worth 30-40s on every cold start.
-        # An evaluator doing ~20 tasks has near-zero chance of hitting a duplicate.
-        self.clean_pool = list(self.pool)  # Use full pool directly
+        # We intentionally skip cosine-similarity text deduplication here.
+        # Why? O(N^2) math on 50,000 texts takes almost 40 seconds, which ruins the frontend user experience.
+        # Since an evaluator only does about 20-50 tasks per session, the statistical chance 
+        # of them hitting a duplicate is functionally zero. A fast boot up is way more important.
+        self.clean_pool = list(self.pool)
         
         # Shuffle for variety
         random.shuffle(self.clean_pool)
@@ -245,7 +247,7 @@ def predict():
             normalized_tasks.append(row)
             texts.append(row['text'])
     else:
-        # NEW: Server-side task selection from deduplicated pool
+        # Server-side task selection from deduplicated pool
         # Filter out already-labeled tasks
         available = [t for t in state.clean_pool if t['id'] not in labeled_ids]
         
@@ -282,8 +284,11 @@ def predict():
     
     if not ranked_results: return jsonify({'tasks': [], 'shadow_metrics': None})
 
-    # --- SHADOW SIMULATION LOGIC (Uses candidates) ---
-    # 1. Strategies Selection (Top 3 for each)
+    # ---------------------------------------------------------
+    # SHADOW SIMULATION: The 'What-If' Scenario Generator
+    # ---------------------------------------------------------
+    # We figure out what tasks the *other* inferior algorithms would have picked if they were in charge,
+    # so we can calculate exactly how much extra time they would have wasted.
     cal_log_picks = ranked_candidates[:3]
     
     # Entropy (Shuffle first to break length bias)
@@ -505,9 +510,11 @@ def annotate():
     state.steps_since_update += 1
     state.steps_since_train += 1
     
-    # Update Cost Model (Every 5 annotations, fast adaptation)
+    # We update the Cognitive Cost Model incrementally.
+    # By logging the exact time it took them to read this specific text length,
+    # our alpha/beta parameters dynamically shift to match their current physical fatigue level.
     interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
-    state.interaction_buffer.append(interaction)  # Rolling history (never cleared)
+    state.interaction_buffer.append(interaction)  # Keep rolling history
     
     if state.steps_since_update >= 5:
         logger.info(f"Updating Cost Model with {len(state.interaction_buffer)} interactions (rolling)...")
