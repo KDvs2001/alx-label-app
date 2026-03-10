@@ -1,25 +1,45 @@
+// CITATION: useState, useEffect - React hooks for local state and side effects
+// SOURCE: React (n.d.). "useState" / "useEffect"
+// URL: https://react.dev/reference/react/useState
 import React, { useState, useEffect } from 'react';
-import Joyride, { STATUS } from 'react-joyride';
+// react-joyride renders step-by-step guided tours with spotlight overlays
+// CITATION: react-joyride - guided user onboarding tours for React
+// SOURCE: react-joyride (n.d.). "React Joyride"
+// URL: https://docs.react-joyride.com/
 
 /**
  * EvaluatorTour Component
  * Guided onboarding using react-joyride to explain the Active Learning UI.
  */
 const EvaluatorTour = ({ onComplete }) => {
+    // controls whether the tour overlay is currently visible
     const [run, setRun] = useState(false);
 
     useEffect(() => {
-        // Uses localStorage so the tour only runs once per browser
+        // localStorage persists a flag across browser sessions so the tour only fires once
+        // CITATION: localStorage - store key/value pairs that survive page reloads
+        // SOURCE: MDN Web Docs (n.d.). "Window.localStorage"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
         const hasSeenTour = localStorage.getItem('cal_log_tour_seen');
         if (!hasSeenTour) {
             setRun(true);
         }
     }, []);
 
+    // react-joyride fires this callback on every status change (step advance, skip, finish)
     const handleJoyrideCallback = (data) => {
+        // destructure status and action from the callback payload
+        // CITATION: destructuring assignment - extract named properties from an object
+        // SOURCE: MDN Web Docs (n.d.). "Destructuring assignment"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
         const { status, action } = data;
+        // STATUS.FINISHED and STATUS.SKIPPED are constants exported by react-joyride
         const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
+        // Array.includes checks whether the current status signals the tour is done
+        // CITATION: Array.includes() - check if a value exists in an array
+        // SOURCE: MDN Web Docs (n.d.). "Array.prototype.includes()"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes
         if (finishedStatuses.includes(status) || action === 'close') {
             setRun(false);
             localStorage.setItem('cal_log_tour_seen', 'true');
@@ -27,12 +47,18 @@ const EvaluatorTour = ({ onComplete }) => {
         }
     };
 
-    // Steps highlight the "Spy Window" to prove the math is adapting
+    // each step object defines a target CSS selector, placement direction, and the JSX content to show
+    // react-joyride uses these to spotlight specific DOM elements in sequence
     const steps = [
         {
             target: 'body',
             placement: 'center',
+            // disableBeacon skips the pulsing dot and opens the tooltip immediately
             disableBeacon: true,
+            // bg-clip-text + text-transparent creates a gradient fill on the heading text
+            // CITATION: CSS background-clip: text - clip gradient to text shape
+            // SOURCE: MDN Web Docs (n.d.). "background-clip"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip
             title: <div className="text-3xl font-black bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-pulse">Welcome to CAL-Log</div>,
             content: (
                 <div className="text-base text-slate-300 space-y-3 mt-4 leading-relaxed">
@@ -42,12 +68,13 @@ const EvaluatorTour = ({ onComplete }) => {
             )
         },
         {
+            // targets the element with class .tour-step-spy-window to spotlight the Spy Window panel
             target: '.tour-step-spy-window',
             placement: 'left',
             title: <div className="text-2xl font-bold text-purple-400 font-mono flex items-center gap-2">THE SPY WINDOW</div>,
             content: (
                 <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
-                    <p>This panel shows the AI's internal thought process.</p>
+                    <p>This panel shows the model's internal thought process.</p>
                     <p>Every time you annotate a task, watch the <strong>Reading Factor (β)</strong> adapt to your natural speed.</p>
                     <p>You can also see the exact <strong>Entropy ÷ Cost</strong> mathematics that caused CAL-Log to select the specific task you are currently reading!</p>
                 </div>
@@ -60,6 +87,10 @@ const EvaluatorTour = ({ onComplete }) => {
             content: (
                 <div className="text-base text-slate-300 space-y-3 mt-2 leading-relaxed">
                     <p>Read the text at your <strong>natural pace</strong> and click Positive or Negative.</p>
+                    {/* HTML <kbd> element represents a keyboard key, styled to look like a physical key cap */}
+                    {/* CITATION: HTML kbd element - represent keyboard input */}
+                    {/* SOURCE: MDN Web Docs (n.d.). "kbd: The Keyboard Input element" */}
+                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd */}
                     <div className="bg-slate-800/80 border border-slate-700 rounded-lg p-3 text-sm">
                         <p className="font-bold text-blue-300 mb-1">Keyboard Shortcuts</p>
                         <p><kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">1</kbd> - Negative &nbsp;&nbsp; <kbd className="bg-slate-700 px-1.5 py-0.5 rounded text-xs font-mono text-white">2</kbd> - Positive</p>
@@ -82,7 +113,10 @@ const EvaluatorTour = ({ onComplete }) => {
         }
     ];
 
-    // Uses react-joyride to visually guide the user through the interface elements
+    // the Joyride component handles spotlight rendering, step sequencing, and user interaction
+    // CITATION: react-joyride props - configuration API for guided tours
+    // SOURCE: react-joyride (n.d.). "Props"
+    // URL: https://docs.react-joyride.com/props
     return (
         <Joyride
             steps={steps}
@@ -94,6 +128,8 @@ const EvaluatorTour = ({ onComplete }) => {
             callback={handleJoyrideCallback}
             spotlightPadding={8}
             spotlightClicks={true}
+            // floaterProps customises the tooltip arrow and shadow effect
+            // these are passed directly to the internal react-floater library
             floaterProps={{
                 styles: {
                     floater: { filter: 'drop-shadow(0 0 15px rgba(139, 92, 246, 0.3))' },

@@ -1,5 +1,9 @@
 
 import React from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { CheckCircle, AlertCircle, Activity, Clock } from 'lucide-react';
 
 /**
@@ -11,26 +15,31 @@ import { CheckCircle, AlertCircle, Activity, Clock } from 'lucide-react';
  * reading comprehension rather than UI navigation time.
  */
 const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime }) => {
-    // Data Sanitization Pipeline:
-    // Strips HTML artifacts, malformed markup, and noise from the raw dataset.
-    // This ensures consistency in reading speed calculations by preventing visual formatting 
-    // anomalies from artificially inflating or deflating the evaluator's cognitive processing time.
+    // strips HTML tags and noise from the raw dataset text so the reading time measurement
+    // reflects actual comprehension rather than time spent parsing broken markup
     const cleanText = (text) => {
         if (!text) return "No Text Found";
 
-        // Remove HTML tags like <br />, <br/>, <br>, etc.
+        // regex removes <br />, <br/>, <br> and any other HTML tags from the text
+        // CITATION: String.replace() with regex - pattern-based string replacement
+        // SOURCE: MDN Web Docs (n.d.). "String.prototype.replace()"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
         let cleaned = text.replace(/<br\s*\/?>/gi, ' ');
-        cleaned = cleaned.replace(/<[^>]+>/g, ''); // Remove any other HTML tags
+        cleaned = cleaned.replace(/<[^>]+>/g, '');
 
-        // Remove extra whitespace
+        // collapse multiple spaces into one and trim leading/trailing whitespace
+        // CITATION: String.trim() - remove whitespace from both ends of a string
+        // SOURCE: MDN Web Docs (n.d.). "String.prototype.trim()"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/trim
         cleaned = cleaned.replace(/\s+/g, ' ').trim();
 
-        // Remove special characters but keep basic punctuation
+        // strip stray special characters but keep normal punctuation
         cleaned = cleaned.replace(/[^\w\s.,!?'-]/g, '');
 
         return cleaned;
     };
 
+    // if there's no task yet, show a loading placeholder with a retry button
     if (!currentTask) {
         return (
             <div className="flex-1 bg-slate-900 rounded-2xl p-8 flex items-center justify-center text-slate-500">
@@ -48,6 +57,7 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
         );
     }
 
+    // optional chaining tries currentTask.data.text first, falls back to currentTask.text
     const displayText = cleanText(currentTask?.data?.text || currentTask?.text);
 
     return (
@@ -57,7 +67,8 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-slate-400 font-bold text-xs uppercase tracking-wider">Task ID: {currentTask?.id}</h2>
 
-                {/* Stopwatch */}
+                {/* live stopwatch showing how long the evaluator has been reading this task */}
+                {/* Math.floor rounds the elapsed seconds down so the display doesn't flicker with decimals */}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-300">
                     <Clock size={16} className="text-slate-600" />
                     <span className="font-mono text-sm font-bold text-slate-700">
@@ -75,8 +86,8 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
             </div>
 
             {/* 
-              * Binary Classification Core 
-              * Buttons are tightly bound to keyboard shortcuts (1 and 2). 
+              * binary classification buttons bound to keyboard shortcuts (1 and 2)
+              * disabled={submitting} prevents double-clicks while the server processes the annotation
               */}
             <div className="grid grid-cols-2 gap-4">
                 <button
@@ -84,6 +95,10 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
                     disabled={submitting}
                     className="p-4 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl border border-red-300 transition-all flex items-center justify-center gap-2 group"
                 >
+                    {/* group-hover:scale-110 makes the icon grow when the user hovers the button */}
+                    {/* CITATION: CSS transform: scale() - grow or shrink an element on hover */}
+                    {/* SOURCE: MDN Web Docs (n.d.). "scale()" */}
+                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/scale */}
                     <AlertCircle size={20} className="group-hover:scale-110 transition" />
                     <span>Negative</span>
                     <span className="text-xs opacity-70 ml-1">(Press 1)</span>

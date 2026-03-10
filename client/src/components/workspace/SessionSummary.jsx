@@ -1,5 +1,16 @@
+// CITATION: useState - React hook for local component state
+// SOURCE: React (n.d.). "useState"
+// URL: https://react.dev/reference/react/useState
 import React, { useState } from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { Home, Download, CheckCircle, Zap, Clock, Activity, TrendingUp, ArrowRight } from 'lucide-react';
+// recharts renders data-driven charts as React components
+// CITATION: Recharts - composable charting library built on D3 and React
+// SOURCE: Recharts (n.d.). "Getting Started"
+// URL: https://recharts.org/en-US/guide
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import EvaluatorFeedbackModal from './EvaluatorFeedbackModal';
 
@@ -10,13 +21,14 @@ import EvaluatorFeedbackModal from './EvaluatorFeedbackModal';
 const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumulativeTimeSaved, cumulativeEntropyCost, cumulativeRandomCost, cumulativeCalLogCost, annotations, contestantId, onHome, onExport }) => {
     const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
-    // Extracts initial vs final cost model parameters to prove adaptation
+    // compare the initial defaults against the converged values to show how the system adapted
     const startAlpha = 5.0;
     const startBeta = 3.0;
     const endAlpha = metrics.alpha;
     const endBeta = metrics.beta;
 
-    // Classifies the user's reading behavior (skimmer vs careful) based on the converged Beta parameter
+    // classify the evaluator's reading behaviour based on where Beta converged
+    // lower beta means the user reads quickly, higher beta means they read carefully
     let evaluatorType = "Balanced Reader";
     let evaluatorDescription = "You read at a moderate pace. CAL-Log optimised tasks for a balanced information gain.";
     let evaluatorColor = "text-purple-400";
@@ -37,11 +49,15 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
         evaluatorBorderColor = "border-blue-500/30";
     }
 
-    // Calculates the final Information Efficiency (Entropy/Cost) for direct comparison against Random/Entropy
+    // optional chaining guards against undefined shadowMetrics before the first batch completes
+    // CITATION: optional chaining (?.) - safe property access without null checks
+    // SOURCE: MDN Web Docs (n.d.). "Optional chaining (?.)"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining
     const calLogEfficiency = shadowMetrics?.cal_log?.info_efficiency || 0;
     const entropyEfficiency = shadowMetrics?.entropy?.info_efficiency || 0;
     const randomEfficiency = shadowMetrics?.random?.info_efficiency || 0;
 
+    // percentage improvement calculated as ((ours - baseline) / baseline) * 100
     const vsEntropyPct = entropyEfficiency > 0
         ? (((calLogEfficiency - entropyEfficiency) / entropyEfficiency) * 100)
         : 0;
@@ -125,7 +141,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                                         <span className="text-xs font-bold text-blue-300 uppercase tracking-wide">CAL-Log</span>
                                         <span className="text-lg font-bold font-mono text-blue-300">{calLogEfficiency.toFixed(4)}</span>
                                     </div>
-                                    <div className="text-[9px] text-blue-400/60 mt-1">bits/sec &mdash; Entropy &divide; Predicted Annotation Cost</div>
+                                    <div className="text-[9px] text-blue-400/60 mt-1">bits/sec - Entropy &divide; Predicted Annotation Cost</div>
                                 </div>
                                 {/* Entropy */}
                                 <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700/50">
@@ -181,6 +197,10 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                                 </div>
                                 <div>
                                     <div className="text-[10px] sm:text-xs text-slate-500 font-medium">Model Retrains</div>
+                                    {/* Math.floor rounds down to show whole retrain cycles (every 5 tasks) */}
+                                    {/* CITATION: Math.floor() - round a number down to the nearest integer */}
+                                    {/* SOURCE: MDN Web Docs (n.d.). "Math.floor()" */}
+                                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor */}
                                     <div className="text-lg text-white font-mono">{Math.floor(annotationCount / 5)}</div>
                                     <div className="text-[10px] text-slate-500 italic mt-0.5 leading-tight">All 3 models retrained every 5 tasks</div>
                                 </div>
@@ -193,17 +213,17 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                         <h4 className="text-slate-500 text-xs font-bold uppercase mb-1">How CAL-Log Learned Your Reading Style</h4>
                         <p className="text-[10px] text-slate-600 mb-4">Alpha (grey dashed) = fixed overhead per task. Beta (orange) = how long text length affects annotation time. Both evolve as you annotate.</p>
                         <div className="h-48 w-full">
-                            {/* Uses Recharts to dynamically scale the visual plot safely within modal boundaries */}
+                            {/* ResponsiveContainer from recharts scales the chart to fill its parent */}
                             <ResponsiveContainer width="100%" height="100%">
-                                {/* Maps the raw AL parameter trajectory log into continuous defense curves */}
+                                {/* LineChart plots the alpha/beta trajectory over annotation steps */}
                                 <LineChart data={history}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                                    {/* Binds data progression to chronological annotation steps */}
+                                    {/* XAxis binds data to chronological annotation steps */}
                                     <XAxis dataKey="step" stroke="#64748b" fontSize={10} label={{ value: 'Annotations', position: 'insideBottomRight', offset: -5, style: { fontSize: 9, fill: '#64748b' } }} />
                                     <YAxis stroke="#64748b" fontSize={10} label={{ value: 'Seconds', angle: -90, position: 'insideLeft', style: { fontSize: 9, fill: '#64748b' } }} />
                                     <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '12px' }} />
                                     <Legend verticalAlign="top" height={24} iconSize={10} wrapperStyle={{ fontSize: '10px' }} />
-                                    {/* Visually distinguishes Beta's aggressive scaling changes (Orange) vs structural Alpha shifts (Grey) */}
+                                    {/* orange solid line for Beta (reading speed), grey dashed for Alpha (overhead) */}
                                     <Line type="monotone" dataKey="beta" stroke="#f97316" strokeWidth={3} dot={false} name="Beta (Reading Speed)" />
                                     <Line type="monotone" dataKey="alpha" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Alpha (Fixed Overhead)" />
                                 </LineChart>
@@ -212,7 +232,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                     </div>
                 </div>
 
-                {/* Footer Constraints: Pre-routes evaluator directly to data download and mandatory final feedback check */}
+                {/* footer actions: home navigation, data export, and the mandatory feedback survey */}
                 <div className="bg-slate-900 border-t border-slate-700 p-6 flex justify-between items-center">
                     <button
                         onClick={onHome}
@@ -243,7 +263,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                 </div>
 
             </div>
-            {/* Feedback Modal Hook: Injects session analytics straight into the survey component to ensure correct quantitative correlations */}
+            {/* passes session analytics to the feedback form so evaluator responses can be correlated with ML data */}
             <EvaluatorFeedbackModal
                 isOpen={showFeedbackModal}
                 onClose={() => setShowFeedbackModal(false)}
@@ -263,7 +283,15 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                     vsEntropyPct: vsEntropyPct.toFixed(1),
                     vsRandomPct: vsRandomPct.toFixed(1),
                     systemReadingProfile: evaluatorType,
+                    // Array.map extracts task IDs, filter(Boolean) removes any undefined entries
+                    // CITATION: Array.map() / Array.filter() - transform and filter arrays
+                    // SOURCE: MDN Web Docs (n.d.). "Array.prototype.map()"
+                    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
                     tasksReceived: (annotations || []).map(a => a.taskId).filter(Boolean),
+                    // Array.reduce sums up word counts to calculate the average task length
+                    // CITATION: Array.reduce() - accumulate array values into a single result
+                    // SOURCE: MDN Web Docs (n.d.). "Array.prototype.reduce()"
+                    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
                     avgTaskLength: (annotations || []).length > 0
                         ? (annotations.reduce((sum, a) => sum + (a.wordCount || 0), 0) / annotations.length)
                         : 0,

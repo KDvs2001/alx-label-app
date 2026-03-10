@@ -1,4 +1,8 @@
 import React from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
 
 /**
@@ -6,12 +10,22 @@ import { TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
  * Explains the (Score = Uncertainty / Cost) math to evaluators to build trust.
  */
 const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
+    // guard clause: skip rendering the entire panel when it's closed
+    // this avoids unnecessary DOM work and keeps the component cheap when hidden
     if (!isOpen) return null;
 
-    // Translates raw variables into simple impact bands (Low/Medium/High)
+    // translates raw alpha/beta numbers into simple impact bands (Low/Medium/High)
+    // chained ternaries keep this compact for a straightforward three-tier classification
+    // CITATION: conditional (ternary) operator - inline if/else expression
+    // SOURCE: MDN Web Docs (n.d.). "Conditional (ternary) operator"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_operator
     const alphaImpact = alpha > 5 ? 'high' : alpha > 3 ? 'medium' : 'low';
     const betaImpact = beta > 3 ? 'high' : beta > 2 ? 'medium' : 'low';
 
+    // map each impact level to a tailwind colour class using a switch
+    // CITATION: switch statement - match a value against multiple cases
+    // SOURCE: MDN Web Docs (n.d.). "switch"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch
     const getImpactColor = (impact) => {
         switch (impact) {
             case 'high': return 'text-red-400';
@@ -21,6 +35,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
         }
     };
 
+    // same approach for background colours - maps impact level to a tailwind utility pair
     const getImpactBg = (impact) => {
         switch (impact) {
             case 'high': return 'bg-red-900/20 border-red-500/30';
@@ -48,14 +63,26 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
 
                 {/* Visualizes current Alpha/Beta values as impact bands */}
                 <div className="grid grid-cols-2 gap-4 mb-8">
+                    {/* template literal builds the className string dynamically from the impact lookup */}
+                    {/* CITATION: template literals - embed expressions in strings with backticks */}
+                    {/* SOURCE: MDN Web Docs (n.d.). "Template literals" */}
+                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals */}
                     <div className={`p-6 rounded-xl border ${getImpactBg(alphaImpact)}`}>
                         <div className="flex items-center justify-between mb-3">
                             <h3 className="text-lg font-bold text-white">Alpha (α) - Task Switching Cost</h3>
                             <Zap className={getImpactColor(alphaImpact)} size={24} />
                         </div>
+                        {/* toFixed(2) rounds the alpha value to two decimal places for display */}
+                        {/* CITATION: Number.toFixed() - format a number to N decimal places */}
+                        {/* SOURCE: MDN Web Docs (n.d.). "Number.prototype.toFixed()" */}
+                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed */}
                         <div className={`text-4xl font-bold ${getImpactColor(alphaImpact)} mb-2`}>
                             {alpha.toFixed(2)}
                         </div>
+                        {/* conditional rendering with && - only show the text that matches the current impact */}
+                        {/* CITATION: conditional rendering with && - short-circuit to show/hide JSX */}
+                        {/* SOURCE: React (n.d.). "Conditional Rendering" */}
+                        {/* URL: https://react.dev/learn/conditional-rendering */}
                         <p className="text-sm text-slate-300">
                             {alphaImpact === 'high' && 'High overhead - significant context-switching penalty'}
                             {alphaImpact === 'medium' && 'Balanced - moderate task-switching cost'}
@@ -68,6 +95,7 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                             <h3 className="text-lg font-bold text-white">Beta (β) - Skimming Time</h3>
                             <TrendingUp className={getImpactColor(betaImpact)} size={24} />
                         </div>
+                        {/* beta panel mirrors alpha but focuses on the log-length scaling factor */}
                         <div className={`text-4xl font-bold ${getImpactColor(betaImpact)} mb-2`}>
                             {beta.toFixed(2)}
                         </div>
@@ -85,6 +113,11 @@ const AlphaBetaImpactPanel = ({ alpha, beta, isOpen, onClose }) => {
                     <div className="space-y-3 text-slate-300">
                         <div className="flex items-start gap-3">
                             <div className="text-blue-400 font-bold text-lg">1.</div>
+                            {/*
+                             * this is the core formula from the cost engine:
+                             * Score = Entropy / Cost, where Cost = alpha + beta * log(length)
+                             * the panel explains this to evaluators so they trust the system's decisions
+                             */}
                             <p>
                                 <strong className="text-white">CAL-Log Score = Uncertainty / Cost</strong>
                                 <br />

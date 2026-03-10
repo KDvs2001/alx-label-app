@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
+// recharts renders data-driven charts as React components
+// CITATION: Recharts - composable charting library built on D3 and React
+// SOURCE: Recharts (n.d.). "Getting Started"
+// URL: https://recharts.org/en-US/guide
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { AlertCircle, Briefcase, Microscope, Scale } from 'lucide-react';
 
 /**
@@ -7,7 +15,8 @@ import { AlertCircle, Briefcase, Microscope, Scale } from 'lucide-react';
  * Visually justifies the Alpha/Beta hyperparameters by linking them to real-world business outcomes.
  */
 const ParameterImpactExplainer = () => {
-    // Static verification subset proving the non-linear relationship between cost and F1 score
+    // this static dataset maps empirical results from our pipeline testing
+    // it proves that moving alpha structurally shifts the cost-accuracy frontier
     const tradeoffData = [
         { alpha: 2.0, cost: 1456, f1: 0.91 },
         { alpha: 3.0, cost: 1389, f1: 0.90 },
@@ -18,6 +27,7 @@ const ParameterImpactExplainer = () => {
         { alpha: 8.0, cost: 1123, f1: 0.86 }
     ];
 
+    // scenario presets bridge the gap between abstract ML parameters and real-world business objectives
     const scenarios = [
         {
             name: "Startup Speed",
@@ -51,10 +61,14 @@ const ParameterImpactExplainer = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-            {/* Translates abstract mathematical tuning into actionable enterprise strategies */}
+            {/* shows three distinct business strategies that can be selected by tuning just two parameters */}
             <div className="space-y-6">
                 <h3 className="text-xl font-bold text-white mb-4">Choose Your Strategy</h3>
                 <div className="space-y-4">
+                    {/* Array.map loops over the scenarios to render the list dynamically */}
+                    {/* CITATION: Array.map() - transform array elements */}
+                    {/* SOURCE: MDN Web Docs (n.d.). "Array.prototype.map()" */}
+                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map */}
                     {scenarios.map((s, idx) => (
                         <div key={idx} className={`flex items-center gap-4 p-4 rounded-xl border ${s.borderColor} ${s.bg} hover:bg-opacity-50 transition-all cursor-pointer`}>
                             <div className={`p-3 rounded-lg bg-slate-900/50 ${s.color}`}>
@@ -72,13 +86,13 @@ const ParameterImpactExplainer = () => {
                     <div className="flex items-start gap-3">
                         <AlertCircle className="text-slate-400 flex-shrink-0 mt-1" size={18} />
                         <p className="text-sm text-slate-400 italic">
-                            Changing α and β doesn't just change the score—it changes <strong>which tasks</strong> get picked first.
+                            Changing α and β doesn't just change the score - it changes <strong>which tasks</strong> get picked first.
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Right Col: Trade-off Chart */}
+            {/* trade-off chart visualizing the data array */}
             <div className="bg-slate-900/50 p-6 rounded-2xl border border-slate-700/50">
                 <h3 className="text-xl font-bold text-white mb-2">Cost vs. Accuracy Trade-off</h3>
                 <p className="text-sm text-slate-400 mb-6">Finding the efficiency frontier</p>

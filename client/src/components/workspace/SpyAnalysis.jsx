@@ -1,9 +1,14 @@
 
 import React from 'react';
+// each child component handles one aspect of the real-time analysis display
 import SelectionCard from './analysis/SelectionCard';
 import ParameterGraphs from './analysis/ParameterGraphs';
 import CostMathDebug from './analysis/CostMathDebug';
 import ComparisonTable from './analysis/ComparisonTable';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { HelpCircle } from 'lucide-react';
 
 /**
@@ -11,17 +16,20 @@ import { HelpCircle } from 'lucide-react';
  * The 'Spy Window' sidebar that hosts all real-time mathematical readouts and visual proofs.
  */
 const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowMetrics, onShowAlphaBetaPanel }) => {
+    // the Spy Window is composed of four sub-panels stacked vertically
+    // each one exposes a different facet of the active learning mathematics
     return (
         <div className="flex flex-col gap-6 pb-8">
 
-            {/* Real-time comparison dashboard of Information Efficiency */}
+            {/* side-by-side efficiency comparison: CAL-Log vs Entropy vs Random */}
             <ComparisonTable shadowMetrics={shadowMetrics} />
 
-            {/* Translates selection math into intuitive UI metrics */}
+            {/* shows why CAL-Log chose this particular task (entropy, cost, score) */}
             <SelectionCard selectionLogic={selectionLogic} />
 
-            {/* Visualizes real-time convergence of cost parameters */}
+            {/* alpha/beta convergence chart with an optional help button */}
             <div className="relative">
+                {/* only render the help button if the parent passed a callback */}
                 {onShowAlphaBetaPanel && (
                     <button
                         onClick={onShowAlphaBetaPanel}
@@ -35,7 +43,7 @@ const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowM
                 <ParameterGraphs metrics={metrics} history={history} />
             </div>
 
-            {/* Exposes raw calculation logs (Information Gain, Speed) for absolute transparency */}
+            {/* raw calculation logs so the evaluator can verify the math themselves */}
             <CostMathDebug
                 selectionLogic={selectionLogic}
                 metrics={metrics}

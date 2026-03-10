@@ -1,4 +1,11 @@
+// CITATION: useState - React hook for local component state
+// SOURCE: React (n.d.). "useState"
+// URL: https://react.dev/reference/react/useState
 import React, { useState } from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { Send, CheckCircle, AlertCircle, X, Copy, ExternalLink } from 'lucide-react';
 
 /**
@@ -31,13 +38,25 @@ const EvaluatorFeedbackModal = ({
 
     if (!isOpen) return null;
 
+    // spread the previous state and overwrite the changed field to keep React state immutable
+    // CITATION: spread syntax (...) - shallow-copy an object while overriding specific keys
+    // SOURCE: MDN Web Docs (n.d.). "Spread syntax (...)"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
     const handleChange = (e) => {
+        // computed property name [name] lets us update whichever form field triggered the event
+        // CITATION: computed property names - use a variable as an object key inside brackets
+        // SOURCE: MDN Web Docs (n.d.). "Object initializer - Computed property names"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#computed_property_names
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleRating = (name, val) => setFormData(prev => ({ ...prev, [name]: val }));
 
+    // preventDefault stops the browser from refreshing the page on form submit
+    // CITATION: Event.preventDefault() - stop the browser's default form submission
+    // SOURCE: MDN Web Docs (n.d.). "Event.preventDefault()"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -48,9 +67,17 @@ const EvaluatorFeedbackModal = ({
         try {
             const payload = { ...formData, ...sessionData };
             const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "http://localhost:5001").replace(/\/$/, "");
+            // fire-and-forget: POST the feedback to the server without blocking the UI
+            // CITATION: Fetch API - make HTTP requests from the browser
+            // SOURCE: MDN Web Docs (n.d.). "fetch()"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/fetch
             fetch(`${SERVER_URL}/api/feedback`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+            // JSON.stringify converts the JS object into a JSON string for the request body
+            // CITATION: JSON.stringify() - serialize a JavaScript value to a JSON string
+            // SOURCE: MDN Web Docs (n.d.). "JSON.stringify()"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
                 body: JSON.stringify(payload)
             }).catch(err => console.error('Feedback save failed (will retry on next visit):', err));
         } catch (err) {
@@ -58,7 +85,10 @@ const EvaluatorFeedbackModal = ({
         }
     };
 
-    // Renders Likert scales (1-5) for quantitative UX metrics
+    // renders a 1-5 Likert scale row for each quantitative UX metric
+    // CITATION: Array.map() - transform an array into a list of JSX elements
+    // SOURCE: React (n.d.). "Rendering Lists"
+    // URL: https://react.dev/learn/rendering-lists
     const renderLikert = (name, label) => (
         <div className="mb-4">
             <label className="block text-sm font-medium text-slate-300 mb-2">{label}</label>
@@ -101,6 +131,11 @@ const EvaluatorFeedbackModal = ({
 
                         {/* Reveals incentive code only after a successful feedback submission */}
                         <div className="w-full max-w-md bg-slate-800/60 border border-slate-700 rounded-xl p-6 text-left space-y-4">
+                            {/* noopener noreferrer prevents the opened tab from accessing window.opener */}
+                            {/* this is a standard security measure for target="_blank" links */}
+                            {/* CITATION: noopener noreferrer - security for external links */}
+                            {/* SOURCE: MDN Web Docs (n.d.). "Link types: noopener" */}
+                            {/* URL: https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel/noopener */}
                             <p className="text-sm text-slate-300 leading-relaxed">
                                 Redeem the following Survey Code at{' '}
                                 <a href="https://www.surveycircle.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300 transition-colors">surveycircle.com</a>{' '}
@@ -114,9 +149,17 @@ const EvaluatorFeedbackModal = ({
                                 </code>
                                 <button
                                     type="button"
+                                    // copy the survey code to the user's clipboard
+                                    // CITATION: navigator.clipboard.writeText() - copy text to the system clipboard
+                                    // SOURCE: MDN Web Docs (n.d.). "Clipboard.writeText()"
+                                    // URL: https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
                                     onClick={() => {
                                         navigator.clipboard.writeText('8J2N-SGKQ-QQ38-QTCG');
                                         setCopied(true);
+                                        // setTimeout resets the "Copied!" label back to "Copy" after 2 seconds
+                                        // CITATION: setTimeout() - schedule a one-off callback after a delay
+                                        // SOURCE: MDN Web Docs (n.d.). "setTimeout()"
+                                        // URL: https://developer.mozilla.org/en-US/docs/Web/API/setTimeout
                                         setTimeout(() => setCopied(false), 2000);
                                     }}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${copied
@@ -149,12 +192,14 @@ const EvaluatorFeedbackModal = ({
                             <h2 className="text-2xl font-bold text-white mb-2">Evaluator Feedback</h2>
                             <p className="text-sm text-slate-400 leading-relaxed">
                                 Thank you for testing CAL-Log! The system auto-captured your stats:
+                                {/* optional chaining safely handles cases where the session hasn't ended yet */}
                                 <span className="text-blue-400 font-mono text-xs ml-2 bg-blue-900/30 px-2 py-1 rounded">α: {sessionData.endingAlpha?.toFixed(2)} β: {sessionData.endingBeta?.toFixed(2)}</span>
                                 <span className="text-green-400 font-mono text-xs ml-2 bg-green-900/30 px-2 py-1 rounded">vs Entropy: {sessionData.vsEntropyPct}%</span>
                                 <span className="text-purple-400 font-mono text-xs ml-2 bg-purple-900/30 px-2 py-1 rounded">vs Random: {sessionData.vsRandomPct}%</span>
                             </p>
                         </div>
 
+                        {/* short-circuit evaluation: conditionally render the error banner only if status is 'error' */}
                         {status === 'error' && (
                             <div className="mb-6 p-4 bg-red-900/20 border border-red-800 rounded-xl flex items-start gap-3">
                                 <AlertCircle className="text-red-400 shrink-0 mt-0.5" size={18} />
@@ -169,8 +214,10 @@ const EvaluatorFeedbackModal = ({
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-300 mb-1">What is your current role?</label>
+                                    {/* controlled select component: the selected 'value' is driven by React state */}
                                     <select name="role" value={formData.role} onChange={handleChange} required className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 transition-colors">
                                         <option value="" disabled>Select role...</option>
+                                        {/* mapping over an array to generate options, using the string itself as the unique React key */}
                                         {['Undergraduate student', 'Postgraduate / PhD student', 'Academic researcher', 'Industry professional', 'Other'].map(o => <option key={o} value={o}>{o}</option>)}
                                     </select>
                                 </div>
@@ -224,6 +271,7 @@ const EvaluatorFeedbackModal = ({
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-300 mb-1">What did you find most surprising or interesting?</label>
+                                    {/* CSS resize-none ensures the textarea cannot be dragged to break the modal layout */}
                                     <textarea name="mostSurprising" value={formData.mostSurprising} onChange={handleChange} rows={2} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 transition-colors resize-none" />
                                 </div>
 
@@ -232,6 +280,10 @@ const EvaluatorFeedbackModal = ({
                                     <textarea name="mostConfusing" value={formData.mostConfusing} onChange={handleChange} rows={3} className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-orange-500/50 transition-colors resize-none" />
                                 </div>
 
+                                {/* only show the expert question if the user selected Intermediate or Expert */}
+                                {/* CITATION: Array.includes() - check if a value exists in an array */}
+                                {/* SOURCE: MDN Web Docs (n.d.). "Array.prototype.includes()" */}
+                                {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes */}
                                 {formData.nlpFamiliarity && ['Intermediate', 'Expert'].includes(formData.nlpFamiliarity) && (
                                     <div>
                                         <label className="block text-sm font-medium text-slate-300 mb-1 text-blue-200">As someone with NLP experience, what one thing would strengthen the submission?</label>

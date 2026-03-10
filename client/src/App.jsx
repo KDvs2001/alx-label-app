@@ -1,10 +1,19 @@
+// react-router-dom handles client-side routing in our single-page application
+// CITATION: react-router-dom - declarative routing for React web applications
+// SOURCE: React Router (n.d.). "react-router-dom"
+// URL: https://reactrouter.com/en/main/start/overview
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import ImpactDashboard from "./pages/ImpactDashboard";
 import ResearchWorkspace from "./components/ResearchWorkspace";
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { Terminal, TrendingUp, Eye } from "lucide-react";
 
-// Simple Navbar Component
+// controls navigation between the public impact dashboard and the private evaluator workspace
 const Navbar = () => {
+  // useLocation lets us read the current URL path to highlight the active menu item
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
@@ -18,6 +27,7 @@ const Navbar = () => {
           CAL-Log Research Tool
         </Link>
         <div className="flex items-center gap-4">
+          {/* template literal toggles text colour based on whether this route is currently active */}
           <Link
             to="/"
             className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
@@ -44,10 +54,12 @@ function App() {
       <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30">
         <Navbar />
         <main>
+          {/* Routes handles the rendering of the correct page component based on the URL */}
           <Routes>
             <Route path="/" element={<ImpactDashboard />} />
             <Route path="/spy" element={<ResearchWorkspace />} />
             <Route path="/impact" element={<ImpactDashboard />} />
+            {/* catch-all route redirects any unknown paths back to the impact dashboard */}
             <Route path="*" element={<ImpactDashboard />} />
           </Routes>
         </main>

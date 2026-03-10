@@ -1,23 +1,40 @@
+// CITATION: useState - React hook for local state
+// SOURCE: React (n.d.). "useState"
+// URL: https://react.dev/reference/react/useState
 import React, { useState } from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { DollarSign, Users, Building, Briefcase, TrendingDown, Clock } from 'lucide-react';
+// recharts renders data-driven charts as React components
+// CITATION: Recharts - composable charting library built on D3 and React
+// SOURCE: Recharts (n.d.). "Getting Started"
+// URL: https://recharts.org/en-US/guide
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 /**
  * ROICalculator Component
- * Interactively proves the core research thesis: CAL-Log generates tangible financial value via saved hours.
+ * Translates the raw time savings of CAL-Log into projected financial savings for enterprise use cases.
  */
 const ROICalculator = () => {
     const [annotations, setAnnotations] = useState(10000);
     const [hourlyWage, setHourlyWage] = useState(20);
 
-    // Average times (in seconds) from experiment data
+    // average processing times in seconds, taken from the empirical results of our study
     const avgTimeRandom = 3.75;
     const avgTimeCALLog = 2.47;
 
     const calculateROI = () => {
+        // convert total annotation time from seconds to hours, then multiply by hourly wage
+        // to calculate the absolute financial cost of the annotation campaign
         const randomCost = (annotations * avgTimeRandom / 3600) * hourlyWage;
         const calLogCost = (annotations * avgTimeCALLog / 3600) * hourlyWage;
         const savings = randomCost - calLogCost;
+        // toFixed(1) forces the percentage to display exactly one decimal place
+        // CITATION: Number.prototype.toFixed() - format number using fixed-point notation
+        // SOURCE: MDN Web Docs (n.d.). "Number.prototype.toFixed()"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed
         const savingsPercent = ((savings / randomCost) * 100).toFixed(1);
         const hoursSaved = (annotations * (avgTimeRandom - avgTimeCALLog) / 3600).toFixed(0);
 
@@ -26,6 +43,7 @@ const ROICalculator = () => {
 
     const roi = calculateROI();
 
+    // data array structured specifically for Recharts BarChart ingestion
     const chartData = [
         { name: 'Random', cost: roi.randomCost, color: '#ef4444' }, 
         { name: 'CAL-Log', cost: roi.calLogCost, color: '#3b82f6' }  
@@ -48,6 +66,10 @@ const ROICalculator = () => {
             <div className="space-y-8">
                 {/* Presets */}
                 <div className="grid grid-cols-3 gap-3">
+                    {/* Array.map maps the preset configurations into intractable buttons */}
+                    {/* CITATION: Array.map() - transform array elements */}
+                    {/* SOURCE: MDN Web Docs (n.d.). "Array.prototype.map()" */}
+                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map */}
                     {presets.map((preset) => (
                         <button
                             key={preset.name}
@@ -68,6 +90,14 @@ const ROICalculator = () => {
                             <label className="text-sm text-slate-400">Annual Annotations</label>
                             <span className="text-blue-400 font-mono font-bold">{annotations.toLocaleString()}</span>
                         </div>
+                        {/* parseInt ensures the slider string value is cast safely to an integer */}
+                        {/* CITATION: parseInt() - convert string to integer */}
+                        {/* SOURCE: MDN Web Docs (n.d.). "parseInt()" */}
+                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt */}
+                        {/* accent-blue-500 is a Tailwind/CSS property that colors the native browser range slider thumb */}
+                        {/* CITATION: CSS accent-color - change the color of native form controls */}
+                        {/* SOURCE: MDN Web Docs (n.d.). "accent-color" */}
+                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/CSS/accent-color */}
                         <input
                             type="range"
                             min="1000"
@@ -103,7 +133,7 @@ const ROICalculator = () => {
                 </div>
             </div>
 
-            {/* Translates abstract time-savings into absolute financial metrics */}
+            {/* visual dashboard mapping the inputs to financial outcomes */}
             <div className="bg-gradient-to-br from-slate-900 to-slate-900/50 p-6 rounded-xl border border-slate-800 flex flex-col justify-between">
 
                 {/* Hero Metrics */}
@@ -113,6 +143,10 @@ const ROICalculator = () => {
                             <DollarSign size={18} />
                             <span className="text-sm font-semibold uppercase tracking-wider">Projected Savings</span>
                         </div>
+                        {/* toLocaleString formats the number with thousands separators for readability */}
+                        {/* CITATION: Number.prototype.toLocaleString() - language-sensitive number formatting */}
+                        {/* SOURCE: MDN Web Docs (n.d.). "Number.prototype.toLocaleString()" */}
+                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString */}
                         <p className="text-3xl font-bold text-white tracking-tight">
                             ${roi.savings.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </p>
@@ -146,6 +180,10 @@ const ROICalculator = () => {
                                 tickLine={false}
                                 axisLine={false}
                             />
+                            {/* Recharts Tooltip formatter expects an array of [value, name] to customize the popup text */}
+                            {/* CITATION: Recharts Custom Tooltips Implementation */}
+                            {/* SOURCE: Medium (2023). "Implementing Custom tooltips and legends using Recharts" */}
+                            {/* URL: https://medium.com/@rutudhokchaule/implementing-custom-tooltips-and-legends-using-recharts-98b6e3c8b712 */}
                             <Tooltip
                                 cursor={{ fill: '#1e293b' }}
                                 contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}

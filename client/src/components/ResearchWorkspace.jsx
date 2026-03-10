@@ -1,4 +1,6 @@
-
+// CITATION: React Hooks (useState, useEffect, useRef, useCallback) - state and lifecycle management
+// SOURCE: React (n.d.). "Built-in React Hooks"
+// URL: https://react.dev/reference/react/hooks
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import WorkspaceHeader from './workspace/WorkspaceHeader';
 import GuidelinesPanel from './workspace/GuidelinesPanel';
@@ -13,16 +15,12 @@ import FatigueTrackerModal from './workspace/FatigueTrackerModal';
 
 /**
  * ResearchWorkspace Component
- * The central orchestration engine of the CAL-Log framework.
- * 
- * Architecture Role: Primary Controller
- * Manages the highly asynchronous lifecycle between the React Client, the Node.js API Gateway, 
- * and the remote Python ML Microservice. It maintains global state boundaries, handles ML model
- * cold-starts, and guarantees that user telemetry (fatigue data) is accurately timestamped 
- * and transmitted without race conditions.
+ * Main container component for the annotation interface.
+ * Manages the state and communication between the frontend React application, 
+ * the Node.js API, and the remote Python ML service.
  */
 const ResearchWorkspace = () => {
-    // Core Evaluation State Hooking
+    // core state for tracking the current task and ML parameters
     const [tasks, setTasks] = useState([]);
     const [currentTask, setCurrentTask] = useState(null);
     const [history, setHistory] = useState([]);
@@ -56,8 +54,10 @@ const ResearchWorkspace = () => {
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
 
-    // Ref for the current in-flight fetch AbortController
-    // This ensures we can cancel stale fetches on re-render, unmount, or new requests
+    // AbortController allows us to cancel pending network requests if component unmounts or state changes
+    // CITATION: AbortController - abort web requests
+    // SOURCE: MDN Web Docs (n.d.). "AbortController"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/API/AbortController
     const fetchControllerRef = useRef(null);
 
     // Evaluator Tour State
@@ -79,7 +79,10 @@ const ResearchWorkspace = () => {
     const [viewStartTime, setViewStartTime] = useState(Date.now());
     const [elapsedTime, setElapsedTime] = useState(0);
 
-    // API URL (Simulation Server - Env for Cloud, Proxy for Local)
+    // Vite exposes environment variables via import.meta.env instead of process.env
+    // CITATION: Env Variables and Modes - exposing variables in Vite
+    // SOURCE: Vite (n.d.). "Env Variables and Modes"
+    // URL: https://vitejs.dev/guide/env-and-mode.html
     const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
     const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
 
@@ -120,11 +123,8 @@ const ResearchWorkspace = () => {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [contestantId, annotationCount]);
 
-    // Interaction Telemetry & Fatigue Monitor:
-    // This effect acts as a passive observer of the evaluator's behavior. 
-    // It filters out statistical anomalies (e.g., getting up for coffee) by aggressively clamping 
-    // extreme outliers from the baseline calculation, ensuring the Adaptive Cost Model isn't 
-    // poisoned by non-reading delays.
+    // monitors time between annotations to detect if the user has left the keyboard or needs a break.
+    // drops the top 20% longest times to prevent outliers (like getting a coffee) from skewing the average.
     useEffect(() => {
         if (!currentTask || tourActive || isFatigueModalOpen) return;
 
@@ -221,6 +221,9 @@ const ResearchWorkspace = () => {
             // - A new fetchNextBatch call supersedes an old one
             // - The component unmounts or the effect re-runs (e.g. tab reactivation)
             // - The 25s timeout fires on an idle/slow service
+            // CITATION: AbortError DOMException - thrown when a fetch is aborted
+            // SOURCE: MDN Web Docs (n.d.). "DOMException"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/DOMException
             if (e.name === 'AbortError') {
                 clearInterval(stageTimer);
                 return; 
@@ -231,6 +234,10 @@ const ResearchWorkspace = () => {
             if (retryCount < 4) {
                 const backoffDelays = [3000, 6000, 12000, 20000];
                 setLoadingStage(retryCount < 2 ? 2 : 3);
+                // using setTimeout to implement exponential backoff for recovering the ML service connection
+                // CITATION: setTimeout - delays execution of a functional callback
+                // SOURCE: MDN Web Docs (n.d.). "setTimeout"
+                // URL: https://developer.mozilla.org/en-US/docs/Web/API/setTimeout
                 setTimeout(() => fetchNextBatch(retryCount + 1), backoffDelays[retryCount]);
                 return;
             }
@@ -243,7 +250,10 @@ const ResearchWorkspace = () => {
 
     const fetchSpySelection = async () => {
         try {
-            // Read from API (formerly file)
+            // standard browser Fetch API used to pull the current selection rationale from the ML service
+            // CITATION: Fetch API - provides an interface for fetching resources
+            // SOURCE: MDN Web Docs (n.d.). "Fetch API"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
             const res = await fetch(`${API_URL}/spy/selection`);
             const data = await res.json();
             setSelectionLogic(data);
@@ -287,15 +297,16 @@ const ResearchWorkspace = () => {
         if (!currentTask || submitting) return;
         setSubmitting(true);
 
+        // Date.now() returns the number of milliseconds elapsed since the epoch
+        // CITATION: Date.now() - timestamp resolution for human interaction
+        // SOURCE: MDN Web Docs (n.d.). "Date.now()"
+        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
         const timeTaken = ((Date.now() - viewStartTime) - fatiguePauseTime) / 1000;
         const taskText = currentTask.data?.text || currentTask.text;
         const textLength = taskText.split(" ").length;
 
-        // Optimistic UI Pipeline:
-        // Crucial for maintaining the evaluator's psychological flow state.
-        // It immediately mutates the local DOM state to serve the next task *before* the network 
-        // request completes. This mathematically masks the ~150ms HTTP latency of the ML 
-        // microservice communication, ensuring the recorded 'time_taken' metric is pure human response time.
+        // update the UI immediately before the network request completes, reducing perceived latency 
+        // so the user's annotation flow isn't interrupted by waiting for the server
         const nextTasks = tasks.slice(1);
         if (nextTasks.length > 0) {
             setTasks(nextTasks);
@@ -381,13 +392,21 @@ const ResearchWorkspace = () => {
         }
     };
 
-    // 5. Hotkeys
+    // Global keyboard event listener for rapid, mouse-free annotation labeling
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (submitting || !currentTask) return;
             if (e.key === '1') handleAnnotate('Negative');
             if (e.key === '2') handleAnnotate('Positive');
+            // Element.matches() prevents hotkeys from firing if the user is simultaneously typing in a text field
+            // CITATION: Element.matches() - check if element would be selected by specified CSS selector
+            // SOURCE: MDN Web Docs (n.d.). "Element.matches()"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Element/matches
             if (e.key === ' ' && !e.target.matches('input, textarea')) {
+                // Event.preventDefault() stops the spacebar from accidentally scrolling the browser page down
+                // CITATION: Event.preventDefault() - cancel default browser action
+                // SOURCE: MDN Web Docs (n.d.). "Event.preventDefault()"
+                // URL: https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
                 e.preventDefault();
                 setShowGuidelines(prev => !prev);
             }
@@ -414,6 +433,10 @@ const ResearchWorkspace = () => {
             if (newAnnotation) {
                 payload.newAnnotation = newAnnotation;
             }
+            // JSON.stringify converts our Javascript session state object into a JSON string for deterministic network transit
+            // CITATION: JSON.stringify() - convert object to JSON string
+            // SOURCE: MDN Web Docs (n.d.). "JSON.stringify()"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
             fetch(`${SERVER_URL}/api/session/save`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -462,6 +485,10 @@ const ResearchWorkspace = () => {
             setAnnotationTimes([]);
             setIsFatigueModalOpen(false);
             setFatiguePauseTime(0);
+            // clearing the tour state from HTML5 local storage forces the UI tour to reappear for newly registered evaluators
+            // CITATION: Window.localStorage - web storage API
+            // SOURCE: MDN Web Docs (n.d.). "Window.localStorage"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
             localStorage.removeItem('cal_log_tour_seen');
             setTourActive(true);
 
@@ -494,6 +521,10 @@ const ResearchWorkspace = () => {
         await saveSession();
         setToast({ message: "Progress saved successfully!", type: "success" });
         setTimeout(() => {
+            // direct window location assignment used here instead of React Router to ensure a full DOM flush and state reset
+            // CITATION: React button onClick redirect using window.location
+            // SOURCE: Stack Overflow (2018). "React button onclick redirect page"
+            // URL: https://stackoverflow.com/questions/50644976/react-button-onclick-redirect-page
             window.location.href = '/';
         }, 1500);
     };
@@ -530,12 +561,18 @@ const ResearchWorkspace = () => {
             annotations: fullAnnotations,
             shadowComparison: shadowMetrics || null
         };
+        // JavaScript Blob and URL API pattern to dynamically generate a downloadable JSON payload directly from browser cache
+        // CITATION: Download JSON object as a file from browser
+        // SOURCE: Stack Overflow (2013). "Download JSON object as a file from browser"
+        // URL: https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
         const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `callog_session_${contestantId}_${Date.now()}.json`;
         a.click();
+        
+        // Revoking the URL immediately after the click frees up browser memory
         URL.revokeObjectURL(url);
         setToast({ message: 'Session data exported!', type: 'success' });
     };
