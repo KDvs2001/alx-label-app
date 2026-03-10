@@ -1,5 +1,9 @@
 
 import React from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { BookOpen, X } from 'lucide-react';
 
 /**
@@ -7,6 +11,11 @@ import { BookOpen, X } from 'lucide-react';
  * Standardizes annotator behavior by defining strict sentiment edge-cases, ensuring high-quality labels.
  */
 const GuidelinesPanel = ({ isOpen, onClose }) => {
+    // the panel slides in from the right using CSS transform
+    // when isOpen is true, translate-x-0 brings it on-screen; translate-x-full hides it off-screen
+    // CITATION: CSS transform: translateX() - slide elements in and out of view
+    // SOURCE: MDN Web Docs (n.d.). "transform"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/CSS/transform
     return (
         <div className={`fixed inset-y-0 right-0 w-96 bg-slate-900 shadow-2xl border-l border-slate-800 transform transition-transform duration-300 z-50 p-6 overflow-y-auto ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
             <div className="flex justify-between items-center mb-6">
@@ -18,9 +27,14 @@ const GuidelinesPanel = ({ isOpen, onClose }) => {
                 </button>
             </div>
 
+            {/* semantic <section> elements group each guideline category for screen readers and code clarity */}
+            {/* CITATION: HTML section element - thematic grouping of content */}
+            {/* SOURCE: MDN Web Docs (n.d.). "section: The Generic Section element" */}
+            {/* URL: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/section */}
             <div className="space-y-6 text-sm text-slate-300">
                 <section>
                     <h3 className="font-bold text-white mb-2 border-b border-slate-700 pb-1">1. Sentiment Definition</h3>
+                    {/* colour-coded spans make it immediately obvious which label maps to which sentiment */}
                     <p className="mb-2">Determine if the review expresses a <span className="text-green-400">Positive</span> or <span className="text-red-400">Negative</span> opinion about the movie.</p>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400">
                         <li>Focus on the <b>author's opinion</b>, not the plot description.</li>
@@ -29,6 +43,7 @@ const GuidelinesPanel = ({ isOpen, onClose }) => {
                 </section>
 
                 <section>
+                    {/* example phrases help annotators calibrate their judgment across reviews */}
                     <h3 className="font-bold text-green-400 mb-2 border-b border-slate-700 pb-1">Positive Indicators (Press 2)</h3>
                     <ul className="list-disc pl-4 space-y-1 text-slate-400">
                         <li>"Masterpiece", "Must-see", "Brilliant acting"</li>
@@ -48,8 +63,10 @@ const GuidelinesPanel = ({ isOpen, onClose }) => {
 
                 <section>
                     <h3 className="font-bold text-white mb-2 border-b border-slate-700 pb-1">Edge Cases</h3>
+                    {/* edge-case guidance helps annotators handle ambiguous reviews consistently */}
                     <div className="bg-slate-800 p-3 rounded text-xs border border-slate-700">
                         <p className="mb-2"><b>Can't Decide?</b></p>
+                        {/* the "default to Negative" rule prevents optimistic bias in the training labels */}
                         <p>If the review is mixed (e.g., "Good acting, bad plot"), pick the <b>dominant sentiment</b>. If truly neutral, skip or label as Negative (strict).</p>
                     </div>
                 </section>

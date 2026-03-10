@@ -1,4 +1,8 @@
 import React from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle } from 'lucide-react';
 
 /**
@@ -18,12 +22,14 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                 </div>
             </div>
             <div className="flex items-center gap-4">
+                {/* only show the contestant badge if a contestant ID has been set */}
                 {contestantId && (
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-slate-300 text-xs rounded border border-slate-700">
                         <User size={14} />
                         <span className="font-mono font-bold">{contestantId}</span>
                     </div>
                 )}
+                {/* window.location.href navigates the browser back to the landing page */}
                 <button
                     onClick={() => window.location.href = '/'}
                     className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded border border-slate-700 transition-colors"
@@ -36,6 +42,7 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                 >
                     <BookOpen size={14} /> Guidelines
                 </button>
+                {/* short-circuit: only show Save & Exit when both contestantId and callback exist */}
                 {contestantId && onSaveAndExit && (
                     <button
                         onClick={onSaveAndExit}
@@ -44,6 +51,7 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                         <Save size={14} /> Save & Exit
                     </button>
                 )}
+                {/* tour-step-feedback-btn is the CSS class that react-joyride targets for the tour spotlight */}
                 {contestantId && (
                     <button
                         onClick={onEndSession}
@@ -60,7 +68,7 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                         <Download size={14} /> Export Data
                     </button>
                 )}
-                {/* Real-time progression counter validates active learning throughput to the evaluator */}
+                {/* annotation counter gives the evaluator a sense of progress through the session */}
                 <div className="text-right border-l border-slate-700 pl-4">
                     <div className="text-2xl font-mono font-bold text-blue-400">{historyCount}</div>
                     <div className="text-xs text-slate-500">Samples Annotated</div>

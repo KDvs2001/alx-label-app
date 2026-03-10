@@ -1,4 +1,8 @@
 import React from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { Coffee, Play, PauseCircle } from 'lucide-react';
 
 /**
@@ -6,16 +10,21 @@ import { Coffee, Play, PauseCircle } from 'lucide-react';
  * Pauses the annotation timer to prevent skewed cost-model calculations when the user is idle.
  */
 const FatigueTrackerModal = ({ isOpen, onResume }) => {
+    // guard clause: skip rendering when the modal is not active
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop Blur */}
+            {/* backdrop-blur creates a frosted glass effect behind the modal */}
+            {/* CITATION: CSS backdrop-filter: blur() - frosted glass visual effect */}
+            {/* SOURCE: MDN Web Docs (n.d.). "backdrop-filter" */}
+            {/* URL: https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter */}
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity"></div>
 
             {/* Modal Box */}
+            {/* relative z-10 ensures the modal content sits above the backdrop layer */}
             <div className="bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden max-w-lg w-full relative z-10 animate-in fade-in zoom-in duration-300">
-                {/* Header Strip */}
+                {/* header uses a subtle yellow tint to signal caution without being alarming */}
                 <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-6 py-4 flex items-center gap-3">
                     <Coffee className="text-yellow-400" size={24} />
                     <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
@@ -23,7 +32,7 @@ const FatigueTrackerModal = ({ isOpen, onResume }) => {
                     </h2>
                 </div>
 
-                {/* Alerts user of pause to maintain experimental data integrity */}
+                {/* explains why the timer paused so the evaluator trusts the data integrity */}
                 <div className="p-6 space-y-4">
                     <p className="text-slate-300 text-lg leading-relaxed">
                         We noticed you've been on this single task much longer than your usual reading pace.
@@ -40,7 +49,7 @@ const FatigueTrackerModal = ({ isOpen, onResume }) => {
                     </div>
                 </div>
 
-                {/* Resumes tracking ensuring active time accurately reflects task difficulty */}
+                {/* onResume callback restarts the annotation timer in ResearchWorkspace */}
                 <div className="bg-slate-950 p-6 flex justify-end gap-4 border-t border-slate-800">
                     <button
                         onClick={onResume}
