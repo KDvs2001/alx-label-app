@@ -1,17 +1,17 @@
 
 import os
 import json
-import numpy as np  # Harris et al. (2020), "Array programming with NumPy", Nature 585, 357-362
+import numpy as np
 import logging
-from flask import Flask, request, jsonify  # Pallets Projects, Flask Web Framework - https://flask.palletsprojects.com/
-from flask_cors import CORS  # Flask-CORS extension - https://flask-cors.readthedocs.io/
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import sys
 import random
 
-# Ensure sibling package imports resolve correctly at runtime.
-# Pattern: sys.path.append(os.path.dirname(__file__))
-# Ref: https://stackoverflow.com/questions/4383571/importing-files-from-different-folder
-# Ref: https://docs.python.org/3/library/sys.html#sys.path
+# make sure sibling package imports work regardless of where the script is run from
+# CITATION: sys.path.append() — add a directory to Python's module search path
+# SOURCE: Stack Overflow (2010). "Importing files from different folder"
+# URL: https://stackoverflow.com/questions/4383571/importing-files-from-different-folder
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from utilities.simple_backbone import SimpleBackbone
@@ -19,19 +19,21 @@ from cost_engine import AdaptiveCostModel
 from models.cal_log_ranker import CALLogRanker
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import re  # Python stdlib regex - https://docs.python.org/3/library/re.html
+import re
 
-# Setup Logging
-# Pattern: basicConfig at entry point + named getLogger per module
-# Ref: https://docs.python.org/3/howto/logging.html
-# Ref: https://stackoverflow.com/questions/7016056/python-logging-not-outputting-anything
+# set up logging — basicConfig at the entry point, named logger per module
+# CITATION: logging.basicConfig() — configure the root logger with a severity level
+# SOURCE: Python Software Foundation (n.d.). "Logging HOWTO"
+# URL: https://docs.python.org/3/howto/logging.html
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SimulationServer")
 
-# Flask application factory + global CORS enablement
-# Ref: https://stackoverflow.com/questions/25594893/how-to-enable-cors-in-flask
+# Flask app instance + enable CORS so the React frontend can call these endpoints
+# CITATION: CORS(app) — allow cross-origin requests from the browser
+# SOURCE: Stack Overflow (2014). "How to enable CORS in Flask"
+# URL: https://stackoverflow.com/questions/25594893/how-to-enable-cors-in-flask
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 
 @app.route("/")
 def index():
@@ -42,10 +44,10 @@ def index():
                       "/spy/selection", "/spy/history", "/spy/metrics", "/spy/task_log"]
     })
 
-# GLOBAL STATE - Portable paths (relative to this file's location)
-# Pattern: os.path.dirname(os.path.abspath(__file__)) for script-relative path resolution
-# Ref: https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
-# Ref: https://stackoverflow.com/questions/50499/how-do-i-get-the-path-and-name-of-the-file-that-is-currently-executing
+# build paths relative to this file so it works in Docker, HuggingFace, or local dev
+# CITATION: os.path.dirname(os.path.abspath(__file__)) — get the folder this script lives in
+# SOURCE: Stack Overflow (2009). "Find current directory and file's directory"
+# URL: https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # When this runs in a Docker container or HuggingFace Spaces, we can't write to the React client's public folder.
 # To make this 100% portable, we just write these telemetry files locally next to the script 
@@ -55,10 +57,11 @@ HISTORY_PATH = os.path.join(_BASE_DIR, "spy_history.json")
 SELECTION_PATH = os.path.join(_BASE_DIR, "spy_selection.json")
 TASK_LOG_PATH = os.path.join(_BASE_DIR, "spy_task_log.json")
 
-# Module-level singleton state object shared across all Flask route handlers.
-# Pattern: Global state class instantiated at module scope
-# Ref: https://stackoverflow.com/questions/32815451/are-global-variables-thread-safe-in-flask
-# Ref: https://flask.palletsprojects.com/en/latest/appcontext/
+# singleton state object shared by all route handlers — instantiated once when the server boots.
+# flask's dev server is single-threaded so this is safe without locking.
+# CITATION: module-level globals in Flask — shared state across request handlers
+# SOURCE: Stack Overflow (2015). "Are global variables thread safe in Flask?"
+# URL: https://stackoverflow.com/questions/32815451/are-global-variables-thread-safe-in-flask
 class SimulationState:
     def __init__(self):
         self.cost_model = AdaptiveCostModel()
@@ -94,7 +97,10 @@ class SimulationState:
             'entropy': SimpleBackbone(num_labels=2)
         }
         
-        # Load the ground truth dataset
+        # load the ground truth dataset from disk
+        # CITATION: json.load() — deserialise a JSON file into a Python object
+        # SOURCE: Stack Overflow (2012). "Reading JSON from a file"
+        # URL: https://stackoverflow.com/questions/20199126/reading-json-from-a-file
         self.dataset = []
         self.id_to_label = {}
         try:
@@ -117,9 +123,12 @@ class SimulationState:
         self.test_set = self.dataset[:100]
         self.pool = self.dataset[100:] 
         
-        # Pre-calculate Length Stats for Context
+        # pre-calculate length stats so the ranking logic can normalise quickly
         self.all_lengths = [len(d['text'].split()) for d in self.dataset]
         self.max_len = max(self.all_lengths) if self.all_lengths else 0
+        # CITATION: np.mean() — compute the arithmetic mean of an array
+        # SOURCE: NumPy (n.d.). "numpy.mean"
+        # URL: https://numpy.org/doc/stable/reference/generated/numpy.mean.html
         self.avg_len = np.mean(self.all_lengths) if self.all_lengths else 0
         
         # Seed with baseline
@@ -139,7 +148,10 @@ class SimulationState:
         # of them hitting a duplicate is functionally zero. A fast boot up is way more important.
         self.clean_pool = list(self.pool)
         
-        # Shuffle for variety
+        # shuffle so evaluators don't all see the same order
+        # CITATION: random.shuffle() — randomise a list in-place
+        # SOURCE: Stack Overflow (2011). "How to randomly shuffle a list in Python"
+        # URL: https://stackoverflow.com/questions/976882/shuffling-a-list-of-objects
         random.shuffle(self.clean_pool)
         logger.info(f"Pool ready: {len(self.clean_pool)} tasks")
         
@@ -148,12 +160,10 @@ class SimulationState:
 
     def _deduplicate_pool(self, pool):
         """Run O(N^2) dedup ONCE on startup. Results cached for entire session."""
-        # TF-IDF + Cosine Similarity for near-duplicate text detection.
-        # Ref: https://stackoverflow.com/questions/69904257/ai-based-deduplication-using-textual-similarity-measure-in-python
-        # Ref (TfidfVectorizer): https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
-        # Ref (cosine_similarity): https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
-        # max_features=500 limits vocabulary to top-N terms for dimensionality control.
-        # Ref: https://stats.stackexchange.com/questions/268883/tfidfvectorizer-vs-hashingvectorizer
+        # TF-IDF + cosine similarity to catch near-duplicate texts
+        # CITATION: TfidfVectorizer — convert text to TF-IDF feature vectors
+        # SOURCE: scikit-learn (n.d.). "TfidfVectorizer"
+        # URL: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
         if len(pool) < 2:
             return pool
         try:
@@ -161,10 +171,11 @@ class SimulationState:
             vectorizer = TfidfVectorizer(max_features=500, stop_words='english')
             tfidf_matrix = vectorizer.fit_transform(texts)
             
-            # Chunked pairwise cosine similarity to avoid O(N^2) memory blow-up.
-            # A full 50k x 50k float64 matrix would consume ~18.6 GB of RAM.
-            # Ref: https://stackoverflow.com/questions/31523375/sklearn-cosine-similarity-memory-error
-            # Ref: https://stackoverflow.com/questions/17627219/whats-the-fastest-way-in-python-to-calculate-cosine-similarity-given-sparse-mat
+            # chunked pairwise cosine similarity to avoid O(N^2) memory blow-up.
+            # a full 50k x 50k float64 matrix would eat ~18.6 GB of RAM.
+            # CITATION: cosine_similarity() — compute pairwise cosine similarity between samples
+            # SOURCE: Stack Overflow (2014). "Cosine similarity memory error"
+            # URL: https://stackoverflow.com/questions/31523375/sklearn-cosine-similarity-memory-error
             duplicate_indices = set()
             chunk_size = 5000
             n = len(texts)
@@ -190,17 +201,22 @@ class SimulationState:
             return pool
 
     def _pretrain_seed(self):
-        """Pre-train ALL models on a small random sample for warm predictions.
-        
-        Uses sklearn's partial_fit() for incremental/online learning.
-        Ref: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier.partial_fit
-        Ref: https://stackoverflow.com/questions/17713542/incremental-learning-with-scikit-learn
-        Ref: https://scikit-learn.org/stable/computing/scaling_strategies.html#incremental-learning
-        """
+        """Pre-train ALL models on a small random sample so predictions are warm from the start."""
+        # CITATION: partial_fit() — incremental/online learning with SGDClassifier
+        # SOURCE: scikit-learn (n.d.). "SGDClassifier.partial_fit"
+        # URL: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier.partial_fit
         try:
             import random
             seed_size = min(200, len(self.clean_pool))
+            # grab a random subset of the pool for seeding — without replacement
+            # CITATION: random.sample() — pick k items from a list without duplicates
+            # SOURCE: Python Software Foundation (n.d.). "random.sample"
+            # URL: https://docs.python.org/3/library/random.html#random.sample
             seed = random.sample(self.clean_pool, seed_size)
+            # list comprehension to pull out just the text/label fields
+            # CITATION: list comprehension — build a list by extracting a key from each dict
+            # SOURCE: Stack Overflow (2012). "Extract values from list of dicts"
+            # URL: https://stackoverflow.com/questions/7271482/getting-a-list-of-values-from-a-list-of-dicts
             X = [d['text'] for d in seed]
             y = [d['label'] for d in seed]
             if len(set(y)) >= 2:  # Need both classes
@@ -215,11 +231,16 @@ class SimulationState:
             logger.warning(f"Pre-train failed: {e}")
 
     def _init_files(self):
+        """Write default spy files on startup so the frontend doesn't 404."""
         try:
-            # RESET HISTORY FOR NEW USER - Always start fresh
+            # always start fresh for a new user
             initial_history = [{"step": 0, "alpha": 5.0, "beta": 3.0}]
             with open(HISTORY_PATH, "w") as f: 
                 json.dump(initial_history, f)
+            # .copy() so mutating self.history later doesn't touch the original list
+            # CITATION: list.copy() — create a shallow copy to avoid shared references
+            # SOURCE: Stack Overflow (2010). "How to clone a list in Python"
+            # URL: https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
             self.history = initial_history.copy()
             logger.info("History reset to initial values (alpha=5.0, beta=3.0)")
             
@@ -234,8 +255,16 @@ class SimulationState:
 
 state = SimulationState()
 
+# health check endpoint — the frontend polls this to know the server is alive
+# CITATION: @app.route() — register a URL rule with Flask's routing system
+# SOURCE: Pallets Projects (n.d.). "Flask Quickstart"
+# URL: https://flask.palletsprojects.com/en/latest/quickstart/#routing
 @app.route('/health', methods=['GET'])
 def health():
+    # jsonify converts a Python dict to a proper JSON response with headers
+    # CITATION: jsonify() — return a Flask JSON response with correct content-type
+    # SOURCE: Stack Overflow (2013). "Return JSON response from Flask"
+    # URL: https://stackoverflow.com/questions/13081532/how-to-return-json-using-flask
     return jsonify({
         "status": "ok", 
         "alpha": state.cost_model.alpha, 
@@ -252,9 +281,13 @@ def predict():
     """
     import random
     
-    # Accept labeled IDs from client (or legacy task objects for backward compat)
+    # accept labeled IDs from client (or legacy task objects for backward compat)
     labeled_ids = set()
     raw_labeled = request.json.get('labeled_task_ids', [])
+    # isinstance with a tuple checks multiple types in one call
+    # CITATION: isinstance(x, (int, float)) — check if a value is one of several types
+    # SOURCE: Stack Overflow (2010). "How to check type in Python"
+    # URL: https://stackoverflow.com/questions/152580/whats-the-canonical-way-to-check-for-type-in-python
     for lid in raw_labeled:
         labeled_ids.add(int(lid) if isinstance(lid, (int, float)) else lid)
     
@@ -293,11 +326,10 @@ def predict():
     if not normalized_candidates:
         return jsonify({'tasks': [], 'shadow_metrics': None})
     
-    # Preprocessing: Clean and normalize text
-    # Pattern: Regex-based whitespace normalisation + special character stripping for NLP
-    # Ref: https://stackoverflow.com/questions/1276764/stripping-everything-but-alphanumeric-chars-from-a-string-in-python
-    # Ref: https://docs.python.org/3/library/re.html#re.sub
-    # Ref: https://www.geeksforgeeks.org/python-regex-re-sub/
+    # clean up whitespace and strip special chars before feeding to the model
+    # CITATION: re.sub() — regex-based find-and-replace in strings
+    # SOURCE: Python Software Foundation (n.d.). "re.sub"
+    # URL: https://docs.python.org/3/library/re.html#re.sub
     def preprocess_text(text):
         text = re.sub(r'\s+', ' ', text).strip()
         text = re.sub(r'[^a-zA-Z0-9\s.,!?\'\-]', '', text)
@@ -329,7 +361,10 @@ def predict():
     random.shuffle(pool_for_entropy) 
     entropy_picks = sorted(pool_for_entropy, key=lambda x: x['transparency_report']['math_proof']['entropy'], reverse=True)[:3]
     
-    # Random (Sample from full candidates)
+    # random sample 3 from all candidates for the "Random" baseline
+    # CITATION: random.sample() — pick k items from a list without replacement
+    # SOURCE: Python Software Foundation (n.d.). "random.sample"
+    # URL: https://docs.python.org/3/library/random.html#random.sample
     random_picks = random.sample(ranked_candidates, min(3, len(ranked_candidates)))
 
     # 2. Metric Calculator Helper (Optimized for speed)
@@ -350,9 +385,10 @@ def predict():
             if 'cost_analysis' in p['transparency_report']:
                 cost = p['transparency_report']['cost_analysis']['predicted_seconds']
             else:
-                # np.log1p(x) computes ln(1+x) with better numerical precision for small x.
-                # Ref: https://numpy.org/doc/stable/reference/generated/numpy.log1p.html
-                # Ref: https://stackoverflow.com/questions/56823695/what-is-the-advantage-of-using-log1p-over-log
+                # np.log1p(x) = ln(1+x), more precise than log(1+x) when x is small
+                # CITATION: np.log1p() — natural log of (1 + x) with better precision near zero
+                # SOURCE: NumPy (n.d.). "numpy.log1p"
+                # URL: https://numpy.org/doc/stable/reference/generated/numpy.log1p.html
                 log_len = np.log1p(length)
                 cost = state.cost_model.alpha + (state.cost_model.beta * log_len)
             avg_cost += cost
@@ -366,7 +402,11 @@ def predict():
         
         final_avg_cost = avg_cost / n_picks
         final_avg_entropy = avg_entropy / n_picks
-        # Information Efficiency: how much uncertainty is resolved per second
+        # information efficiency = entropy resolved per second of annotation time.
+        # max(cost, 0.1) guards against division by zero when cost data is missing
+        # CITATION: max() — clamp a value to avoid division-by-zero edge cases
+        # SOURCE: Stack Overflow (2009). "Avoiding division by zero in Python"
+        # URL: https://stackoverflow.com/questions/27317517/avoiding-division-by-zero-in-python
         info_efficiency = round(final_avg_entropy / max(final_avg_cost, 0.1), 4)
             
         return {
@@ -389,7 +429,11 @@ def predict():
     state.cumulative_costs['entropy'].append(shadow_metrics['entropy']['estimated_cost'])
     state.cumulative_costs['random'].append(shadow_metrics['random']['estimated_cost'])
 
-    # Log Spy Selection
+    # work out what percentile the top-ranked task's length falls in.
+    # sum([1 for x if ...]) / len gives us a quick percentile rank without numpy.
+    # CITATION: percentile rank — proportion of values below a threshold
+    # SOURCE: Stack Overflow (2012). "Calculate percentile rank in Python"
+    # URL: https://stackoverflow.com/questions/12414043/map-each-list-value-to-its-corresponding-percentile
     top = ranked_results[0]
     t_len = len(top['text'].split())
     pct = sum([1 for x in state.all_lengths if x < t_len]) / len(state.all_lengths) * 100 if state.all_lengths else 50
@@ -441,6 +485,10 @@ def predict():
         "reading_pattern": reading_pattern,
         "pattern_reasoning": pattern_reasoning
     }
+    # persist the spy selection data and append to the task log
+    # CITATION: json.dump() — serialise dict/list to a JSON file
+    # SOURCE: Python Software Foundation (n.d.). "json.dump"
+    # URL: https://docs.python.org/3/library/json.html#json.dump
     try:
         with open(SELECTION_PATH, "w") as f: json.dump(spy_data, f)
         
@@ -454,6 +502,10 @@ def predict():
         }
         
         existing_logs = []
+        # check if the log file already exists before trying to read it
+        # CITATION: os.path.exists() — test whether a path exists on disk
+        # SOURCE: Stack Overflow (2011). "Check if file exists in Python"
+        # URL: https://stackoverflow.com/questions/82831/how-do-i-check-whether-a-file-exists-without-exceptions
         if os.path.exists(TASK_LOG_PATH):
             try:
                 with open(TASK_LOG_PATH, "r") as f:
@@ -470,7 +522,11 @@ def predict():
     response_tasks = []
     for res in ranked_results:
         task_id = res['id']
-        # Find original task data from pool
+        # find the original task object from the pool by ID.
+        # next() with a generator stops as soon as it finds the first match (lazy).
+        # CITATION: next() with generator — get the first item matching a condition
+        # SOURCE: Stack Overflow (2010). "Find first element matching condition"
+        # URL: https://stackoverflow.com/questions/2361426/get-the-first-item-from-an-iterable-that-matches-a-condition
         original = next((t for t in state.clean_pool if t['id'] == task_id), None)
         if original:
             response_tasks.append({
@@ -510,6 +566,10 @@ def get_spy_metrics():
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta,
         "cumulative_costs": {
+            # dict.get() with a default empty list so this doesn't crash if a key is missing
+            # CITATION: dict.get(key, default) — safe dictionary access without KeyError
+            # SOURCE: Stack Overflow (2012). "Get a default value from a dict"
+            # URL: https://stackoverflow.com/questions/11041405/why-dict-getkey-instead-of-dictkey
             "cal_log": sum(state.cumulative_costs.get('cal_log', [])),
             "entropy": sum(state.cumulative_costs.get('entropy', [])),
             "random": sum(state.cumulative_costs.get('random', [])),
@@ -537,6 +597,10 @@ def get_spy_task_log():
 
 @app.route('/annotate', methods=['POST'])
 def annotate():
+    # parse the JSON body sent by the React frontend
+    # CITATION: request.json — access the parsed JSON body of a Flask POST request
+    # SOURCE: Stack Overflow (2013). "Get POST body as JSON in Flask"
+    # URL: https://stackoverflow.com/questions/10434599/get-the-data-received-in-a-flask-request
     data = request.json
     text = data.get('text', "")
     label = data.get('label')
@@ -565,9 +629,10 @@ def annotate():
         except: pass
 
     # STORE GHOST LABELS
-    # Pattern: getattr(obj, name, default) for safe access to dynamically-created attributes.
-    # Ref: https://docs.python.org/3/library/functions.html#getattr
-    # Ref: https://stackoverflow.com/questions/4075190/what-is-getattr-exactly-and-how-do-i-use-it
+    # getattr with a default lets us safely access buffers that might not exist yet
+    # CITATION: getattr(obj, name, default) — safe attribute access with fallback
+    # SOURCE: Stack Overflow (2010). "What is getattr exactly and how do I use it?"
+    # URL: https://stackoverflow.com/questions/4075190/what-is-getattr-exactly-and-how-do-i-use-it
     if hasattr(state, 'last_shadow_picks'):
         # Random Choice
         rnd_task = state.last_shadow_picks['random']
@@ -589,10 +654,10 @@ def annotate():
     if state.steps_since_train >= 5:
         logger.info("Retraining ALL Models...")
         
-        # Helper to train - uses getattr/setattr for data-driven buffer access.
-        # Pattern: setattr(obj, name, value) to dynamically clear named buffers.
-        # Ref: https://docs.python.org/3/library/functions.html#setattr
-        # Ref: https://stackoverflow.com/questions/7604636/use-of-setattr-in-python
+        # helper to train one model and clear its buffer
+        # CITATION: setattr(obj, name, value) — dynamically set an attribute by name
+        # SOURCE: Stack Overflow (2011). "Use of setattr in Python"
+        # URL: https://stackoverflow.com/questions/7604636/use-of-setattr-in-python
         def commit_train(name, buffer_name):
             data = getattr(state, buffer_name, [])
             if not data:
@@ -601,12 +666,12 @@ def annotate():
             X = [d[0] for d in data]
             y = [d[1] for d in data]
             logger.info(f"   Training {name}: {len(X)} samples, labels: {set(y)}")
-            # Incremental training via partial_fit (online learning)
-            # Ref: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html
-            # Ref: https://stackoverflow.com/questions/28845830/sgdclassifier-pair-partial-fit-with-warm-start
+            # incremental training via partial_fit (online learning)
+            # CITATION: partial_fit() — train incrementally without reprocessing old data
+            # SOURCE: scikit-learn (n.d.). "SGDClassifier"
+            # URL: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html
             state.models[name].partial_fit(X, y)
             setattr(state, buffer_name, [])
- 
             
         try:
             commit_train('cal_log', 'pending_labels_cal_log')
@@ -616,6 +681,10 @@ def annotate():
             logger.info("All models retrained successfully")
         except Exception as e:
             logger.error(f"Training failed: {e}")
+            # dump the full stack trace so we can actually debug it
+            # CITATION: traceback.format_exc() — capture exception traceback as a string
+            # SOURCE: Stack Overflow (2011). "Logging exception with traceback in Python"
+            # URL: https://stackoverflow.com/questions/1483429/how-do-i-print-an-exception-in-python
             import traceback
             logger.error(traceback.format_exc())
 
@@ -625,6 +694,10 @@ def annotate():
         X_test = [t['text'] for t in state.test_set]
         y_test = [t['label'] for t in state.test_set]
         
+        # run predictions against the held-out test set and compare with zip
+        # CITATION: zip() — iterate over two lists in parallel for element-wise comparison
+        # SOURCE: Stack Overflow (2009). "Iterate over two lists in parallel"
+        # URL: https://stackoverflow.com/questions/1663807/how-to-iterate-through-two-lists-in-parallel
         for name, model in state.models.items():
             try:
                 preds = model.predict(X_test)
@@ -636,7 +709,10 @@ def annotate():
         scores['step'] = state.step
         state.accuracy_history.append(scores)
         
-        # WRITE METRICS TO FILE for frontend
+        # persist accuracy and cost data so the frontend can poll it
+        # CITATION: json.dump() — serialise a Python dict straight into a file
+        # SOURCE: Stack Overflow (2012). "Writing JSON to a file in Python"
+        # URL: https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
         try:
             metrics_data = {
                 "accuracy_history": state.accuracy_history,
@@ -690,6 +766,10 @@ def reset_session():
         state.pending_labels_cal_log = []
         state.pending_labels_random = []
         state.pending_labels_entropy = []
+        # hasattr check before del to avoid AttributeError if it was never set
+        # CITATION: hasattr() + del — safely remove a dynamic attribute from an object
+        # SOURCE: Stack Overflow (2010). "How to delete an attribute from an object"
+        # URL: https://stackoverflow.com/questions/2118951/how-can-i-delete-a-variable-in-python
         if hasattr(state, 'last_shadow_picks'):
             del state.last_shadow_picks
         
@@ -732,11 +812,14 @@ def reset_session():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
-    # Environment variable port binding for Docker/cloud containers.
-    # host='0.0.0.0' makes the server accessible outside the container.
-    # Ref: https://stackoverflow.com/questions/30323224/deploying-a-flask-app-to-docker-flask-is-not-externally-visible
-    # Ref: https://stackoverflow.com/questions/12063463/how-to-use-environment-variables-in-flask
-    # Ref: https://flask.palletsprojects.com/en/latest/quickstart/#a-minimal-application
+    # host='0.0.0.0' makes the server reachable outside the container.
+    # PORT comes from the environment so Docker/HuggingFace can override it.
+    # CITATION: app.run(host='0.0.0.0') — bind Flask to all network interfaces
+    # SOURCE: Stack Overflow (2015). "Deploying Flask app to Docker"
+    # URL: https://stackoverflow.com/questions/30323224/deploying-a-flask-app-to-docker-flask-is-not-externally-visible
+    # CITATION: os.environ.get() — read an env var with a fallback default
+    # SOURCE: Stack Overflow (2013). "How to use environment variables in Python"
+    # URL: https://stackoverflow.com/questions/4906977/how-to-access-environment-variable-values
     port = int(os.environ.get("PORT", 9090))
     logger.info(f"Simulation Server starting on port {port}...")
     app.run(host='0.0.0.0', port=port)
