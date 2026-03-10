@@ -1,4 +1,8 @@
 import React from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { Activity, ArrowRight, Gauge, Ruler } from 'lucide-react';
 
 /**
@@ -7,7 +11,10 @@ import { Activity, ArrowRight, Gauge, Ruler } from 'lucide-react';
  * It translates background math (entropies, predicted costs) into human-readable visual indicators.
  */
 const SelectionCard = ({ selectionLogic }) => {
-    // Helper to get pattern icon and color
+    // map each reading pattern to its display style using a switch statement
+    // CITATION: switch statement - match a value against multiple cases
+    // SOURCE: MDN Web Docs (n.d.). "switch"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch
     const getPatternStyle = (pattern) => {
         switch (pattern) {
             case 'fast_skimmer':
@@ -21,7 +28,8 @@ const SelectionCard = ({ selectionLogic }) => {
         }
     };
 
-    // Helper to get length class color
+
+    // map each task length category to its display colour and label
     const getLengthStyle = (lengthClass) => {
         switch (lengthClass) {
             case 'short':
@@ -41,6 +49,7 @@ const SelectionCard = ({ selectionLogic }) => {
                 <Activity size={100} />
             </div>
             <h3 className="text-blue-400 font-bold mb-4 flex items-center gap-2">
+                {/* animate-pulse gives the dot a breathing effect to signal live data */}
                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" /> SELECTION LOGIC
             </h3>
 
@@ -52,6 +61,9 @@ const SelectionCard = ({ selectionLogic }) => {
                      * This demonstrates that the system doesn't just treat humans as static oracles,
                      * but continuously adapts its cost predictions to their real-time behavior.
                      */}
+                    {/* CITATION: conditional rendering with && - short-circuit to show/hide JSX */}
+                    {/* SOURCE: React (n.d.). "Conditional Rendering" */}
+                    {/* URL: https://react.dev/learn/conditional-rendering */}
                     {selectionLogic.reading_pattern && selectionLogic.reading_pattern.pattern !== 'insufficient_data' && (
                         <div className={`p-3 rounded-lg border ${getPatternStyle(selectionLogic.reading_pattern.pattern).bgColor} ${getPatternStyle(selectionLogic.reading_pattern.pattern).borderColor}`}>
                             <div className="flex items-center gap-2 mb-2">
@@ -59,6 +71,13 @@ const SelectionCard = ({ selectionLogic }) => {
                                 <div className="text-xs text-slate-400">Reading Pattern (Last 5 Annotations)</div>
                             </div>
                             <div className={`font-bold ${getPatternStyle(selectionLogic.reading_pattern.pattern).color} text-sm`}>
+                                {/* replace underscores with spaces and uppercase for display */}
+                                {/* CITATION: String.replace() - replace matched substrings */}
+                                {/* SOURCE: MDN Web Docs (n.d.). "String.prototype.replace()" */}
+                                {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace */}
+                                {/* CITATION: String.toUpperCase() - convert string to all caps for display */}
+                                {/* SOURCE: MDN Web Docs (n.d.). "String.prototype.toUpperCase()" */}
+                                {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toUpperCase */}
                                 {selectionLogic.reading_pattern.pattern.replace('_', ' ').toUpperCase()}
                             </div>
                         </div>
@@ -110,7 +129,8 @@ const SelectionCard = ({ selectionLogic }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <div className="text-xs text-slate-500">Entropy Score</div>
-                            <div className="text-xl font-bold text-purple-400">{(selectionLogic.entropy || 0).toFixed(3)}</div>
+                         {/* fallback || 0 prevents NaN if the value hasn't arrived yet */}
+                         <div className="text-xl font-bold text-purple-400">{(selectionLogic.entropy || 0).toFixed(3)}</div>
                         </div>
                         <div>
                             <div className="text-xs text-slate-500">Predicted Cost</div>

@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y \
 # do this before copying the rest of the code so that if only python code changes, 
 # docker doesn't trigger a full reinstall of all pip dependencies
 # CITATION: COPY requirements.txt first - leverage Docker layer caching
-# SOURCE: Stack Overflow (2015). "Best practise for Dockerfile layer caching"
-# URL: https://stackoverflow.com/questions/34398188/best-practise-for-dockerfile-caching
+# SOURCE: Docker Docs (n.d.). "Leverage build cache"
+# URL: https://docs.docker.com/build/cache/
 COPY ml_service/requirements.txt .
 
 # Install Python dependencies

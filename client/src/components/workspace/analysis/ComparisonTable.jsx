@@ -1,4 +1,11 @@
+// CITATION: useState - React hook for local component state
+// SOURCE: React (n.d.). "useState"
+// URL: https://react.dev/reference/react/useState
 import React, { useState } from 'react';
+// lucide-react provides tree-shakable SVG icon components
+// CITATION: lucide-react - SVG icon library as React components
+// SOURCE: Lucide (n.d.). "lucide-react"
+// URL: https://lucide.dev/guide/packages/lucide-react
 import { TrendingUp, Eye, Zap, Clock, BarChart3 } from 'lucide-react';
 import ShadowAuditModal from './ShadowAuditModal';
 
@@ -8,17 +15,26 @@ import ShadowAuditModal from './ShadowAuditModal';
  * Demonstrates the effectiveness of the cost-aware approach.
  */
 const ComparisonTable = ({ shadowMetrics }) => {
+    // track whether the audit modal is open or closed
     const [showAudit, setShowAudit] = useState(false);
 
     if (!shadowMetrics) return null;
 
-    // Primary metric: Information Efficiency (Bits per second).
-    // Calculated as: Entropy (bits resolved) / Cost (annotation time).
+    // primary metric: Information Efficiency (Bits per second).
+    // calculated as: Entropy (bits resolved) / Cost (annotation time).
+    // || 0 is a fallback so we don't get NaN if the server hasn't sent data yet
+    // CITATION: logical OR (||) fallback - provide a default when a value is falsy
+    // SOURCE: MDN Web Docs (n.d.). "Logical OR (||)"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_OR
     const calLogEff = shadowMetrics.cal_log.info_efficiency || 0;
     const entropyEff = shadowMetrics.entropy.info_efficiency || 0;
     const randomEff = shadowMetrics.random.info_efficiency || 0;
 
-    // Percentage improvement of CAL-Log over baselines: ((New - Old) / Old) * 100
+    // percentage improvement of CAL-Log over baselines: ((New - Old) / Old) * 100
+    // guard against division by zero with the ternary check
+    // CITATION: Number.toFixed() - format a number to N decimal places
+    // SOURCE: MDN Web Docs (n.d.). "Number.prototype.toFixed()"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed
     const vsEntropyPct = entropyEff > 0
         ? (((calLogEff - entropyEff) / entropyEff) * 100).toFixed(1)
         : '0.0';
@@ -35,6 +51,10 @@ const ComparisonTable = ({ shadowMetrics }) => {
      * Shows Efficiency, Entropy, and Cost to explain why a strategy wins 
      * (e.g., slightly lower entropy but much lower cost).
      */
+    // template literals with backticks let us build dynamic classNames inline
+    // CITATION: template literals - embed expressions in strings with backticks
+    // SOURCE: MDN Web Docs (n.d.). "Template literals"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
     const renderStrategyCard = (name, efficiency, entropy, cost, color, borderColor, isHighlighted) => (
         <div className={`p-3 rounded-lg border ${isHighlighted ? `${borderColor} shadow-[0_0_15px_rgba(59,130,246,0.1)]` : 'border-slate-700/50'} ${isHighlighted ? 'bg-blue-900/20' : 'bg-slate-900/50'}`}>
             <div className={`text-[10px] uppercase tracking-widest mb-2 font-bold ${color}`}>{name}</div>
@@ -56,6 +76,11 @@ const ComparisonTable = ({ shadowMetrics }) => {
     );
 
     return (
+        // React Fragment (<> </>) lets us return sibling elements without adding
+        // an extra wrapper div to the DOM
+        // CITATION: React Fragments - group elements without extra DOM nodes
+        // SOURCE: React (n.d.). "Fragment"
+        // URL: https://react.dev/reference/react/Fragment
         <>
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
                 <div className="flex justify-between items-start mb-4">
@@ -101,7 +126,10 @@ const ComparisonTable = ({ shadowMetrics }) => {
                 </div>
 
                 {/* CAL-Log Advantage Banner */}
-                {/* Highlights CAL-Log's advantage to validate the research hypothesis. */}
+                {/* highlights CAL-Log's advantage to validate the research hypothesis */}
+                {/* CITATION: conditional rendering with && - short-circuit to show/hide JSX */}
+                {/* SOURCE: React (n.d.). "Conditional Rendering" */}
+                {/* URL: https://react.dev/learn/conditional-rendering */}
                 <div className={`rounded-lg p-3 text-center border ${isWinningVsEntropy ? 'bg-green-900/20 border-green-900/50' : 'bg-slate-800/50 border-slate-700/50'}`}>
                     <div className={`text-[10px] mb-1 uppercase tracking-wider font-bold ${isWinningVsEntropy ? 'text-green-400/80' : 'text-slate-400'}`}>
                         CAL-Log vs Baselines
@@ -136,5 +164,6 @@ const ComparisonTable = ({ shadowMetrics }) => {
         </>
     );
 };
+
 
 export default ComparisonTable;
