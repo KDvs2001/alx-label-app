@@ -31,9 +31,8 @@ CAL-Log is implemented via a modern, strictly separated **4-Tier Architecture** 
 4. **Data Tier (MongoDB)**
    - Persistent NoSQL document storage retaining evaluator progress, tracking high-resolution interaction telemetry, and qualitative feedback logs.
 
-> **Diagram placeholder** – replace the PNG file below with the actual exported image from your 4-Tier Architecture diagram.
 
-![4-Tier Architecture Diagram](assets/architecture_diagram.png)
+![4-Tier Architecture Diagram](assests\Architecture_Diagram.png)
 
 ---
 
