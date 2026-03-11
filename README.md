@@ -32,7 +32,7 @@ CAL-Log is implemented via a modern, strictly separated **4-Tier Architecture** 
    - Persistent NoSQL document storage retaining evaluator progress, tracking high-resolution interaction telemetry, and qualitative feedback logs.
 
 
-![4-Tier Architecture Diagram](ResearchTool\assests\Architecture_Diagram.png)
+![4-Tier Architecture Diagram](assests/Architecture_Diagram.png)
 
 ---
 
