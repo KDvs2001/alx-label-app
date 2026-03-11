@@ -2,6 +2,7 @@
 // SOURCE: React (n.d.). "useState" / "useEffect"
 // URL: https://react.dev/reference/react/useState
 import React, { useState, useEffect } from 'react';
+import Joyride, { STATUS } from 'react-joyride';
 // react-joyride renders step-by-step guided tours with spotlight overlays
 // CITATION: react-joyride - guided user onboarding tours for React
 // SOURCE: react-joyride (n.d.). "React Joyride"

@@ -1,204 +1,161 @@
-# CAL-Log Research Tool
+# CAL-Log: Cost-Aware Active Learning with Logarithmic Cost 📊
 
----
+![License](https://img.shields.io/badge/License-Research_Only-blue.svg)
+![React](https://img.shields.io/badge/Frontend-React_18-61DAFB?logo=react)
+![Node](https://img.shields.io/badge/Backend-Node+Express-339933?logo=nodedotjs)
+![Python](https://img.shields.io/badge/ML_Engine-Python_3.9-3776AB?logo=python)
 
-## 📊 Overview
-
-**CAL-Log** (Cost‑Aware Active Learning with Logarithmic Cost) is a research prototype that selects annotation tasks based on **information gain per unit of cognitive cost**.  The system adapts in real‑time to each annotator’s reading speed, providing a mathematically‑grounded, transparent active‑learning loop.
+**CAL-Log** is an advanced research platform designed to empirically evaluate active learning strategies. Unlike traditional uncertainty sampling techniques, CAL-Log selects annotation tasks based on **information gain per unit of cognitive cost**, adapting dynamically to individual annotator reading speeds to minimize overall human effort.
 
 ---
 
 ## 🎯 Research Objectives
 
-- Demonstrate that a **cost‑aware scoring function** (Entropy / Cost) reduces annotation time compared to classic uncertainty‑sampling baselines.
-- Model annotator fatigue with an **OLS‑based cost model** (α + β·log length).
-- Provide **full transparency** for every selected task (entropy, cost, β‑label) to support reproducible research.
+1. **Empirical Cost Optimization**: Demonstrate that a mathematically grounded cost-aware scoring engine reduces total annotation duration compared to baseline models.
+2. **Fatigue Modeling**: Accurately predict and account for annotator fatigue using a dynamic Ordinary Least Squares (OLS) regression based on an alpha-beta logarithmic reading curve.
+3. **Transparent Evaluation**: Provide absolute structural transparency to the evaluator via the "Spy Window", exposing real-time Shannon entropy values, cost penalty calculations, and dynamic algorithm clustering.
 
 ---
 
-## 🏗️ Architecture
+## 🏗️ 4-Tier Architecture
 
-The project is split into three independent runtimes that communicate via HTTP:
+CAL-Log is implemented via a modern, strictly separated **4-Tier Architecture** prioritizing stateless scalability and high-performance computation.
 
-1. **Frontend (React + Vite)** – UI for annotators, Spy‑Mode dashboard, and evaluator briefing.
-2. **Backend (Node + Express + MongoDB)** – REST API, session persistence, and feedback collection.
-3. **ML Service (Python + Flask + scikit‑learn)** – CAL‑Log algorithm, adaptive cost model, and shadow‑model benchmarking.
+1. **Presentation Tier (React + Vite)**
+   - High-performance UI leveraging optimistic state updates for zero-perceived-latency task transitions.
+   - Dynamic real-time data visualization via Recharts (SVG-based charting).
+2. **Application Tier (Node.js + Express)**
+   - Robust RESTful API orchestrating secure session state persistence, file payload proxying, and qualitative survey collection.
+3. **Analytics & ML Tier (Python + Flask)**
+   - Computationally intensive boundary isolating the CAL-Log ranking engine, RoBERTa classifiers, and mathematical cost matrix algorithms.
+4. **Data Tier (MongoDB)**
+   - Persistent NoSQL document storage retaining evaluator progress, tracking high-resolution interaction telemetry, and qualitative feedback logs.
 
-> **Diagram placeholders** – replace the PNG files with the actual exported images from your Mermaid diagrams.
+> **Diagram placeholder** – replace the PNG file below with the actual exported image from your 4-Tier Architecture diagram.
 
-![Use‑Case Diagram](assets/use_case_diagram.png)
-![Class Diagram (ML Service)](assets/ml_service_class_diagram.png)
-![ER Diagram (MongoDB)](assets/er_diagram.png)
+![4-Tier Architecture Diagram](assets/architecture_diagram.png)
 
 ---
 
-## 📐 Core Mathematics
+## 📐 Core Mathematics & Cost Matrix
+
+The Active Learning task selection is governed by the following mathematical constraints:
 
 ```text
 Score(x) = Entropy(x) / Cost(x)
+
 Cost(x)  = α + β · log(1 + Length(x))
 ```
 
-- **Entropy(x)** – Shannon entropy of the RoBERTa‑Base classifier’s soft‑max output.
-- **α (alpha)** – Fixed overhead for task‑switching (seconds).
-- **β (beta)** – Dynamic per‑word cost, updated every 5 annotations via Ordinary Least Squares regression on the annotator’s observed reading speed.
+- **Entropy(x)**: Shannon entropy derived from the RoBERTa-Base classifier’s soft-max margin outputs.
+- **α (alpha)**: Fixed cognitive overhead penalty for task-switching (measured in seconds).
+- **β (beta)**: Dynamic, per-word reading speed cost penalty. Update frequency is triggered every 5 consecutive text annotations using observed `Date.now()` telemetry points.
 
-The cost model is **fatigue‑aware**: after each 5 k words processed, β is re‑estimated, causing the system to favor shorter tasks for a careful reader (β > 3) or longer tasks for a fast skimmer (β < 1.5).
-
----
-
-## 🛠️ Prerequisites
-
-| Component | Minimum Version |
-|-----------|-----------------|
-| **Node.js** | 18.x |
-| **Python** | 3.9 |
-| **MongoDB** | 4.4 (Atlas or local) |
-| **Docker** (optional) | – |
+The matrix adapts rapidly: as annotator fatigue increases, the gradient penalty shifts, seamlessly favoring shorter informational tasks to mitigate exhaustion (`β > 3`), or supplying longer high-yield documents when the annotator enters a steady fast-reading state (`β < 1.5`).
 
 ---
 
-## 🚀 Quick Start
+## 🛠️ Prerequisites & Dependencies
 
+To deploy the CAL-Log suite locally, ensure the host machine meets the following version specifications:
+
+| Component | Minimum Version | Notes |
+|-----------|-----------------|-------|
+| **Node.js** | 18.x | Required for Vite and Express. |
+| **Python** | 3.9+ | Required for Scikit-Learn pipelines. |
+| **MongoDB** | 4.4+ | Atlas Cloud Cluster or Local Daemon. |
+| **Git** | 2.x | Required for clone operations. |
+
+---
+
+## 🚀 Deployment Guide
+
+Deploying the system requires initializing the three distinct runtimes in parallel.
+
+### 1. Repository Setup
 ```bash
-# 1️⃣ Clone the repository
-git clone <repo‑url>
+git clone <repo-url>
 cd ResearchTool
+```
 
-# 2️⃣ Install server dependencies
+### 2. Application Tier (Backend)
+```bash
 cd server
 npm install
-cp .env.example .env   # set MONGODB_URI, PORT, etc.
-cd ..
+# Create a .env file linking to your MongoDB instance
+cp .env.example .env
+npm start # Initiates on http://localhost:5001
+```
 
-# 3️⃣ Install client dependencies
-cd client
-npm install
-cd ..
-
-# 4️⃣ Install ML service dependencies
+### 3. Analytics Tier (ML Service)
+```bash
 cd ml_service
 pip install -r requirements.txt
-cd ..
+python simulation_server.py # Initiates on http://localhost:9090
 ```
 
-### Run the three services (three terminals recommended)
-
+### 4. Presentation Tier (Frontend)
 ```bash
-# Terminal 1 – ML Service (Flask)
-cd ml_service
-python simulation_server.py   # → http://localhost:9090
-
-# Terminal 2 – Backend (Express)
-cd server
-npm start                     # → http://localhost:5001
-
-# Terminal 3 – Frontend (Vite)
 cd client
-npm run dev                  # → http://localhost:5173
+npm install
+npm run dev # Initiates on http://localhost:5173
 ```
 
-Open `http://localhost:5173/spy` to start an annotation session.
+Ensure all terminals are running concurrently. Access the evaluator UI via `http://localhost:5173/spy`.
 
 ---
 
-## 👤 Evaluator (User) Manual
+## 👤 Evaluator Protocol (User Guide)
 
-1. **Enter Contestant ID** – unique identifier for your session.
-2. **Read the brief** – the onboarding modal explains CAL‑Log and the Spy‑Mode.
-3. **Label each task** – click *Positive* or *Negative*; the timer records `timeSeconds`.
-4. **Watch the Spy Panel** – real‑time display of:
-   - Entropy score
-   - Cost score (α + β·log len)
-   - Current β‑label (`Fast Skimmer`, `Balanced`, `Careful Reader`)
-   - ROI comparison against Random & Entropy baselines
-5. **Complete the survey** – after the last task, fill the post‑session questionnaire (feedback route).
-
----
-
-## 🧑‍🔬 Researcher (Developer) Guide
-
-- **Adding a new baseline**: create a new `SimpleBackbone` instance in `SimulationState._init_files()` and register it in `self.models`.
-- **Changing the cost‑model update frequency**: modify `SimulationState.steps_since_update` logic in `annotate()`.
-- **Exporting logs**: run `node scripts/export_feedback.js` to generate `evaluator_feedback_export.json`.
-- **Running batch experiments (Kaggle mode)**: use `ml_service/experiment_runner.py` (not included in the repo) – it loads the same `SimulationState` class and iterates over all datasets.
+When entering the platform for an active study session:
+1. **Authentication**: Enter your uniquely assigned Contestant ID.
+2. **Onboarding Briefing**: Review the modal defining the scope of CAL-Log evaluation and the mechanics of the dashboard.
+3. **Task Adjudication**: Analyze the central workspace card and label tasks as *Positive* or *Negative*.
+4. **Spy Analytics Monitoring**: Review the right-side Spy Panel observing:
+   - Real-time Entropy/Cost ratios.
+   - Live adjustments to the structural $\beta$ (beta) classification label (`Fast Skimmer`, etc).
+   - Projected Financial ROI graphs mapped against Random baseline vectors.
+5. **Debriefing**: Upon reaching the task threshold, generate the internal feedback survey, saving and securely clearing session state variables.
 
 ---
 
-## 📂 Project Structure (Current)
+## 📂 Project Structure
 
-```
+```text
 ResearchTool/
-├── client/                     # React + Vite UI
+├── client/                     # Presentation Tier (React + Vite)
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── ResearchWorkspace.jsx
-│   │   │   └── workspace/
-│   │   │       ├── EvaluatorBriefingModal.jsx
-│   │   │       └── SpyAnalysis.jsx
-│   │   └── pages/
-│   │       └── ImpactDashboard.jsx
-│   └── public/
-│       ├── demo_tasks.json
-│       └── spy_*.json          # runtime telemetry files
-├── server/                     # Express API + MongoDB
-│   ├── index.js
-│   └── infrastructure/
-│       ├── http/routes/
-│       │   ├── session.js      # ← now contains DDD‑style comments
-│       │   └── feedback.js     # ← now contains DDD‑style comments
-│       └── database/models/
-│           ├── AnnotationSession.js
-│           └── EvaluatorFeedback.js
-├── ml_service/                 # Flask ML core
-│   ├── simulation_server.py
-│   ├── cost_engine.py
-│   └── models/
-│       └── cal_log_ranker.py
-└── README.md
-```
-
-> **Note** – `server/application/services/mlService.js` has been permanently removed.
-
----
-
-## 🐞 Troubleshooting
-
-| Symptom | Likely Cause | Fix |
-|---------|--------------|-----|
-| `Cannot connect to MongoDB` | Missing/incorrect `MONGODB_URI` in `.env` | Verify the connection string, ensure network access.
-| `Flask server 502` | Port conflict (9090) | Stop any other process using the port or change `PORT` in `ml_service/.env`.
-| UI shows *No tasks* | Dataset not loaded | Ensure `dataset.json` exists in `ml_service/` and is valid JSON.
-| Transparency panel empty | `beta` not updated yet | Wait until at least 5 annotations have been recorded.
-
----
-
-## 📚 Citation
-
-If you use this tool for research, please cite the original CAL‑Log paper:
-```
-@inproceedings{cal‑log2024,
-  title={Cost‑Aware Active Learning with Logarithmic Cost Model},
-  author={Your Name and Co‑author},
-  booktitle={Proceedings of the International Conference on AI & Interaction},
-  year={2024}
-}
+│   │   ├── components/         # Stateful React modules (TaskCard, ROICalculator)
+│   │   └── pages/              # Primary Routes (ImpactDashboard)
+├── server/                     # Application Tier (Node.js)
+│   ├── infrastructure/
+│   │   ├── http/routes/        # Secure routing endpoints
+│   │   └── database/models/   # Mongoose structured schemas
+├── ml_service/                 # Analytics Tier (Python)
+│   ├── simulation_server.py    # Flask initialization vector
+│   ├── cost_engine.py          # OLS fatigue tracking matrix
+│   └── models/                 # Ranking and backbone structures
+└── README.md                   # Core documentation
 ```
 
 ---
 
-## 📝 License
+## 📚 Academic Citations
 
-Research‑use only.  Redistribution or commercial use requires explicit permission from the authors.
+If you construct tools mapping to these implementations or algorithms, reference the foundation paper:
 
----
+```bibtex
+@INPROCEEDINGS{11454245,
+  author={Kariyakaranage, Vihanga Supasan and Athuraliya, Banuka},
+  booktitle={2026 International Conference on Artificial Intelligence in Information and Communication (ICAIIC)}, 
+  title={AL-X0: Cost-Aware Active Learning for Cloud-Scale NLP via Zero-Shot Proxy Valuation}, 
+  year={2026},
+  volume={},
+  number={},
+  pages={657-662},
+  keywords={Cloud computing;Adaptation models;Uncertainty;Costs;Annotations;Active learning;Text categorization;Brain modeling;Calibration;Cost accounting;Active learning;cost-aware learning;text classification;annotation efficiency;cloud computing},
+  doi={10.1109/ICAIIC68212.2026.11454245}}
 
-## 🙏 Acknowledgements
+```
 
-- The **Open‑Source community** for `scikit‑learn`, `express`, `mongoose`, and `react`.
-- **Annotators** who participated in the user study.
-- **Funding** from XYZ grant (if applicable).
-
----
-
-*Prepared for the viva defense of the CAL‑Log thesis (2026).*
+*Prepared and explicitly audited for the viva defense of the CAL-Log thesis study (2026).*
