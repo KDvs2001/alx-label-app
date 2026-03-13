@@ -723,7 +723,7 @@ const ResearchWorkspace = () => {
                         </div>
                         {/* Pause Overlay - freezes the workspace visually during Viva explanations */}
                         {isPaused && (
-                            <div className="absolute inset-0 z-30 bg-slate-950/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-4 border-2 border-amber-500/50">
+                            <div className="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-4 border-2 border-amber-500/50">
                                 <div className="w-16 h-16 rounded-full bg-amber-600/20 border-2 border-amber-500 flex items-center justify-center">
                                     <Pause size={32} className="text-amber-400" />
                                 </div>

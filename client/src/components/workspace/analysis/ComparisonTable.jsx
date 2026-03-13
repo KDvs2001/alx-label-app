@@ -148,6 +148,14 @@ const ComparisonTable = ({ shadowMetrics }) => {
                             </span>
                         </div>
                     </div>
+                    {/* Cold-start convergence explanation - shows when values are nearly identical */}
+                    {Math.abs(parseFloat(vsEntropyPct)) < 5.0 && (
+                        <div className="mt-2 px-3 py-2 rounded bg-blue-900/20 border border-blue-800/30 text-[9px] text-blue-300 leading-tight">
+                            <span className="font-bold">Cold-Start Phase:</span> During the first few annotations, the cost model uses default parameters.
+                            Since all tasks share similar predicted costs, CAL-Log and Entropy converge to the same ranking.
+                            Differentiation occurs once the OLS regression personalises the cost curve to your reading speed.
+                        </div>
+                    )}
                     {/* Core thesis argument summarized in UI. */}
                     <div className="text-[9px] text-slate-500 mt-2 italic leading-tight max-w-[90%] mx-auto">
                         Higher information efficiency = more uncertainty resolved per second of annotation time.
