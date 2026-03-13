@@ -3,13 +3,13 @@ import React from 'react';
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle } from 'lucide-react';
+import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle, Pause, Play } from 'lucide-react';
 
 /**
  * WorkspaceHeader Component
  * Global control strip. Enforces experimental timeline constraints and data export requirements.
  */
-const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession }) => {
+const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause }) => {
     return (
         <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
             <div className="flex items-center gap-3">
@@ -42,6 +42,19 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                 >
                     <BookOpen size={14} /> Guidelines
                 </button>
+                {contestantId && onTogglePause && (
+                    <button
+                        onClick={onTogglePause}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-white text-xs rounded border transition-colors font-bold ${
+                            isPaused
+                                ? 'bg-amber-600 hover:bg-amber-700 border-amber-700 animate-pulse'
+                                : 'bg-slate-700 hover:bg-slate-600 border-slate-600'
+                        }`}
+                    >
+                        {isPaused ? <Play size={14} /> : <Pause size={14} />}
+                        {isPaused ? 'Resume' : 'Pause'}
+                    </button>
+                )}
                 {/* short-circuit: only show Save & Exit when both contestantId and callback exist */}
                 {contestantId && onSaveAndExit && (
                     <button

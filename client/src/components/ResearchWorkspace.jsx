@@ -12,6 +12,7 @@ import AlphaBetaImpactPanel from './workspace/AlphaBetaImpactPanel';
 import SessionSummary from './workspace/SessionSummary';
 import EvaluatorTour from './workspace/EvaluatorTour';
 import FatigueTrackerModal from './workspace/FatigueTrackerModal';
+import { Pause, Play } from 'lucide-react';
 
 /**
  * ResearchWorkspace Component
@@ -79,6 +80,11 @@ const ResearchWorkspace = () => {
     const [viewStartTime, setViewStartTime] = useState(Date.now());
     const [elapsedTime, setElapsedTime] = useState(0);
 
+    // Pause State - allows the presenter to freeze the timer mid-session (e.g., for Viva explanation)
+    const [isPaused, setIsPaused] = useState(false);
+    const pauseStartTimeRef = useRef(null);
+    const totalPauseTimeRef = useRef(0);
+
     // Vite exposes environment variables via import.meta.env instead of process.env
     // CITATION: Env Variables and Modes - exposing variables in Vite
     // SOURCE: Vite (n.d.). "Env Variables and Modes"
@@ -126,11 +132,11 @@ const ResearchWorkspace = () => {
     // monitors time between annotations to detect if the user has left the keyboard or needs a break.
     // drops the top 20% longest times to prevent outliers (like getting a coffee) from skewing the average.
     useEffect(() => {
-        if (!currentTask || tourActive || isFatigueModalOpen) return;
+        if (!currentTask || tourActive || isFatigueModalOpen || isPaused) return;
 
         const timer = setInterval(() => {
             // Need to account for any time we spent paused in the fatigue modal
-            const elapsed = ((Date.now() - viewStartTime) - fatiguePauseTime) / 1000;
+            const elapsed = ((Date.now() - viewStartTime) - fatiguePauseTime - totalPauseTimeRef.current) / 1000;
             setElapsedTime(elapsed);
 
             // Fatigue Check Logic: Only check if they've done at least 3 tasks to get a baseline
@@ -154,7 +160,7 @@ const ResearchWorkspace = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime, fatigueTriggeredForTask]);
+    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime, fatigueTriggeredForTask, isPaused]);
 
     // Reset timer when task changes
     useEffect(() => {
@@ -163,8 +169,28 @@ const ResearchWorkspace = () => {
             setElapsedTime(0);
             setFatiguePauseTime(0); // Reset paused accumulation
             setFatigueTriggeredForTask(false); // Enable fatigue warning for the new task
+            totalPauseTimeRef.current = 0; // Reset pause accumulation for the new task
+            setIsPaused(false);
+            pauseStartTimeRef.current = null;
         }
     }, [currentTask]);
+
+    // Pause/Resume toggle handler
+    const handleTogglePause = useCallback(() => {
+        setIsPaused(prev => {
+            if (!prev) {
+                // Entering pause: record when we paused
+                pauseStartTimeRef.current = Date.now();
+            } else {
+                // Resuming: accumulate the pause duration
+                if (pauseStartTimeRef.current) {
+                    totalPauseTimeRef.current += Date.now() - pauseStartTimeRef.current;
+                    pauseStartTimeRef.current = null;
+                }
+            }
+            return !prev;
+        });
+    }, []);
 
 
     const fetchNextBatch = async (retryCount = 0) => {
@@ -301,7 +327,7 @@ const ResearchWorkspace = () => {
         // CITATION: Date.now() - timestamp resolution for human interaction
         // SOURCE: MDN Web Docs (n.d.). "Date.now()"
         // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
-        const timeTaken = ((Date.now() - viewStartTime) - fatiguePauseTime) / 1000;
+        const timeTaken = ((Date.now() - viewStartTime) - fatiguePauseTime - totalPauseTimeRef.current) / 1000;
         const taskText = currentTask.data?.text || currentTask.text;
         const textLength = taskText.split(" ").length;
 
@@ -680,6 +706,8 @@ const ResearchWorkspace = () => {
                         onSaveAndExit={handleSaveAndExit}
                         onExport={exportSessionData}
                         onEndSession={() => setShowSummary(true)}
+                        isPaused={isPaused}
+                        onTogglePause={handleTogglePause}
                     />
 
                     <div className="flex-1 min-h-0 relative">
@@ -687,12 +715,28 @@ const ResearchWorkspace = () => {
                         <div className="absolute inset-0 flex flex-col">
                             <TaskCard
                                 currentTask={currentTask}
-                                submitting={submitting}
+                                submitting={submitting || isPaused}
                                 onAnnotate={handleAnnotate}
                                 onRetry={fetchNextBatch}
                                 elapsedTime={elapsedTime}
                             />
                         </div>
+                        {/* Pause Overlay - freezes the workspace visually during Viva explanations */}
+                        {isPaused && (
+                            <div className="absolute inset-0 z-30 bg-slate-950/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center gap-4 border-2 border-amber-500/50">
+                                <div className="w-16 h-16 rounded-full bg-amber-600/20 border-2 border-amber-500 flex items-center justify-center">
+                                    <Pause size={32} className="text-amber-400" />
+                                </div>
+                                <div className="text-xl font-bold text-amber-400">Session Paused</div>
+                                <div className="text-sm text-slate-400">Timer and fatigue detection are frozen</div>
+                                <button
+                                    onClick={handleTogglePause}
+                                    className="mt-2 flex items-center gap-2 px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold transition-colors"
+                                >
+                                    <Play size={16} /> Resume Annotation
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 

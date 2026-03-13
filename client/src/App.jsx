@@ -9,7 +9,7 @@ import ResearchWorkspace from "./components/ResearchWorkspace";
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Terminal, TrendingUp, Eye } from "lucide-react";
+import { Terminal, TrendingUp, Eye, BookOpen } from "lucide-react";
 
 // controls navigation between the public impact dashboard and the private evaluator workspace
 const Navbar = () => {
@@ -42,6 +42,15 @@ const Navbar = () => {
             <Eye size={16} />
             Spy Window
           </Link>
+          <a
+            href="https://cal-log-docs.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm font-medium transition-colors text-slate-400 hover:text-white"
+          >
+            <BookOpen size={16} />
+            Documentation
+          </a>
         </div>
       </div>
     </nav>
