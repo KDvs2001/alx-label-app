@@ -71,6 +71,16 @@ class SimpleBackbone:
         X = self.vectorizer.transform(texts)
         return self.classifier.predict_proba(X)
         
+    def predict(self, texts):
+        """Return hard class labels for a list of texts.
+        Used by the validation phase to compute accuracy against the held-out test set.
+        """
+        # CITATION: SGDClassifier.predict() - predict class labels for samples
+        # SOURCE: scikit-learn (n.d.). "SGDClassifier.predict"
+        # URL: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier.predict
+        X = self.vectorizer.transform(texts)
+        return self.classifier.predict(X)
+
     def partial_fit(self, texts, labels):
         """Incrementally train on new labeled data."""
         # check we have both classes — SGD can still update weights with one class

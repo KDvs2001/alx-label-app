@@ -9,7 +9,7 @@ import sys
 import random
 
 # make sure sibling package imports work regardless of where the script is run from
-# CITATION: sys.path.append() — add a directory to Python's module search path
+# CITATION: sys.path.append() - add a directory to Python's module search path
 # SOURCE: Stack Overflow (2010). "Importing files from different folder"
 # URL: https://stackoverflow.com/questions/4383571/importing-files-from-different-folder
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -21,15 +21,15 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 
-# set up logging — basicConfig at the entry point, named logger per module
-# CITATION: logging.basicConfig() — configure the root logger with a severity level
+# set up logging - basicConfig at the entry point, named logger per module
+# CITATION: logging.basicConfig() - configure the root logger with a severity level
 # SOURCE: Python Software Foundation (n.d.). "Logging HOWTO"
 # URL: https://docs.python.org/3/howto/logging.html
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("SimulationServer")
 
 # Flask app instance + enable CORS so the React frontend can call these endpoints
-# CITATION: CORS(app) — allow cross-origin requests from the browser
+# CITATION: CORS(app) - allow cross-origin requests from the browser
 # SOURCE: Stack Overflow (2014). "How to enable CORS in Flask"
 # URL: https://stackoverflow.com/questions/25594893/how-to-enable-cors-in-flask
 app = Flask(__name__)
@@ -45,7 +45,7 @@ def index():
     })
 
 # build paths relative to this file so it works in Docker, HuggingFace, or local dev
-# CITATION: os.path.dirname(os.path.abspath(__file__)) — get the folder this script lives in
+# CITATION: os.path.dirname(os.path.abspath(__file__)) - get the folder this script lives in
 # SOURCE: Stack Overflow (2009). "Find current directory and file's directory"
 # URL: https://stackoverflow.com/questions/5137497/find-current-directory-and-files-directory
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -57,9 +57,9 @@ HISTORY_PATH = os.path.join(_BASE_DIR, "spy_history.json")
 SELECTION_PATH = os.path.join(_BASE_DIR, "spy_selection.json")
 TASK_LOG_PATH = os.path.join(_BASE_DIR, "spy_task_log.json")
 
-# singleton state object shared by all route handlers — instantiated once when the server boots.
+# singleton state object shared by all route handlers - instantiated once when the server boots.
 # flask's dev server is single-threaded so this is safe without locking.
-# CITATION: module-level globals in Flask — shared state across request handlers
+# CITATION: module-level globals in Flask - shared state across request handlers
 # SOURCE: Stack Overflow (2015). "Are global variables thread safe in Flask?"
 # URL: https://stackoverflow.com/questions/32815451/are-global-variables-thread-safe-in-flask
 class SimulationState:
@@ -98,7 +98,7 @@ class SimulationState:
         }
         
         # load the ground truth dataset from disk
-        # CITATION: json.load() — deserialise a JSON file into a Python object
+        # CITATION: json.load() - deserialise a JSON file into a Python object
         # SOURCE: Stack Overflow (2012). "Reading JSON from a file"
         # URL: https://stackoverflow.com/questions/20199126/reading-json-from-a-file
         self.dataset = []
@@ -126,7 +126,7 @@ class SimulationState:
         # pre-calculate length stats so the ranking logic can normalise quickly
         self.all_lengths = [len(d['text'].split()) for d in self.dataset]
         self.max_len = max(self.all_lengths) if self.all_lengths else 0
-        # CITATION: np.mean() — compute the arithmetic mean of an array
+        # CITATION: np.mean() - compute the arithmetic mean of an array
         # SOURCE: NumPy (n.d.). "numpy.mean"
         # URL: https://numpy.org/doc/stable/reference/generated/numpy.mean.html
         self.avg_len = np.mean(self.all_lengths) if self.all_lengths else 0
@@ -149,7 +149,7 @@ class SimulationState:
         self.clean_pool = list(self.pool)
         
         # shuffle so evaluators don't all see the same order
-        # CITATION: random.shuffle() — randomise a list in-place
+        # CITATION: random.shuffle() - randomise a list in-place
         # SOURCE: Stack Overflow (2011). "How to randomly shuffle a list in Python"
         # URL: https://stackoverflow.com/questions/976882/shuffling-a-list-of-objects
         random.shuffle(self.clean_pool)
@@ -161,7 +161,7 @@ class SimulationState:
     def _deduplicate_pool(self, pool):
         """Run O(N^2) dedup ONCE on startup. Results cached for entire session."""
         # TF-IDF + cosine similarity to catch near-duplicate texts
-        # CITATION: TfidfVectorizer — convert text to TF-IDF feature vectors
+        # CITATION: TfidfVectorizer - convert text to TF-IDF feature vectors
         # SOURCE: scikit-learn (n.d.). "TfidfVectorizer"
         # URL: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
         if len(pool) < 2:
@@ -173,7 +173,7 @@ class SimulationState:
             
             # chunked pairwise cosine similarity to avoid O(N^2) memory blow-up.
             # a full 50k x 50k float64 matrix would eat ~18.6 GB of RAM.
-            # CITATION: cosine_similarity() — compute pairwise cosine similarity between samples
+            # CITATION: cosine_similarity() - compute pairwise cosine similarity between samples
             # SOURCE: Stack Overflow (2014). "Cosine similarity memory error"
             # URL: https://stackoverflow.com/questions/31523375/sklearn-cosine-similarity-memory-error
             duplicate_indices = set()
@@ -202,19 +202,19 @@ class SimulationState:
 
     def _pretrain_seed(self):
         """Pre-train ALL models on a small random sample so predictions are warm from the start."""
-        # CITATION: partial_fit() — incremental/online learning with SGDClassifier
+        # CITATION: partial_fit() - incremental/online learning with SGDClassifier
         # SOURCE: scikit-learn (n.d.). "SGDClassifier.partial_fit"
         # URL: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html#sklearn.linear_model.SGDClassifier.partial_fit
         try:
             import random
             seed_size = min(200, len(self.clean_pool))
-            # grab a random subset of the pool for seeding — without replacement
-            # CITATION: random.sample() — pick k items from a list without duplicates
+            # grab a random subset of the pool for seeding - without replacement
+            # CITATION: random.sample() - pick k items from a list without duplicates
             # SOURCE: Python Software Foundation (n.d.). "random.sample"
             # URL: https://docs.python.org/3/library/random.html#random.sample
             seed = random.sample(self.clean_pool, seed_size)
             # list comprehension to pull out just the text/label fields
-            # CITATION: list comprehension — build a list by extracting a key from each dict
+            # CITATION: list comprehension - build a list by extracting a key from each dict
             # SOURCE: Stack Overflow (2012). "Extract values from list of dicts"
             # URL: https://stackoverflow.com/questions/7271482/getting-a-list-of-values-from-a-list-of-dicts
             X = [d['text'] for d in seed]
@@ -238,7 +238,7 @@ class SimulationState:
             with open(HISTORY_PATH, "w") as f: 
                 json.dump(initial_history, f)
             # .copy() so mutating self.history later doesn't touch the original list
-            # CITATION: list.copy() — create a shallow copy to avoid shared references
+            # CITATION: list.copy() - create a shallow copy to avoid shared references
             # SOURCE: Stack Overflow (2010). "How to clone a list in Python"
             # URL: https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
             self.history = initial_history.copy()
@@ -255,14 +255,14 @@ class SimulationState:
 
 state = SimulationState()
 
-# health check endpoint — the frontend polls this to know the server is alive
-# CITATION: @app.route() — register a URL rule with Flask's routing system
+# health check endpoint - the frontend polls this to know the server is alive
+# CITATION: @app.route() - register a URL rule with Flask's routing system
 # SOURCE: Pallets Projects (n.d.). "Flask Quickstart"
 # URL: https://flask.palletsprojects.com/en/latest/quickstart/#routing
 @app.route('/health', methods=['GET'])
 def health():
     # jsonify converts a Python dict to a proper JSON response with headers
-    # CITATION: jsonify() — return a Flask JSON response with correct content-type
+    # CITATION: jsonify() - return a Flask JSON response with correct content-type
     # SOURCE: Stack Overflow (2013). "Return JSON response from Flask"
     # URL: https://stackoverflow.com/questions/13081532/how-to-return-json-using-flask
     return jsonify({
@@ -285,7 +285,7 @@ def predict():
     labeled_ids = set()
     raw_labeled = request.json.get('labeled_task_ids', [])
     # isinstance with a tuple checks multiple types in one call
-    # CITATION: isinstance(x, (int, float)) — check if a value is one of several types
+    # CITATION: isinstance(x, (int, float)) - check if a value is one of several types
     # SOURCE: Stack Overflow (2010). "How to check type in Python"
     # URL: https://stackoverflow.com/questions/152580/whats-the-canonical-way-to-check-for-type-in-python
     for lid in raw_labeled:
@@ -327,7 +327,7 @@ def predict():
         return jsonify({'tasks': [], 'shadow_metrics': None})
     
     # clean up whitespace and strip special chars before feeding to the model
-    # CITATION: re.sub() — regex-based find-and-replace in strings
+    # CITATION: re.sub() - regex-based find-and-replace in strings
     # SOURCE: Python Software Foundation (n.d.). "re.sub"
     # URL: https://docs.python.org/3/library/re.html#re.sub
     def preprocess_text(text):
@@ -362,7 +362,7 @@ def predict():
     entropy_picks = sorted(pool_for_entropy, key=lambda x: x['transparency_report']['math_proof']['entropy'], reverse=True)[:3]
     
     # random sample 3 from all candidates for the "Random" baseline
-    # CITATION: random.sample() — pick k items from a list without replacement
+    # CITATION: random.sample() - pick k items from a list without replacement
     # SOURCE: Python Software Foundation (n.d.). "random.sample"
     # URL: https://docs.python.org/3/library/random.html#random.sample
     random_picks = random.sample(ranked_candidates, min(3, len(ranked_candidates)))
@@ -386,7 +386,7 @@ def predict():
                 cost = p['transparency_report']['cost_analysis']['predicted_seconds']
             else:
                 # np.log1p(x) = ln(1+x), more precise than log(1+x) when x is small
-                # CITATION: np.log1p() — natural log of (1 + x) with better precision near zero
+                # CITATION: np.log1p() - natural log of (1 + x) with better precision near zero
                 # SOURCE: NumPy (n.d.). "numpy.log1p"
                 # URL: https://numpy.org/doc/stable/reference/generated/numpy.log1p.html
                 log_len = np.log1p(length)
@@ -404,7 +404,7 @@ def predict():
         final_avg_entropy = avg_entropy / n_picks
         # information efficiency = entropy resolved per second of annotation time.
         # max(cost, 0.1) guards against division by zero when cost data is missing
-        # CITATION: max() — clamp a value to avoid division-by-zero edge cases
+        # CITATION: max() - clamp a value to avoid division-by-zero edge cases
         # SOURCE: Stack Overflow (2009). "Avoiding division by zero in Python"
         # URL: https://stackoverflow.com/questions/27317517/avoiding-division-by-zero-in-python
         info_efficiency = round(final_avg_entropy / max(final_avg_cost, 0.1), 4)
@@ -423,6 +423,14 @@ def predict():
         "entropy": calc_metrics(entropy_picks),
         "random": calc_metrics(random_picks)
     }
+
+    # Store which tasks the shadow strategies would have picked so the
+    # /annotate route can feed them their ground-truth labels for retraining.
+    # Without this, shadow models never learn and the comparison is invalid.
+    state.last_shadow_picks = {
+        'random': random_picks[0] if random_picks else None,
+        'entropy': entropy_picks[0] if entropy_picks else None
+    }
     
     # Track cumulative costs per strategy
     state.cumulative_costs['cal_log'].append(shadow_metrics['cal_log']['estimated_cost'])
@@ -431,7 +439,7 @@ def predict():
 
     # work out what percentile the top-ranked task's length falls in.
     # sum([1 for x if ...]) / len gives us a quick percentile rank without numpy.
-    # CITATION: percentile rank — proportion of values below a threshold
+    # CITATION: percentile rank - proportion of values below a threshold
     # SOURCE: Stack Overflow (2012). "Calculate percentile rank in Python"
     # URL: https://stackoverflow.com/questions/12414043/map-each-list-value-to-its-corresponding-percentile
     top = ranked_results[0]
@@ -486,7 +494,7 @@ def predict():
         "pattern_reasoning": pattern_reasoning
     }
     # persist the spy selection data and append to the task log
-    # CITATION: json.dump() — serialise dict/list to a JSON file
+    # CITATION: json.dump() - serialise dict/list to a JSON file
     # SOURCE: Python Software Foundation (n.d.). "json.dump"
     # URL: https://docs.python.org/3/library/json.html#json.dump
     try:
@@ -503,7 +511,7 @@ def predict():
         
         existing_logs = []
         # check if the log file already exists before trying to read it
-        # CITATION: os.path.exists() — test whether a path exists on disk
+        # CITATION: os.path.exists() - test whether a path exists on disk
         # SOURCE: Stack Overflow (2011). "Check if file exists in Python"
         # URL: https://stackoverflow.com/questions/82831/how-do-i-check-whether-a-file-exists-without-exceptions
         if os.path.exists(TASK_LOG_PATH):
@@ -524,7 +532,7 @@ def predict():
         task_id = res['id']
         # find the original task object from the pool by ID.
         # next() with a generator stops as soon as it finds the first match (lazy).
-        # CITATION: next() with generator — get the first item matching a condition
+        # CITATION: next() with generator - get the first item matching a condition
         # SOURCE: Stack Overflow (2010). "Find first element matching condition"
         # URL: https://stackoverflow.com/questions/2361426/get-the-first-item-from-an-iterable-that-matches-a-condition
         original = next((t for t in state.clean_pool if t['id'] == task_id), None)
@@ -567,7 +575,7 @@ def get_spy_metrics():
         "beta": state.cost_model.beta,
         "cumulative_costs": {
             # dict.get() with a default empty list so this doesn't crash if a key is missing
-            # CITATION: dict.get(key, default) — safe dictionary access without KeyError
+            # CITATION: dict.get(key, default) - safe dictionary access without KeyError
             # SOURCE: Stack Overflow (2012). "Get a default value from a dict"
             # URL: https://stackoverflow.com/questions/11041405/why-dict-getkey-instead-of-dictkey
             "cal_log": sum(state.cumulative_costs.get('cal_log', [])),
@@ -598,7 +606,7 @@ def get_spy_task_log():
 @app.route('/annotate', methods=['POST'])
 def annotate():
     # parse the JSON body sent by the React frontend
-    # CITATION: request.json — access the parsed JSON body of a Flask POST request
+    # CITATION: request.json - access the parsed JSON body of a Flask POST request
     # SOURCE: Stack Overflow (2013). "Get POST body as JSON in Flask"
     # URL: https://stackoverflow.com/questions/10434599/get-the-data-received-in-a-flask-request
     data = request.json
@@ -626,11 +634,12 @@ def annotate():
         try:
             state.history.append({"step": state.step, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta})
             with open(HISTORY_PATH, "w") as f: json.dump(state.history, f)
-        except: pass
+        except Exception as e:
+            logger.warning(f"Failed to persist cost model history: {e}")
 
     # STORE GHOST LABELS
     # getattr with a default lets us safely access buffers that might not exist yet
-    # CITATION: getattr(obj, name, default) — safe attribute access with fallback
+    # CITATION: getattr(obj, name, default) - safe attribute access with fallback
     # SOURCE: Stack Overflow (2010). "What is getattr exactly and how do I use it?"
     # URL: https://stackoverflow.com/questions/4075190/what-is-getattr-exactly-and-how-do-i-use-it
     if hasattr(state, 'last_shadow_picks'):
@@ -655,7 +664,7 @@ def annotate():
         logger.info("Retraining ALL Models...")
         
         # helper to train one model and clear its buffer
-        # CITATION: setattr(obj, name, value) — dynamically set an attribute by name
+        # CITATION: setattr(obj, name, value) - dynamically set an attribute by name
         # SOURCE: Stack Overflow (2011). "Use of setattr in Python"
         # URL: https://stackoverflow.com/questions/7604636/use-of-setattr-in-python
         def commit_train(name, buffer_name):
@@ -667,7 +676,7 @@ def annotate():
             y = [d[1] for d in data]
             logger.info(f"   Training {name}: {len(X)} samples, labels: {set(y)}")
             # incremental training via partial_fit (online learning)
-            # CITATION: partial_fit() — train incrementally without reprocessing old data
+            # CITATION: partial_fit() - train incrementally without reprocessing old data
             # SOURCE: scikit-learn (n.d.). "SGDClassifier"
             # URL: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html
             state.models[name].partial_fit(X, y)
@@ -682,7 +691,7 @@ def annotate():
         except Exception as e:
             logger.error(f"Training failed: {e}")
             # dump the full stack trace so we can actually debug it
-            # CITATION: traceback.format_exc() — capture exception traceback as a string
+            # CITATION: traceback.format_exc() - capture exception traceback as a string
             # SOURCE: Stack Overflow (2011). "Logging exception with traceback in Python"
             # URL: https://stackoverflow.com/questions/1483429/how-do-i-print-an-exception-in-python
             import traceback
@@ -695,7 +704,7 @@ def annotate():
         y_test = [t['label'] for t in state.test_set]
         
         # run predictions against the held-out test set and compare with zip
-        # CITATION: zip() — iterate over two lists in parallel for element-wise comparison
+        # CITATION: zip() - iterate over two lists in parallel for element-wise comparison
         # SOURCE: Stack Overflow (2009). "Iterate over two lists in parallel"
         # URL: https://stackoverflow.com/questions/1663807/how-to-iterate-through-two-lists-in-parallel
         for name, model in state.models.items():
@@ -703,14 +712,16 @@ def annotate():
                 preds = model.predict(X_test)
                 acc = np.mean([1 if p == y else 0 for p, y in zip(preds, y_test)])
                 scores[name] = round(acc, 3)
-            except: scores[name] = 0.5
+            except Exception as e:
+                logger.warning(f"Validation failed for '{name}': {e}")
+                scores[name] = 0.5
             
         
         scores['step'] = state.step
         state.accuracy_history.append(scores)
         
         # persist accuracy and cost data so the frontend can poll it
-        # CITATION: json.dump() — serialise a Python dict straight into a file
+        # CITATION: json.dump() - serialise a Python dict straight into a file
         # SOURCE: Stack Overflow (2012). "Writing JSON to a file in Python"
         # URL: https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
         try:
@@ -767,7 +778,7 @@ def reset_session():
         state.pending_labels_random = []
         state.pending_labels_entropy = []
         # hasattr check before del to avoid AttributeError if it was never set
-        # CITATION: hasattr() + del — safely remove a dynamic attribute from an object
+        # CITATION: hasattr() + del - safely remove a dynamic attribute from an object
         # SOURCE: Stack Overflow (2010). "How to delete an attribute from an object"
         # URL: https://stackoverflow.com/questions/2118951/how-can-i-delete-a-variable-in-python
         if hasattr(state, 'last_shadow_picks'):
@@ -814,10 +825,10 @@ def reset_session():
 if __name__ == "__main__":
     # host='0.0.0.0' makes the server reachable outside the container.
     # PORT comes from the environment so Docker/HuggingFace can override it.
-    # CITATION: app.run(host='0.0.0.0') — bind Flask to all network interfaces
+    # CITATION: app.run(host='0.0.0.0') - bind Flask to all network interfaces
     # SOURCE: Stack Overflow (2015). "Deploying Flask app to Docker"
     # URL: https://stackoverflow.com/questions/30323224/deploying-a-flask-app-to-docker-flask-is-not-externally-visible
-    # CITATION: os.environ.get() — read an env var with a fallback default
+    # CITATION: os.environ.get() - read an env var with a fallback default
     # SOURCE: Stack Overflow (2013). "How to use environment variables in Python"
     # URL: https://stackoverflow.com/questions/4906977/how-to-access-environment-variable-values
     port = int(os.environ.get("PORT", 9090))

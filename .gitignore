@@ -22,3 +22,6 @@ ml_service/models/all-MiniLM-L6-v2/
 
 # OS files
 Thumbs.db
+
+# Documentation site (isolated as separate repo)
+docs-site/

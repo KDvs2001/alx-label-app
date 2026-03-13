@@ -29,7 +29,8 @@ const EvaluatorFeedbackModal = ({
         ratingInterfaceClear: 0,
         mostSurprising: '',
         mostConfusing: '',
-        strengthenSubmission: ''
+        strengthenSubmission: '',
+        noticeChangeAtAnnotation: ''
     });
 
     const [status, setStatus] = useState('idle'); // idle, loading, success, error
@@ -268,6 +269,12 @@ const EvaluatorFeedbackModal = ({
                             {/* Section 4 */}
                             <div className="p-5 bg-slate-800/40 rounded-xl border border-slate-700/50 space-y-4">
                                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-700 pb-2 mb-4">4. Final Thoughts</h3>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-1">At roughly which annotation did you first notice the system adapting to your reading style? (0 if never)</label>
+                                    <input type="number" name="noticeChangeAtAnnotation" value={formData.noticeChangeAtAnnotation} onChange={handleChange} min="0" max="100" placeholder="e.g. 8"
+                                        className="w-28 bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2.5 outline-none focus:border-blue-500 transition-colors" />
+                                </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-300 mb-1">What did you find most surprising or interesting?</label>

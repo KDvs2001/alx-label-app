@@ -85,7 +85,6 @@ class AdaptiveCostModel:
             # SOURCE: NumPy (n.d.). "numpy.std"
             # URL: https://numpy.org/doc/stable/reference/generated/numpy.std.html
             length_variance = np.std(log_lengths)
-            
             if length_variance < 0.3:
                 # LOW VARIANCE FALLBACK: direct speed estimation.
                 # with similar-length texts, attribute a small fraction to
@@ -113,6 +112,17 @@ class AdaptiveCostModel:
                 # URL: https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html
                 result, _, _, _ = np.linalg.lstsq(A, times, rcond=None)
                 new_alpha, new_beta = result[0], result[1]
+
+                # Log regression fit quality so we can defend statistical validity
+                # R² = 1 - (SS_residual / SS_total): 1.0 = perfect fit, 0.0 = no better than mean
+                # CITATION: R-squared — coefficient of determination for regression quality
+                # SOURCE: Stack Overflow (2013). "Calculating R-squared from sklearn"
+                # URL: https://stackoverflow.com/questions/24101524/r-squared-coefficient-of-determination-in-python
+                residuals = times - A @ result
+                ss_res = np.sum(residuals ** 2)
+                ss_tot = np.sum((times - np.mean(times)) ** 2)
+                r_squared = 1 - (ss_res / max(ss_tot, 1e-9))
+                logger.info(f"   R² = {r_squared:.3f} (regression fit quality)")
             
             # clamp to reasonable ranges so the cost model doesn't go haywire
             # CITATION: max(min()) pattern — numeric clamping idiom in Python
