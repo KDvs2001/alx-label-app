@@ -69,35 +69,35 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
     const isWinningVsRandom = calLogEfficiency > randomEfficiency;
 
     return (
-        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
 
                 {/* Header */}
-                <div className="bg-gradient-to-r from-blue-900 via-slate-900 to-slate-900 p-8 text-center border-b border-slate-800">
-                    <div className="inline-flex items-center justify-center p-3 bg-green-500/20 rounded-full mb-4 ring-1 ring-green-500/50">
-                        <CheckCircle size={32} className="text-green-400" />
+                <div className="bg-gradient-to-r from-blue-900 via-slate-900 to-slate-900 p-4 text-center border-b border-slate-800 shrink-0">
+                    <div className="inline-flex items-center justify-center p-2 bg-green-500/20 rounded-full mb-2 ring-1 ring-green-500/50">
+                        <CheckCircle size={24} className="text-green-400" />
                     </div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Session Complete</h1>
-                    <p className="text-slate-400">Here is how CAL-Log adapted to your annotation behavior.</p>
+                    <h1 className="text-2xl font-bold text-white mb-1">Session Complete</h1>
+                    <p className="text-slate-400 text-sm">Here is how CAL-Log adapted to your annotation behavior.</p>
                 </div>
 
-                <div className="p-8 space-y-6">
+                <div className="p-5 space-y-4 overflow-y-auto flex-1 min-h-0">
 
                         {/* Reading Profile Hero: Validates that the system correctly profiled the human evaluator */}
-                        <div className={`bg-gradient-to-r ${evaluatorBgColor} rounded-xl p-6 border ${evaluatorBorderColor}`}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <Activity className={evaluatorColor} />
+                        <div className={`bg-gradient-to-r ${evaluatorBgColor} rounded-xl p-4 border ${evaluatorBorderColor}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Activity className={evaluatorColor} size={18} />
                             <h3 className="text-slate-300 font-bold">Your Reading Profile</h3>
                         </div>
-                        <div className="flex items-start gap-8">
+                        <div className="flex items-start gap-6">
                             <div className="flex-1">
-                                <div className={`text-4xl font-bold ${evaluatorColor} mb-2`}>{evaluatorType}</div>
-                                <div className="text-sm text-slate-400 mb-4">
+                                <div className={`text-3xl font-bold ${evaluatorColor} mb-1`}>{evaluatorType}</div>
+                                <div className="text-xs text-slate-400">
                                     {evaluatorDescription}
                                 </div>
                             </div>
                             {/* Parameter Changes: Alpha and Beta */}
-                            <div className="grid grid-cols-2 gap-6 bg-slate-900/50 rounded-lg p-4 border border-white/5">
+                            <div className="grid grid-cols-2 gap-4 bg-slate-900/50 rounded-lg p-3 border border-white/5">
                                 <div className="text-center">
                                     <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Alpha (Overhead)</div>
                                     <div className="flex items-center gap-2 justify-center">
@@ -123,9 +123,9 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                         {/* Highlights the core thesis: CAL-Log achieves higher information density per second than baselines */}
-                        <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                            <div className="flex items-center gap-3 mb-4">
-                                <Zap className="text-blue-400" />
+                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Zap className="text-blue-400" size={18} />
                                 <h3 className="text-slate-300 font-bold">CAL-Log Advantage</h3>
                             </div>
 
@@ -179,13 +179,13 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                         </div>
 
                         {/* Session Statistics: Displays the frequency of model retrains and parameter updates */}
-                        <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
-                            <div className="flex items-center gap-3 mb-4">
-                                <Clock className="text-purple-400" />
+                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Clock className="text-purple-400" size={18} />
                                 <h3 className="text-slate-300 font-bold">Session Statistics</h3>
                             </div>
-                            <div className="text-4xl font-bold text-white mb-2">{annotationCount}</div>
-                            <div className="text-sm text-slate-400 mb-6">
+                            <div className="text-3xl font-bold text-white mb-1">{annotationCount}</div>
+                            <div className="text-xs text-slate-400 mb-4">
                                 Total tasks annotated in this session.
                             </div>
 
@@ -212,7 +212,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                     <div className="bg-slate-950 rounded-xl border border-slate-800 p-4">
                         <h4 className="text-slate-500 text-xs font-bold uppercase mb-1">How CAL-Log Learned Your Reading Style</h4>
                         <p className="text-[10px] text-slate-600 mb-4">Alpha (grey dashed) = fixed overhead per task. Beta (orange) = how long text length affects annotation time. Both evolve as you annotate.</p>
-                        <div className="h-48 w-full">
+                        <div className="h-40 w-full">
                             {/* ResponsiveContainer from recharts scales the chart to fill its parent */}
                             <ResponsiveContainer width="100%" height="100%">
                                 {/* LineChart plots the alpha/beta trajectory over annotation steps */}
@@ -233,7 +233,7 @@ const SessionSummary = ({ metrics, history, shadowMetrics, annotationCount, cumu
                 </div>
 
                 {/* footer actions: home navigation, data export, and the mandatory feedback survey */}
-                <div className="bg-slate-900 border-t border-slate-700 p-6 flex justify-between items-center">
+                <div className="bg-slate-900 border-t border-slate-700 p-4 flex justify-between items-center shrink-0">
                     <button
                         onClick={onHome}
                         className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors font-bold border-2 border-transparent"
