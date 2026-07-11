@@ -12,7 +12,7 @@ import AlphaBetaImpactPanel from './workspace/AlphaBetaImpactPanel';
 import SessionSummary from './workspace/SessionSummary';
 import EvaluatorTour from './workspace/EvaluatorTour';
 import FatigueTrackerModal from './workspace/FatigueTrackerModal';
-import { Pause, Play } from 'lucide-react';
+import { Pause, Play, X, Settings, Activity } from 'lucide-react';
 
 /**
  * ResearchWorkspace Component
@@ -89,6 +89,13 @@ const ResearchWorkspace = () => {
     // Dataset Configuration State
     const [datasetConfig, setDatasetConfig] = useState(null);
 
+    // Active Learning & Verification Queue States
+    const [roundSize, setRoundSize] = useState(10);
+    const [currentRound, setCurrentRound] = useState(1);
+    const [showRoundTransition, setShowRoundTransition] = useState(false);
+    const [verificationQueue, setVerificationQueue] = useState([]);
+    const [isVerifying, setIsVerifying] = useState(false);
+
     // Vite exposes environment variables via import.meta.env instead of process.env
     // CITATION: Env Variables and Modes - exposing variables in Vite
     // SOURCE: Vite (n.d.). "Env Variables and Modes"
@@ -136,7 +143,7 @@ const ResearchWorkspace = () => {
     // monitors time between annotations to detect if the user has left the keyboard or needs a break.
     // drops the top 20% longest times to prevent outliers (like getting a coffee) from skewing the average.
     useEffect(() => {
-        if (!currentTask || tourActive || isFatigueModalOpen || isPaused) return;
+        if (!currentTask || tourActive || isFatigueModalOpen || isPaused || showRoundTransition) return;
 
         const timer = setInterval(() => {
             // Need to account for any time we spent paused in the fatigue modal
@@ -164,7 +171,7 @@ const ResearchWorkspace = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime, fatigueTriggeredForTask, isPaused]);
+    }, [currentTask, viewStartTime, tourActive, isFatigueModalOpen, annotationTimes, fatiguePauseTime, fatigueTriggeredForTask, isPaused, showRoundTransition]);
 
     // Reset timer when task changes
     useEffect(() => {
@@ -321,6 +328,9 @@ const ResearchWorkspace = () => {
                     ece: mData.ece,
                     last_bg_auto_labeled_count: mData.last_bg_auto_labeled_count
                 });
+                if (mData.verification_queue) {
+                    setVerificationQueue(mData.verification_queue);
+                }
             }
         } catch (e) {
             // Ignore poll errors
@@ -342,20 +352,11 @@ const ResearchWorkspace = () => {
             if (data.status === 'success') {
                 const count = data.count;
                 if (count > 0) {
-                    const newIds = data.records.map(r => r.id);
-                    const updatedLabeledIds = [...labeledIdsRef.current, ...newIds];
-                    labeledIdsRef.current = updatedLabeledIds;
-                    setLabeledTaskIds(updatedLabeledIds);
-                    setAnnotationCount(prev => prev + count);
-                    
-                    // Display success toast
-                    setToast({ message: `Successfully auto-labeled ${count} high-confidence tasks!`, type: "success" });
-                    
-                    // Retrain/refresh pool
+                    setToast({ message: `Queued ${count} high-confidence tasks for verification!`, type: "success" });
+                    setIsVerifying(true);
                     pollMetrics();
-                    fetchNextBatch();
                 } else {
-                    setToast({ message: "No tasks found with >= 98% confidence to auto-label.", type: "warning" });
+                    setToast({ message: "No tasks met the 98% confidence threshold for auto-labeling.", type: "warning" });
                 }
             } else {
                 setToast({ message: "Auto-labeling failed: " + data.message, type: "error" });
@@ -365,6 +366,37 @@ const ResearchWorkspace = () => {
             setToast({ message: "Network error during auto-labeling.", type: "error" });
         } finally {
             setIsAutoLabeling(false);
+        }
+    };
+
+    const handleVerify = async (taskId, action, correctedLabel = null) => {
+        try {
+            const body = { action };
+            if (taskId !== null) body.taskId = taskId;
+            if (correctedLabel !== null) body.correctedLabel = correctedLabel;
+            
+            const res = await fetch(`${API_URL}/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                if (action === 'approve_all') {
+                    setVerificationQueue([]);
+                    setToast({ message: "Approved all auto-labeled predictions!", type: "success" });
+                    setIsVerifying(false);
+                } else {
+                    setVerificationQueue(prev => prev.filter(item => item.id !== taskId));
+                    setToast({ message: action === 'approve' ? "Prediction approved!" : `Corrected to ${correctedLabel}!`, type: "success" });
+                }
+                pollMetrics();
+            } else {
+                setToast({ message: "Verification failed: " + data.message, type: "error" });
+            }
+        } catch (e) {
+            console.error("Verification failed:", e);
+            setToast({ message: "Network error during verification.", type: "error" });
         }
     };
 
@@ -447,8 +479,8 @@ const ResearchWorkspace = () => {
             });
             const data = await response.json();
 
-            // Check if model was retrained
-            if (data.trained) {
+            // Check if model was retrained (but skip instant fetch if we hit round boundary)
+            if (data.trained && newCount % roundSize !== 0) {
                 setToast({ message: "Model Retrained! Fetching new tasks...", type: "success" });
                 pollMetrics();  // Non-blocking refresh
                 fetchNextBatch();  // Uses labeledIdsRef (always fresh)
@@ -458,7 +490,9 @@ const ResearchWorkspace = () => {
             saveSession(newCount, newLabeledIds, fullAnnotation);
 
             // Fetch more tasks if running low
-            if (nextTasks.length < 3) {
+            if (newCount % roundSize === 0) {
+                setShowRoundTransition(true);
+            } else if (nextTasks.length < 3) {
                 fetchNextBatch();
             } else {
                 setTimeout(fetchSpySelection, 300);
@@ -510,6 +544,7 @@ const ResearchWorkspace = () => {
                 payload.datasetName = datasetConfig.datasetName;
                 payload.labels = datasetConfig.labels;
                 payload.uploadedTexts = datasetConfig.uploadedTexts;
+                payload.roundSize = roundSize;
             }
             // Include full annotation data if provided
             if (newAnnotation) {
@@ -547,6 +582,11 @@ const ResearchWorkspace = () => {
                     setCumulativeCalLogCost(data.session.cumulativeCalLogCost || 0);
 
                     // Recover dataset config
+                    const rSize = data.session.roundSize || 10;
+                    setRoundSize(rSize);
+                    setCurrentRound(Math.floor(data.session.annotationCount / rSize) + 1);
+                    setShowRoundTransition(false);
+
                     const recConfig = {
                         datasetName: data.session.datasetName || 'imdb',
                         labels: data.session.labels || ['Negative', 'Positive'],
@@ -561,7 +601,8 @@ const ResearchWorkspace = () => {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 ...recConfig,
-                                seedType: 'unlabeled'
+                                seedType: 'unlabeled',
+                                roundSize: rSize
                             })
                         });
                     } catch (e) {
@@ -573,6 +614,11 @@ const ResearchWorkspace = () => {
             }
         } else {
             // Both 'fresh' AND null (brand new user) need a full reset
+            const rSize = config?.roundSize || 10;
+            setRoundSize(rSize);
+            setCurrentRound(1);
+            setShowRoundTransition(false);
+
             setDatasetConfig(config);
             setAnnotationCount(0);
             setLabeledTaskIds([]);
@@ -796,6 +842,22 @@ const ResearchWorkspace = () => {
                     <div className="flex-1 min-h-0 relative">
                         {/* Task Card Container - Flex-1 ensures it grows natively */}
                         <div className="absolute inset-0 flex flex-col">
+                            {verificationQueue.length > 0 && (
+                                <div className="bg-gradient-to-r from-purple-900/60 to-indigo-900/60 border border-purple-500/50 rounded-xl p-3 flex items-center justify-between mb-4 shadow-lg animate-pulse shrink-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-ping" />
+                                        <span className="text-xs font-semibold text-slate-200">
+                                            CAL-Log auto-labeled <span className="font-bold text-purple-300">{verificationQueue.length}</span> high-confidence tasks. Validate them to ensure accuracy!
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsVerifying(true)}
+                                        className="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5"
+                                    >
+                                        Verify Predictions
+                                    </button>
+                                </div>
+                            )}
                             <TaskCard
                                 currentTask={currentTask}
                                 submitting={submitting || isPaused}
@@ -845,6 +907,173 @@ const ResearchWorkspace = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Human-in-the-Loop Verification Modal */}
+            {isVerifying && (
+                <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-slate-900 border border-slate-700/80 rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] flex flex-col gap-5 shadow-2xl relative">
+                        <button
+                            onClick={() => setIsVerifying(false)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-white transition"
+                        >
+                            <X size={20} />
+                        </button>
+                        
+                        <div>
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <Settings size={22} className="text-purple-400" />
+                                Human-in-the-Loop Double Validation
+                            </h3>
+                            <p className="text-xs text-slate-400 mt-1">
+                                Review high-confidence auto-label predictions. Correct mistakes to retrain the model.
+                            </p>
+                        </div>
+
+                        {/* Scrollable list of verification tasks */}
+                        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 max-h-[50vh] custom-scrollbar">
+                            {verificationQueue.length === 0 ? (
+                                <div className="text-center py-8 text-slate-500">
+                                    No tasks pending verification.
+                                </div>
+                            ) : (
+                                verificationQueue.map(task => (
+                                    <div key={task.id} className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-4 flex flex-col gap-3">
+                                        <p className="text-xs text-slate-300 font-serif leading-relaxed line-clamp-3">
+                                            "{task.text}"
+                                        </p>
+                                        <div className="flex items-center justify-between border-t border-slate-700/50 pt-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] uppercase font-semibold tracking-wider text-slate-400 bg-slate-800 px-2 py-1 rounded">
+                                                    Confidence: {(task.confidence * 100).toFixed(1)}%
+                                                </span>
+                                                <span className="text-xs text-slate-300">
+                                                    Predicted: <span className="font-bold text-purple-400">{task.predicted_label}</span>
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                {/* Approve Button */}
+                                                <button
+                                                    onClick={() => handleVerify(task.id, 'approve')}
+                                                    className="px-3 py-1 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 text-green-400 text-xs font-bold rounded-lg transition-all"
+                                                >
+                                                    Approve
+                                                </button>
+                                                {/* Correct Buttons (alternative labels) */}
+                                                {datasetConfig?.labels ? (
+                                                    datasetConfig.labels
+                                                        .filter(lbl => lbl !== task.predicted_label)
+                                                        .map(lbl => (
+                                                            <button
+                                                                key={lbl}
+                                                                onClick={() => handleVerify(task.id, 'correct', lbl)}
+                                                                className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-lg transition-all"
+                                                            >
+                                                                Correct to {lbl}
+                                                            </button>
+                                                        ))
+                                                ) : (
+                                                    // Fallback if labels are not loaded yet
+                                                    <button
+                                                        onClick={() => handleVerify(task.id, 'correct', task.predicted_label === 'Positive' ? 'Negative' : 'Positive')}
+                                                        className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-lg transition-all"
+                                                    >
+                                                        Correct label
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        {/* Batch Verification Footer */}
+                        <div className="border-t border-slate-800 pt-4 flex gap-3">
+                            <button
+                                onClick={() => handleVerify(null, 'approve_all')}
+                                disabled={verificationQueue.length === 0}
+                                className="flex-1 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-700/50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-purple-500/20 transition-all text-sm"
+                            >
+                                Approve All {verificationQueue.length} Predictions
+                            </button>
+                            <button
+                                onClick={() => setIsVerifying(false)}
+                                className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all text-sm"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Round Transition Screen Overlay */}
+            {showRoundTransition && (
+                <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+                    <div className="bg-slate-900 border border-slate-700/80 rounded-2xl p-8 max-w-lg w-full shadow-2xl relative overflow-hidden flex flex-col gap-6">
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+                        
+                        <div className="text-center">
+                            <div className="w-16 h-16 rounded-full bg-blue-500/10 border-2 border-blue-500/50 flex items-center justify-center mx-auto mb-4 text-blue-400">
+                                <Activity size={32} className="animate-pulse" />
+                            </div>
+                            <h2 className="text-3xl font-extrabold text-white">Round {currentRound} Complete!</h2>
+                            <p className="text-sm text-slate-400 mt-2">
+                                CAL-Log has successfully completed this active learning iteration.
+                            </p>
+                        </div>
+
+                        {/* Round Performance Cards */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-center">
+                                <span className="text-xs text-slate-400 block mb-1">Model Accuracy</span>
+                                <span className="text-2xl font-bold text-green-400">
+                                    {metrics.accuracy_history && metrics.accuracy_history.length > 0
+                                        ? (metrics.accuracy_history[metrics.accuracy_history.length - 1].cal_log * 100).toFixed(0) + '%'
+                                        : '50%'}
+                                </span>
+                            </div>
+                            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-center">
+                                <span className="text-xs text-slate-400 block mb-1">Workload Pruned</span>
+                                <span className="text-2xl font-bold text-blue-400">
+                                    {metrics.last_bg_auto_labeled_count || 0} tasks
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Cost Parameter Adaptation */}
+                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">CAL-Log Adaptive Feedback</span>
+                            <div className="flex flex-col gap-2 text-sm text-slate-300">
+                                <div className="flex justify-between">
+                                    <span>Setup Overhead (α):</span>
+                                    <span className="font-mono font-bold">{metrics.alpha ? metrics.alpha.toFixed(2) : '5.00'}s</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Reading Factor (β):</span>
+                                    <span className="font-mono font-bold text-amber-400">{metrics.beta ? metrics.beta.toFixed(2) : '3.00'}s</span>
+                                </div>
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
+                                As you annotated, CAL-Log mapped your reading speed (β) and overhead (α) to adaptively filter out exhausting, redundant tasks.
+                            </p>
+                        </div>
+
+                        {/* Continue Button */}
+                        <button
+                            onClick={() => {
+                                setShowRoundTransition(false);
+                                setCurrentRound(prev => prev + 1);
+                                pollMetrics();
+                                fetchNextBatch();
+                            }}
+                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+                        >
+                            Start Round {currentRound + 1}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

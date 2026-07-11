@@ -38,6 +38,7 @@ router.post('/save', async (req, res) => {
         if (req.body.datasetName) updateOps.datasetName = req.body.datasetName;
         if (req.body.labels) updateOps.labels = req.body.labels;
         if (req.body.uploadedTexts) updateOps.uploadedTexts = req.body.uploadedTexts;
+        if (req.body.roundSize) updateOps.roundSize = req.body.roundSize;
 
         // $set replaces scalar fields, $push appends to the annotations array.
         // doing both in one call makes it atomic — no read-modify-write race conditions
@@ -110,7 +111,8 @@ router.get('/load/:contestantId', async (req, res) => {
                 lastUpdated: session.lastUpdated,
                 datasetName: session.datasetName,
                 labels: session.labels,
-                uploadedTexts: session.uploadedTexts
+                uploadedTexts: session.uploadedTexts,
+                roundSize: session.roundSize
             }
         });
     } catch (error) {

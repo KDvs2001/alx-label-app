@@ -24,6 +24,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
     // Step 3: Seeding Configuration
     const [seedType, setSeedType] = useState('unlabeled'); // 'unlabeled', 'labeled_seed'
     const [seedCount, setSeedCount] = useState(10);
+    const [roundSize, setRoundSize] = useState(10);
 
     // Warmup polling
     useEffect(() => {
@@ -135,7 +136,8 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
             labels: classLabels.split(',').map(l => l.trim()).filter(l => l.length > 0),
             seedType,
             seedCount: seedType === 'labeled_seed' ? seedCount : 0,
-            uploadedTexts: datasetSource === 'custom' ? customTexts : null
+            uploadedTexts: datasetSource === 'custom' ? customTexts : null,
+            roundSize
         };
         onSubmit(contestantId, 'fresh', config);
     };
@@ -327,6 +329,24 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
                         <div className="flex items-center gap-3 mb-6">
                             <Settings className="text-blue-400" size={28} />
                             <h2 className="text-2xl font-bold text-white text-left">Active Learning Seeding</h2>
+                        </div>
+
+                        <div className="mb-6 text-left">
+                            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                Active Learning Round Size
+                            </label>
+                            <select
+                                value={roundSize}
+                                onChange={(e) => setRoundSize(Number(e.target.value))}
+                                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-blue-500 transition"
+                            >
+                                <option value={5}>5 Tasks per Round (Fast adaptation)</option>
+                                <option value={10}>10 Tasks per Round (Standard)</option>
+                                <option value={20}>20 Tasks per Round (Thorough evaluation)</option>
+                            </select>
+                            <p className="text-[10px] text-slate-500 mt-1">
+                                Retraining and workload pruning occur automatically at the end of each round.
+                            </p>
                         </div>
 
                         <div className="mb-6 text-left">

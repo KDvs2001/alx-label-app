@@ -74,6 +74,10 @@ const AnnotationSessionSchema = new mongoose.Schema({
     uploadedTexts: [{
         type: String
     }],
+    roundSize: {
+        type: Number,
+        default: 10
+    },
     // embed annotation history directly inside the session doc.
     // each session has ~50 annotations max, well within Mongo's 16MB doc limit,
     // so embedding beats a separate collection + JOIN here.

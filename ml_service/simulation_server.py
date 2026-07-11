@@ -105,6 +105,8 @@ class SimulationState:
         self.selected_task_lengths = [] # Track history of selected task lengths
         self.labeled_ids = set() # Track all task IDs labeled manually or automatically
         self.last_bg_auto_labeled_count = 0
+        self.round_size = 10
+        self.verification_queue = {} # Maps taskId (int) -> dict of task details (text, label, confidence, etc.)
 
         # Initialize Files (Prevent 404s on Frontend)
         self._init_files()
@@ -295,7 +297,8 @@ def health():
     
     ece_val = 0.0
     last_bg_auto_labeled_count = 0
-    pool_remaining = len([t for t in state.clean_pool if t['id'] not in state.labeled_ids])
+    verification_queue_list = list(state.verification_queue.values())
+    pool_remaining = len([t for t in state.clean_pool if t['id'] not in state.labeled_ids and t['id'] not in state.verification_queue])
     
     if os.path.exists(METRICS_PATH):
         try:
@@ -320,7 +323,8 @@ def health():
         "ece": ece_val,
         "last_bg_auto_labeled_count": last_bg_auto_labeled_count,
         "pool_remaining": pool_remaining,
-        "pool_total": len(state.pool) if hasattr(state, 'pool') else 1000
+        "pool_total": len(state.pool) if hasattr(state, 'pool') else 1000,
+        "verification_queue": verification_queue_list
     })
 
 @app.route('/session/init-priors', methods=['POST'])
@@ -424,7 +428,7 @@ def predict():
     else:
         # Server-side task selection from deduplicated pool
         # Filter out already-labeled tasks
-        available = [t for t in state.clean_pool if t['id'] not in labeled_ids]
+        available = [t for t in state.clean_pool if t['id'] not in labeled_ids and t['id'] not in state.verification_queue]
         
         if not available:
             logger.warning("All tasks have been labeled!")
@@ -800,18 +804,13 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                         # Auto-label with 98% confidence
                         if max_conf >= 0.98:
                             pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
-                            record_annotation_observation(
-                                text=task['text'],
-                                time_seconds=0.1,
-                                label=pred_label,
-                                task_id=task['id']
-                            )
-                            state.labeled_ids.add(task['id'])
+                            state.verification_queue[task['id']] = {
+                                'id': task['id'],
+                                'text': task['text'],
+                                'predicted_label': pred_label,
+                                'confidence': float(max_conf)
+                            }
                             auto_labeled_count += 1
-                            
-                            # Incrementally retrain
-                            label_int = 1 if pred_label == 'Positive' else 0
-                            state.models['cal_log'].partial_fit([task['text']], [label_int])
                 except Exception as e:
                     logger.error(f"Background Thread: Dynamic auto-labeling failed: {e}")
             
@@ -964,6 +963,8 @@ def reset_session():
         state.custom_labels = custom_labels
         state.labeled_ids = set() # Clear server-side labeled IDs
         state.last_bg_auto_labeled_count = 0
+        state.round_size = int(payload.get("roundSize", 10))
+        state.verification_queue = {}
 
         # 1. Reset cost model to cold-start defaults
         state.cost_model = build_cost_model()
@@ -987,8 +988,60 @@ def reset_session():
                 mock_lbl = idx % num_labels
                 state.dataset.append({'id': idx, 'text': txt, 'label': mock_lbl})
                 state.id_to_label[idx] = mock_lbl
+        elif dataset_name == "ag_news":
+            logger.info("Generating AG News preset (800 items)...")
+            state.dataset = []
+            state.id_to_label = {}
+            
+            categories = ["World", "Sports", "Business", "Sci/Tech"]
+            subjects = {
+                "World": ["United Nations", "Global leaders", "Peace talks", "Protests erupt in", "New policy announcement in"],
+                "Sports": ["Championship match", "Olympic runner", "Local team", "Tournament finals", "Star athlete"],
+                "Business": ["Stock markets", "Startup company", "Tech giant merger", "Retail index", "Inflation rates"],
+                "Sci/Tech": ["New AI algorithm", "Space telescope", "Quantum computer", "Battery technology", "Robotics breakthrough"]
+            }
+            actions = {
+                "World": ["focuses on climate change", "sign historic agreement", "sparks international debate", "demands economic reforms", "aims for border stability"],
+                "Sports": ["ends in dramatic overtime", "sets new world record", "secures victory in finals", "suffers unexpected defeat", "announces retirement plans"],
+                "Business": ["reach record highs", "faces federal antitrust probe", "unveils multi-billion IPO", "warns of incoming recession", "boosts quarterly profit margins"],
+                "Sci/Tech": ["exhibits human-like reasoning", "discovers distant exoplanet", "solves complex physics equation", "promises faster charging times", "demonstrates advanced dexterity"]
+            }
+            
+            for idx in range(800):
+                cat = categories[idx % 4]
+                sub = subjects[cat][(idx // 4) % len(subjects[cat])]
+                act = actions[cat][(idx // 16) % len(actions[cat])]
+                headline = f"{sub} {act} - Topic Report #{idx}."
+                lbl = idx % num_labels
+                state.dataset.append({'id': idx, 'text': headline, 'label': lbl})
+                state.id_to_label[idx] = lbl
+        elif dataset_name == "rotten_tomatoes":
+            logger.info("Loading Rotten Tomatoes preset (600 items)...")
+            state.dataset = []
+            state.id_to_label = {}
+            try:
+                import re
+                with open("dataset.json", "r") as f:
+                    raw = json.load(f)
+                    count = 0
+                    for i, r in enumerate(raw):
+                        if count >= 600:
+                            break
+                        txt = r.get('data', {}).get('text') or r.get('text', "")
+                        l_str = r.get('true_label') or r.get('label')
+                        lbl = 1 if l_str == 'Positive' else 0
+                        if txt:
+                            sentences = re.split(r'\.\s+', txt)
+                            short_txt = ". ".join(sentences[:2])
+                            if not short_txt.endswith('.'):
+                                short_txt += '.'
+                            state.dataset.append({'id': i, 'text': short_txt, 'label': lbl})
+                            state.id_to_label[i] = lbl
+                            count += 1
+            except Exception as e:
+                logger.error(f"Failed to load Rotten Tomatoes preset: {e}")
         else:
-            # Re-read preset dataset.json (simulating default IMDB/Tomatoes)
+            # Re-read preset dataset.json (simulating default IMDB)
             logger.info(f"Loading preset dataset: {dataset_name}")
             state.dataset = []
             state.id_to_label = {}
@@ -1159,17 +1212,15 @@ def auto_label():
             prob = probs[idx]
             max_conf = np.max(prob)
             
-            # If the model is extremely confident (>98%), auto-annotate it to save human effort
+            # If the model is extremely confident (>98%), place it in the verification queue
             if max_conf >= 0.98:
                 pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
-                
-                # Record machine observation with minimal lead time (0.1s)
-                record_annotation_observation(
-                    text=task['text'], 
-                    time_seconds=0.1, 
-                    label=pred_label,
-                    task_id=task['id']
-                )
+                state.verification_queue[task['id']] = {
+                    'id': task['id'],
+                    'text': task['text'],
+                    'predicted_label': pred_label,
+                    'confidence': float(max_conf)
+                }
                 auto_labels_record.append({
                     "id": task['id'],
                     "text": task['text'][:50] + "...",
@@ -1178,11 +1229,7 @@ def auto_label():
                 })
                 auto_labeled_count += 1
                 
-                # Retrain backbone on it incrementally
-                label_int = 1 if pred_label == 'Positive' else 0
-                state.backbone.partial_fit([task['text']], [label_int])
-                
-        logger.info(f"Auto-labeled {auto_labeled_count} tasks with confidence >= 98%.")
+        logger.info(f"Auto-labeled {auto_labeled_count} tasks with confidence >= 98% and queued for verification.")
         return jsonify({
             "status": "success",
             "count": auto_labeled_count,
@@ -1190,6 +1237,81 @@ def auto_label():
         })
     except Exception as e:
         logger.error(f"Auto-labeling failed: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/verify', methods=['POST'])
+def verify_task():
+    """Verify (Approve or Correct) an auto-labeled task in the active learning loop."""
+    try:
+        data = request.json or {}
+        action = data.get("action")
+        task_id = data.get("taskId")
+        corrected_label = data.get("correctedLabel")
+        
+        if action == "approve_all":
+            count = 0
+            # copy keys to avoid runtime modification errors
+            for tid in list(state.verification_queue.keys()):
+                task = state.verification_queue.pop(tid, None)
+                if task:
+                    lbl = task['predicted_label']
+                    record_annotation_observation(
+                        text=task['text'],
+                        time_seconds=0.1,
+                        label=lbl,
+                        task_id=tid
+                    )
+                    state.labeled_ids.add(tid)
+                    lbl_int = 1 if lbl == 'Positive' else 0
+                    state.backbone.partial_fit([task['text']], [lbl_int])
+                    count += 1
+            return jsonify({"status": "success", "message": f"Approved all {count} tasks."})
+            
+        if task_id is None:
+            return jsonify({"status": "error", "message": "taskId is required"}), 400
+            
+        try:
+            task_id = int(task_id)
+        except:
+            pass
+            
+        task = state.verification_queue.pop(task_id, None)
+        if not task:
+            return jsonify({"status": "error", "message": f"Task {task_id} not found in verification queue"}), 404
+            
+        if action == "approve":
+            lbl = task['predicted_label']
+            record_annotation_observation(
+                text=task['text'],
+                time_seconds=0.1,
+                label=lbl,
+                task_id=task_id
+            )
+            state.labeled_ids.add(task_id)
+            lbl_int = 1 if lbl == 'Positive' else 0
+            state.backbone.partial_fit([task['text']], [lbl_int])
+            return jsonify({"status": "success", "message": f"Task {task_id} approved."})
+            
+        elif action == "correct":
+            if not corrected_label:
+                return jsonify({"status": "error", "message": "correctedLabel is required for correction"}), 400
+            record_annotation_observation(
+                text=task['text'],
+                time_seconds=0.5,
+                label=corrected_label,
+                task_id=task_id
+            )
+            state.labeled_ids.add(task_id)
+            lbl_int = 1 if corrected_label == 'Positive' else 0
+            state.backbone.partial_fit([task['text']], [lbl_int])
+            logger.info(f"Retrained model on human correction for task {task_id} (corrected to {corrected_label})")
+            return jsonify({"status": "success", "message": f"Task {task_id} corrected."})
+            
+        else:
+            return jsonify({"status": "error", "message": f"Invalid action: {action}"}), 400
+            
+    except Exception as e:
+        logger.error(f"Verification failed: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
