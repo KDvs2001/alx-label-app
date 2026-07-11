@@ -1,31 +1,32 @@
-import React from 'react';
-// lucide-react provides tree-shakable SVG icon components
-// CITATION: lucide-react - SVG icon library as React components
-// SOURCE: Lucide (n.d.). "lucide-react"
-// URL: https://lucide.dev/guide/packages/lucide-react
-import { X, User, AlertCircle, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, User, AlertCircle, ArrowLeft, Upload, Database, Settings, Activity } from 'lucide-react';
 
 /**
- * ContestantIdModal Component
- * Session entry point. Masks ML cold-start latency during typing.
+ * ContestantIdModal Component (Multi-step Setup Wizard)
+ * Handles contestant registration, dataset import (preset or file upload), 
+ * label configuration, and active learning seeding options.
  */
-const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
-    // local state for the input field and UI flags
-    // CITATION: useState - React hook for local component state
-    // SOURCE: React (n.d.). "useState"
-    // URL: https://react.dev/reference/react/useState
-    const [contestantId, setContestantId] = React.useState('');
-    const [showResumePrompt, setShowResumePrompt] = React.useState(false);
-    const [isChecking, setIsChecking] = React.useState(false);
-    const [mlReady, setMlReady] = React.useState(false);
-    const [warmupAttempts, setWarmupAttempts] = React.useState(0);
+const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
+    const [step, setStep] = useState(1);
+    const [contestantId, setContestantId] = useState('');
+    const [showResumePrompt, setShowResumePrompt] = useState(false);
+    const [isChecking, setIsChecking] = useState(false);
+    const [mlReady, setMlReady] = useState(false);
+    const [warmupAttempts, setWarmupAttempts] = useState(0);
 
-    // wakes up the HF Space early so the user doesn't wait
-    // useEffect runs the polling side-effect and returns a cleanup that cancels it on unmount
-    // CITATION: useEffect - run side effects and clean them up on unmount
-    // SOURCE: React (n.d.). "useEffect"
-    // URL: https://react.dev/reference/react/useEffect
-    React.useEffect(() => {
+    // Step 2: Dataset Configuration
+    const [datasetSource, setDatasetSource] = useState('imdb'); // 'imdb', 'rotten_tomatoes', 'ag_news', 'custom'
+    const [classLabels, setClassLabels] = useState('Negative, Positive');
+    const [customFile, setCustomFile] = useState(null);
+    const [customTexts, setCustomTexts] = useState([]);
+    const [fileError, setFileError] = useState('');
+
+    // Step 3: Seeding Configuration
+    const [seedType, setSeedType] = useState('unlabeled'); // 'unlabeled', 'labeled_seed'
+    const [seedCount, setSeedCount] = useState(10);
+
+    // Warmup polling
+    useEffect(() => {
         if (!isOpen || mlReady) return;
         const API_URL = import.meta.env.VITE_ML_API_URL || "/ml";
         let cancelled = false;
@@ -33,108 +34,125 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
         const pollWarmup = async () => {
             while (!cancelled) {
                 try {
-                    // AbortSignal.timeout gives the fetch a hard 15s deadline before it throws
-                    // CITATION: AbortSignal.timeout() - auto-cancel a fetch after N milliseconds
-                    // SOURCE: MDN Web Docs (n.d.). "AbortSignal.timeout()"
-                    // URL: https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static
                     const res = await fetch(`${API_URL}/health`, { signal: AbortSignal.timeout(15000) });
                     if (res.ok && !cancelled) {
                         setMlReady(true);
-                        return; // Service is alive, stop polling
+                        return;
                     }
                 } catch {
-                    // Space still waking - retry
+                    // Space warming
                 }
                 if (!cancelled) {
-                    // functional updater form: prev => prev + 1 avoids stale closures in async loops
-                    // CITATION: functional updates - use the previous state when the next depends on it
-                    // SOURCE: React (n.d.). "useState - Updating state based on the previous state"
-                    // URL: https://react.dev/reference/react/useState#updating-state-based-on-the-previous-state
                     setWarmupAttempts(prev => prev + 1);
-                    // wrapping setTimeout in a Promise lets us use await to pause the loop
-                    // CITATION: promisified setTimeout - create an awaitable delay in async functions
-                    // SOURCE: Stack Overflow. "What is the JavaScript version of sleep()?"
-                    // URL: https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
                     await new Promise(r => setTimeout(r, 5000));
                 }
             }
         };
         pollWarmup();
-
-        // cleanup function: setting cancelled = true stops the polling loop when the component unmounts
         return () => { cancelled = true; };
     }, [isOpen, mlReady]);
 
     if (!isOpen) return null;
 
-    // preventDefault stops the browser from doing a full page reload on form submit
-    // CITATION: Event.preventDefault() - stop the browser's default form submission
-    // SOURCE: MDN Web Docs (n.d.). "Event.preventDefault()"
-    // URL: https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault
-    const handleSubmit = async (e) => {
+    // Check if contestant ID already exists (DB lookup)
+    const handleCheckContestant = async (e) => {
         e.preventDefault();
         if (!contestantId.trim() || isChecking) return;
 
         setIsChecking(true);
-        // Validates contestant IDs in MongoDB to handle session resuming
         try {
-            // fetch the session endpoint to check if this contestant has an existing session
-            // CITATION: Fetch API - make HTTP requests from the browser
-            // SOURCE: MDN Web Docs (n.d.). "fetch()"
-            // URL: https://developer.mozilla.org/en-US/docs/Web/API/fetch
             const SERVER_URL = (import.meta.env.VITE_SERVER_URL || "").replace(/\/$/, "");
             const response = await fetch(`${SERVER_URL}/api/session/load/${contestantId}`);
-            // response.json() parses the HTTP response body as JSON
-            // CITATION: Response.json() - read the response body and parse it as JSON
-            // SOURCE: MDN Web Docs (n.d.). "Response.json()"
-            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Response/json
             const data = await response.json();
 
             setIsChecking(false);
             if (data.exists) {
                 setShowResumePrompt(true);
             } else {
-                // New session
-                onSubmit(contestantId, null);
+                setStep(2); // Go to dataset config
             }
         } catch (error) {
             console.error('Error checking session:', error);
             setIsChecking(false);
-            // Proceed as new session
-            onSubmit(contestantId, null);
+            setStep(2); // Proceed to dataset config
         }
     };
 
     const handleResume = () => {
-        onSubmit(contestantId, 'resume');
+        onSubmit(contestantId, 'resume', null);
     };
 
     const handleFresh = () => {
-        // clear frontend session storage and proceed
-        // all ML + backend reset logic is centralized in ResearchWorkspace.handleContestantIdSubmit
-        // CITATION: sessionStorage.clear() - wipe all key/value pairs from session storage
-        // SOURCE: MDN Web Docs (n.d.). "Storage.clear()"
-        // URL: https://developer.mozilla.org/en-US/docs/Web/API/Storage/clear
         sessionStorage.clear();
         localStorage.removeItem('cal_log_tour_seen');
-        onSubmit(contestantId, 'fresh');
+        setStep(2);
+        setShowResumePrompt(false);
     };
 
-    // if the server found an existing session, show the resume/fresh prompt instead of the entry form
+    // Client-side file reader (reads CSV or JSON)
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setCustomFile(file);
+        setFileError('');
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const content = event.target.result;
+                let parsedTexts = [];
+                if (file.name.endsWith('.json')) {
+                    const data = JSON.parse(content);
+                    parsedTexts = Array.isArray(data) 
+                        ? data.map(item => item.text || item.content || item.data?.text || String(item))
+                        : [];
+                } else if (file.name.endsWith('.csv')) {
+                    // Quick-and-dirty CSV parser
+                    const lines = content.split('\n');
+                    parsedTexts = lines
+                        .map(line => line.trim().replace(/^"|"$/g, ''))
+                        .filter(line => line.length > 5);
+                } else {
+                    throw new Error('Unsupported format. Please upload .json or .csv');
+                }
+
+                if (parsedTexts.length === 0) {
+                    throw new Error('No valid text items found in the file.');
+                }
+                setCustomTexts(parsedTexts);
+            } catch (err) {
+                setFileError(err.message || 'Error parsing file.');
+                setCustomTexts([]);
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    const handleLaunch = () => {
+        // Collect configuration
+        const config = {
+            datasetName: datasetSource,
+            labels: classLabels.split(',').map(l => l.trim()).filter(l => l.length > 0),
+            seedType,
+            seedCount: seedType === 'labeled_seed' ? seedCount : 0,
+            uploadedTexts: datasetSource === 'custom' ? customTexts : null
+        };
+        onSubmit(contestantId, 'fresh', config);
+    };
+
+    // 1. Resume Prompt Overlay
     if (showResumePrompt) {
         return (
-            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-                <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-md">
+                <div className="bg-slate-900 border border-slate-700/80 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
                     <div className="flex items-center gap-3 mb-6">
                         <AlertCircle className="text-blue-400" size={28} />
-                        <h2 className="text-2xl font-bold text-white">Session Found</h2>
+                        <h2 className="text-2xl font-bold text-white">Existing Session</h2>
                     </div>
-
                     <p className="text-slate-300 mb-6">
-                        We found an existing session for <span className="font-bold text-blue-400">{contestantId}</span>.
-                        Would you like to resume where you left off or start fresh?
+                        We found saved data for contestant <span className="font-bold text-blue-400">{contestantId}</span>.
+                        Would you like to resume your previous run or overwrite it and start a new setup?
                     </p>
-
                     <div className="flex gap-3">
                         <button
                             onClick={handleResume}
@@ -144,9 +162,9 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
                         </button>
                         <button
                             onClick={handleFresh}
-                            className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all"
+                            className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all"
                         >
-                            Start Fresh
+                            Start New Setup
                         </button>
                     </div>
                 </div>
@@ -155,91 +173,253 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose, existingSession }) => {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <User className="text-blue-400" size={28} />
-                        <h2 className="text-2xl font-bold text-white">Enter Contestant ID</h2>
-                    </div>
-                    {/* only render the close button if the parent passed an onClose callback */}
-                    {onClose && (
-                        <button onClick={onClose} className="text-slate-400 hover:text-white transition">
-                            <X size={24} />
-                        </button>
-                    )}
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-md overflow-y-auto py-8">
+            <div className="bg-slate-900 border border-slate-700/80 rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl relative my-auto">
+                
+                {/* Close Button */}
+                <button 
+                    onClick={() => { setStep(1); onClose && onClose(); }}
+                    className="absolute top-6 right-6 text-slate-400 hover:text-white transition"
+                >
+                    <X size={20} />
+                </button>
+
+                {/* Progress Indicators */}
+                <div className="flex items-center justify-center gap-2 mb-8">
+                    <div className={`h-2 w-12 rounded-full transition-all duration-300 ${step >= 1 ? 'bg-blue-500' : 'bg-slate-700'}`} />
+                    <div className={`h-2 w-12 rounded-full transition-all duration-300 ${step >= 2 ? 'bg-blue-500' : 'bg-slate-700'}`} />
+                    <div className={`h-2 w-12 rounded-full transition-all duration-300 ${step >= 3 ? 'bg-blue-500' : 'bg-slate-700'}`} />
                 </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Contestant ID
-                        </label>
-                        <input
-                            type="text"
-                            value={contestantId}
-                            // controlled component: React owns the input value, onChange syncs it back to state
-                            // CITATION: controlled components - React state as the single source of truth for inputs
-                            // SOURCE: React (n.d.). "Sharing State Between Components"
-                            // URL: https://react.dev/learn/sharing-state-between-components
-                            onChange={(e) => setContestantId(e.target.value)}
-                            placeholder="e.g., CONTESTANT001"
-                            className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
-                            autoFocus
-                            required
-                        />
+                {/* STEP 1: Identification */}
+                {step === 1 && (
+                    <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <User className="text-blue-400" size={28} />
+                            <h2 className="text-2xl font-bold text-white text-left">Get Started</h2>
+                        </div>
+                        <p className="text-sm text-slate-400 mb-6 text-left">
+                            Please enter your Contestant ID or researcher identifier to begin tracking your cognitive modeling metrics.
+                        </p>
+                        <form onSubmit={handleCheckContestant}>
+                            <div className="mb-6 text-left">
+                                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                    Contestant ID
+                                </label>
+                                <input
+                                    type="text"
+                                    value={contestantId}
+                                    onChange={(e) => setContestantId(e.target.value)}
+                                    placeholder="e.g., CONTESTANT001"
+                                    className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
+                                    autoFocus
+                                    required
+                                />
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => window.location.href = '/'}
+                                    className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <ArrowLeft size={16} /> Back
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isChecking}
+                                    className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-700/50 text-white font-bold rounded-xl transition-all"
+                                >
+                                    {isChecking ? 'Checking...' : 'Continue'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
+                )}
 
-                    <div className="flex gap-3">
-                        {/* window.location.href navigates the browser to the landing page */}
-                        <button
-                            type="button"
-                            onClick={() => window.location.href = '/'}
-                            className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
-                        >
-                            <ArrowLeft size={18} />
-                            Back
-                        </button>
-                        {/* disabled greys out the button while we check the server */}
-                        {/* ternary in the template literal swaps between a dim "waiting" style and the normal style */}
-                        <button
-                            type="submit"
-                            disabled={isChecking}
-                            className={`flex-1 px-6 py-3 font-bold text-white rounded-xl transition-all ${isChecking ? 'bg-blue-600/50 cursor-wait' : 'bg-blue-600 hover:bg-blue-700'
-                                }`}
-                        >
-                            {/* swap the button label depending on whether we're mid-request */}
-                            {isChecking ? 'Checking...' : 'Continue'}
-                        </button>
+                {/* STEP 2: Dataset Configuration */}
+                {step === 2 && (
+                    <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <Database className="text-blue-400" size={28} />
+                            <h2 className="text-2xl font-bold text-white text-left">Configure Dataset</h2>
+                        </div>
+
+                        <div className="mb-5 text-left">
+                            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                Dataset Source
+                            </label>
+                            <select
+                                value={datasetSource}
+                                onChange={(e) => setDatasetSource(e.target.value)}
+                                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-blue-500 transition"
+                            >
+                                <option value="imdb">IMDB Movie Reviews (Sentiment Analysis)</option>
+                                <option value="rotten_tomatoes">Rotten Tomatoes (Critics Choice)</option>
+                                <option value="ag_news">AG News (Categorical News Classification)</option>
+                                <option value="custom">Upload custom CSV / JSON dataset file</option>
+                            </select>
+                        </div>
+
+                        {datasetSource === 'custom' && (
+                            <div className="mb-5 text-left">
+                                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                    Upload Dataset File
+                                </label>
+                                <div className="border-2 border-dashed border-slate-700 hover:border-slate-500 rounded-xl p-6 text-center transition-all bg-slate-800/40 relative cursor-pointer">
+                                    <input
+                                        type="file"
+                                        accept=".json,.csv"
+                                        onChange={handleFileUpload}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                    <Upload className="text-slate-400 mx-auto mb-2" size={24} />
+                                    <p className="text-sm font-medium text-slate-300">
+                                        {customFile ? customFile.name : 'Click or Drag & Drop .csv or .json file'}
+                                    </p>
+                                    <p className="text-xs text-slate-500 mt-1">
+                                        JSON should be a flat list of strings. CSV should contain text strings.
+                                    </p>
+                                </div>
+                                {fileError && <p className="text-xs text-rose-400 mt-1">{fileError}</p>}
+                                {customTexts.length > 0 && (
+                                    <p className="text-xs text-green-400 mt-1">✓ Parsed {customTexts.length} texts successfully.</p>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="mb-6 text-left">
+                            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                Class Labels (Comma Separated)
+                            </label>
+                            <input
+                                type="text"
+                                value={classLabels}
+                                onChange={(e) => setClassLabels(e.target.value)}
+                                placeholder="Negative, Positive"
+                                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-blue-500 transition"
+                            />
+                            <p className="text-[10px] text-slate-500 mt-1">
+                                Configure the options your annotator will choose.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setStep(1)}
+                                className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-2"
+                            >
+                                <ArrowLeft size={16} /> Back
+                            </button>
+                            <button
+                                onClick={() => setStep(3)}
+                                disabled={datasetSource === 'custom' && customTexts.length === 0}
+                                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-700/50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all"
+                            >
+                                Continue
+                            </button>
+                        </div>
                     </div>
-                </form>
+                )}
 
-                <p className="text-xs text-slate-500 mt-4 text-center">
-                    Your progress will be automatically saved
-                </p>
+                {/* STEP 3: Seeding & Active Learning Launch */}
+                {step === 3 && (
+                    <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <Settings className="text-blue-400" size={28} />
+                            <h2 className="text-2xl font-bold text-white text-left">Active Learning Seeding</h2>
+                        </div>
 
-                {/* ML Service Warmup Status Indicator */}
-                {/* warmup indicator: ternary switches between a green "ready" dot and amber "connecting" pulse */}
-                <div className={`mt-3 flex items-center justify-center gap-2 text-xs transition-all duration-500 ${mlReady ? 'text-green-400' : 'text-amber-400'}`}>
-                    {mlReady ? (
-                        <>
-                            <div className="w-2 h-2 rounded-full bg-green-400" />
-                            <span>ML Service Ready ✓</span>
-                        </>
-                    ) : (
-                        <>
-                            {/* animate-pulse gives the dot a breathing effect while the service is still waking */}
-                            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                            <span>
-                                {/* template literal shows which polling attempt we're on */}
-                                {warmupAttempts === 0
-                                    ? 'Connecting to ML Service...'
-                                    : `Waking up ML Service... (attempt ${warmupAttempts + 1})`
-                                }
-                            </span>
-                        </>
-                    )}
+                        <div className="mb-6 text-left">
+                            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                                Initial Labeled Points Option
+                            </label>
+                            
+                            <div className="flex flex-col gap-3">
+                                <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                                    seedType === 'unlabeled' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800/40 hover:bg-slate-800'
+                                }`}>
+                                    <input 
+                                        type="radio" 
+                                        name="seedType" 
+                                        value="unlabeled"
+                                        checked={seedType === 'unlabeled'}
+                                        onChange={() => setSeedType('unlabeled')}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <p className="text-sm font-semibold text-white">Start from Scratch (Fully Unlabeled)</p>
+                                        <p className="text-xs text-slate-400 mt-0.5">
+                                            The model is empty. It queries completely randomly to start bootstrapping the active learning cycle.
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <label className={`flex items-start gap-3 p-4 rounded-xl border transition-all cursor-pointer ${
+                                    seedType === 'labeled_seed' ? 'border-blue-500 bg-blue-500/10' : 'border-slate-700 bg-slate-800/40 hover:bg-slate-800'
+                                }`}>
+                                    <input 
+                                        type="radio" 
+                                        name="seedType" 
+                                        value="labeled_seed"
+                                        checked={seedType === 'labeled_seed'}
+                                        onChange={() => setSeedType('labeled_seed')}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <p className="text-sm font-semibold text-white">Import Small Labeled Seed Set</p>
+                                        <p className="text-xs text-slate-400 mt-0.5">
+                                            Pre-train models on a random subset of labeled data points to give the active learning engine a warm start.
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {seedType === 'labeled_seed' && (
+                            <div className="mb-6 text-left animate-fadeIn">
+                                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                    Number of Labeled Seed Points
+                                </label>
+                                <input
+                                    type="number"
+                                    min="5"
+                                    max="50"
+                                    value={seedCount}
+                                    onChange={(e) => setSeedCount(Number(e.target.value))}
+                                    className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-blue-500 transition"
+                                />
+                                <p className="text-[10px] text-slate-500 mt-1">
+                                    Values between 5 and 50 are recommended to seed the classification boundary.
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setStep(2)}
+                                className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl border border-slate-700 transition-all flex items-center justify-center gap-2"
+                            >
+                                <ArrowLeft size={16} /> Back
+                            </button>
+                            <button
+                                onClick={handleLaunch}
+                                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                            >
+                                <Activity size={16} /> Launch Session
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Footer and Connection Status */}
+                <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                    <span>Progress will auto-save</span>
+                    <div className={`flex items-center gap-1.5 font-medium ${mlReady ? 'text-green-500' : 'text-amber-500 animate-pulse'}`}>
+                        <div className={`w-2 h-2 rounded-full ${mlReady ? 'bg-green-500' : 'bg-amber-500'}`} />
+                        <span>{mlReady ? 'ML Core Connected' : `Connecting... (${warmupAttempts})`}</span>
+                    </div>
                 </div>
+
             </div>
         </div>
     );

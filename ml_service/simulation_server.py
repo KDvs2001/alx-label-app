@@ -103,6 +103,8 @@ class SimulationState:
         self.history = []
         self.interaction_buffer = []  # Buffer to accumulate interactions for cost model update
         self.selected_task_lengths = [] # Track history of selected task lengths
+        self.labeled_ids = set() # Track all task IDs labeled manually or automatically
+        self.last_bg_auto_labeled_count = 0
 
         # Initialize Files (Prevent 404s on Frontend)
         self._init_files()
@@ -260,6 +262,10 @@ class SimulationState:
                 json.dump(initial_history, f)
             # .copy() so mutating self.history later doesn't touch the original list
             # CITATION: list.copy() - create a shallow copy to avoid shared references
+            with open(HISTORY_PATH, "w") as f: 
+                json.dump(initial_history, f)
+            # .copy() so mutating self.history later doesn't touch the original list
+            # CITATION: list.copy() - create a shallow copy to avoid shared references
             # SOURCE: Stack Overflow (2010). "How to clone a list in Python"
             # URL: https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
             self.history = initial_history.copy()
@@ -286,6 +292,19 @@ def health():
     # CITATION: jsonify() - return a Flask JSON response with correct content-type
     # SOURCE: Stack Overflow (2013). "Return JSON response from Flask"
     # URL: https://stackoverflow.com/questions/13081532/how-to-return-json-using-flask
+    
+    ece_val = 0.0
+    last_bg_auto_labeled_count = 0
+    pool_remaining = len([t for t in state.clean_pool if t['id'] not in state.labeled_ids])
+    
+    if os.path.exists(METRICS_PATH):
+        try:
+            with open(METRICS_PATH, "r") as f:
+                mData = json.load(f)
+                ece_val = mData.get("ece", 0.0)
+                last_bg_auto_labeled_count = mData.get("last_bg_auto_labeled_count", 0)
+        except: pass
+
     return jsonify({
         "status": "ok", 
         "alpha": state.cost_model.alpha, 
@@ -297,7 +316,11 @@ def health():
             "model": state.cost_model.difficulty_model.metadata()
         },
         "mode": "Real Research",
-        "accuracy_history": getattr(state, 'accuracy_history', [])
+        "accuracy_history": getattr(state, 'accuracy_history', []),
+        "ece": ece_val,
+        "last_bg_auto_labeled_count": last_bg_auto_labeled_count,
+        "pool_remaining": pool_remaining,
+        "pool_total": len(state.pool) if hasattr(state, 'pool') else 1000
     })
 
 @app.route('/session/init-priors', methods=['POST'])
@@ -739,6 +762,64 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
             
             scores['step'] = current_step
             state.accuracy_history.append(scores)
+
+            # Compute Expected Calibration Error (ECE) dynamically
+            ece_val = 0.0
+            try:
+                probs_test = state.models['cal_log'].predict_proba(X_test)
+                confidences = np.max(probs_test, axis=1)
+                predictions = np.argmax(probs_test, axis=1)
+                y_test_arr = np.array(y_test)
+                
+                bin_boundaries = np.linspace(0, 1, 11)
+                for i in range(10):
+                    bin_lower = bin_boundaries[i]
+                    bin_upper = bin_boundaries[i+1]
+                    in_bin = (confidences > bin_lower) & (confidences <= bin_upper)
+                    prop_in_bin = np.mean(in_bin)
+                    if prop_in_bin > 0:
+                        accuracy_in_bin = np.mean(predictions[in_bin] == y_test_arr[in_bin])
+                        avg_confidence_in_bin = np.mean(confidences[in_bin])
+                        ece_val += prop_in_bin * np.abs(avg_confidence_in_bin - accuracy_in_bin)
+                ece_val = round(float(ece_val), 3)
+            except Exception as e:
+                logger.warning(f"Background Thread: Failed to calculate ECE in validation: {e}")
+            
+            # AUTOMATIC HIGH-CONFIDENCE AUTO-LABELING (Background Active Pruning)
+            auto_labeled_count = 0
+            available = [t for t in state.clean_pool if t['id'] not in state.labeled_ids]
+            
+            if available:
+                try:
+                    texts = [t['text'] for t in available]
+                    probs = state.models['cal_log'].predict_proba(texts)
+                    for idx, task in enumerate(available):
+                        prob = probs[idx]
+                        max_conf = np.max(prob)
+                        
+                        # Auto-label with 98% confidence
+                        if max_conf >= 0.98:
+                            pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
+                            record_annotation_observation(
+                                text=task['text'],
+                                time_seconds=0.1,
+                                label=pred_label,
+                                task_id=task['id']
+                            )
+                            state.labeled_ids.add(task['id'])
+                            auto_labeled_count += 1
+                            
+                            # Incrementally retrain
+                            label_int = 1 if pred_label == 'Positive' else 0
+                            state.models['cal_log'].partial_fit([task['text']], [label_int])
+                except Exception as e:
+                    logger.error(f"Background Thread: Dynamic auto-labeling failed: {e}")
+            
+            if auto_labeled_count > 0:
+                logger.info(f"Background Thread: Auto-labeled {auto_labeled_count} items. Workload reduced.")
+                state.last_bg_auto_labeled_count = auto_labeled_count
+            else:
+                state.last_bg_auto_labeled_count = 0
             
             # Persist metrics to file
             try:
@@ -746,7 +827,10 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                     "accuracy_history": state.accuracy_history,
                     "step": current_step,
                     "alpha": alpha,
-                    "beta": beta
+                    "beta": beta,
+                    "ece": ece_val,
+                    "last_bg_auto_labeled_count": auto_labeled_count,
+                    "pool_remaining": len(available) - auto_labeled_count
                 }
                 with open(METRICS_PATH, "w") as f:
                     json.dump(metrics_data, f)
@@ -769,17 +853,26 @@ def annotate():
     text = data.get('text', "")
     label = data.get('label')
     time_taken = data.get('time_taken', 1.0)
+    task_id = data.get('taskId')
     
     state.step += 1
     state.steps_since_update += 1
     state.steps_since_train += 1
+    
+    if task_id is not None:
+        # Convert to int if it is numerical to maintain consistency with JSON IDs
+        try:
+            task_id = int(task_id)
+        except (ValueError, TypeError):
+            pass
+        state.labeled_ids.add(task_id)
     
     # We update the Cognitive Cost Model incrementally.
     # By logging the exact time it took them to read this specific text length,
     # our alpha/beta parameters dynamically shift to match their current physical fatigue level.
     interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
     state.interaction_buffer.append(interaction)  # Keep rolling history
-    record_annotation_observation(text=text, time_seconds=time_taken, label=label)
+    record_annotation_observation(text=text, time_seconds=time_taken, label=label, task_id=task_id)
     
     if state.steps_since_update >= 5:
         recent_interactions = state.interaction_buffer[-5:]
@@ -858,47 +951,117 @@ def annotate():
 
 @app.route('/reset', methods=['POST'])
 def reset_session():
-    """Reset ALL state for a new contestant, complete fresh start."""
+    """Reset ALL state for a new contestant, complete fresh start with optional dataset configurations."""
     try:
+        payload = request.json or {}
+        dataset_name = payload.get("datasetName", "imdb")
+        custom_labels = payload.get("labels", ["Negative", "Positive"])
+        seed_type = payload.get("seedType", "unlabeled")
+        seed_count = int(payload.get("seedCount", 10))
+        uploaded_texts = payload.get("uploadedTexts")
+        
+        num_labels = len(custom_labels)
+        state.custom_labels = custom_labels
+        state.labeled_ids = set() # Clear server-side labeled IDs
+        state.last_bg_auto_labeled_count = 0
+
         # 1. Reset cost model to cold-start defaults
         state.cost_model = build_cost_model()
         state.ranker = CALLogRanker(state.cost_model)
         
-        # 2. Re-initialize backbone models (fresh weights, no previous training)
-        state.backbone = SimpleBackbone(num_labels=2)
+        # 2. Re-initialize backbone models (fresh weights, matching the number of labels)
+        state.backbone = SimpleBackbone(num_labels=num_labels)
         state.models = {
             'cal_log': state.backbone,
-            'random': SimpleBackbone(num_labels=2),
-            'entropy': SimpleBackbone(num_labels=2)
+            'random': SimpleBackbone(num_labels=num_labels),
+            'entropy': SimpleBackbone(num_labels=num_labels)
         }
         
-        # 3. Re-pretrain on seed sample for warm start
-        state._pretrain_seed()
+        # 3. Handle custom or preset dataset loading
+        if dataset_name == "custom" and uploaded_texts:
+            logger.info(f"Loading custom uploaded dataset with {len(uploaded_texts)} items...")
+            state.dataset = []
+            state.id_to_label = {}
+            for idx, txt in enumerate(uploaded_texts):
+                # Generate mock labels for simulation backends
+                mock_lbl = idx % num_labels
+                state.dataset.append({'id': idx, 'text': txt, 'label': mock_lbl})
+                state.id_to_label[idx] = mock_lbl
+        else:
+            # Re-read preset dataset.json (simulating default IMDB/Tomatoes)
+            logger.info(f"Loading preset dataset: {dataset_name}")
+            state.dataset = []
+            state.id_to_label = {}
+            try:
+                with open("dataset.json", "r") as f:
+                    raw = json.load(f)
+                    for i, r in enumerate(raw):
+                        txt = r.get('data', {}).get('text') or r.get('text', "")
+                        l_str = r.get('true_label') or r.get('label')
+                        lbl = 1 if l_str == 'Positive' else 0
+                        if txt:
+                            state.dataset.append({'id': i, 'text': txt, 'label': lbl})
+                            state.id_to_label[i] = lbl
+            except Exception as e:
+                logger.error(f"Failed to load dataset.json during reset: {e}")
         
-        # 4. Reset all counters
+        # Hydrate pool
+        state.test_set = state.dataset[:100] if len(state.dataset) > 100 else state.dataset[:10]
+        state.pool = state.dataset[100:] if len(state.dataset) > 100 else state.dataset
+        state.clean_pool = list(state.pool)
+        
+        # Recalculate length statistics
+        state.all_lengths = [len(d['text'].split()) for d in state.dataset]
+        state.max_len = max(state.all_lengths) if state.all_lengths else 0
+        state.avg_len = np.mean(state.all_lengths) if state.all_lengths else 0
+
+        # Shuffle pool
+        import random
+        random.shuffle(state.clean_pool)
+        
+        # 4. Handle Seeding
+        if seed_type == "labeled_seed" and seed_count > 0:
+            logger.info(f"Applying labeled seed of {seed_count} points for warm start...")
+            seed_size = min(seed_count, len(state.clean_pool))
+            seed = random.sample(state.clean_pool, seed_size)
+            
+            X = [d['text'] for d in seed]
+            y = [d['label'] for d in seed]
+            
+            # Warm fit all models
+            if len(set(y)) >= 2 or num_labels > 2:
+                for name, model in state.models.items():
+                    model.partial_fit(X, y)
+                    
+            # Subtract seed IDs from pool and add to labeled_ids
+            for s in seed:
+                state.labeled_ids.add(s['id'])
+                
+            state.clean_pool = [t for t in state.clean_pool if t['id'] not in state.labeled_ids]
+            logger.info(f"Active learning models seeded. Remaining pool: {len(state.clean_pool)} items.")
+        else:
+            state._pretrain_seed()
+        
+        # 5. Reset all counters
         state.step = 0
         state.steps_since_update = 0
         state.steps_since_train = 0
         state.selected_task_lengths = []
         
-        # 5. Clear all buffers
+        # 6. Clear all buffers
         state.interaction_buffer = []
         state.pending_labels_cal_log = []
         state.pending_labels_random = []
         state.pending_labels_entropy = []
-        # hasattr check before del to avoid AttributeError if it was never set
-        # CITATION: hasattr() + del - safely remove a dynamic attribute from an object
-        # SOURCE: Stack Overflow (2010). "How to delete an attribute from an object"
-        # URL: https://stackoverflow.com/questions/2118951/how-can-i-delete-a-variable-in-python
         if hasattr(state, 'last_shadow_picks'):
             del state.last_shadow_picks
         
-        # 6. Reset history to initial state
+        # 7. Reset history to initial state
         state.history = [{"step": 0, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta}]
         state.accuracy_history = [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}]
         state.cumulative_costs = {'cal_log': [], 'entropy': [], 'random': []}
         
-        # 7. Clear all spy files
+        # 8. Clear all spy files
         for fpath in [HISTORY_PATH, METRICS_PATH, SELECTION_PATH, TASK_LOG_PATH]:
             try:
                 if fpath == HISTORY_PATH:
@@ -908,28 +1071,27 @@ def reset_session():
                     with open(fpath, "w") as f:
                         json.dump({
                             "accuracy_history": state.accuracy_history,
-                            "step": 0, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta
+                            "step": 0, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta, "ece": 0.0, "last_bg_auto_labeled_count": 0, "pool_remaining": len(state.clean_pool)
                         }, f)
                 else:
                     with open(fpath, "w") as f:
                         json.dump([] if fpath == TASK_LOG_PATH else {}, f)
             except: pass
         
-        # 8. Re-shuffle pool for variety
-        import random
-        random.shuffle(state.clean_pool)
-        
-        logger.info("FULL SESSION RESET: fresh backbone, cost model, shuffled pool, and history for new contestant")
+        logger.info(f"FULL SESSION RESET COMPLETED: dataset={dataset_name}, labels={custom_labels}, seed={seed_type} ({seed_count})")
         
         return jsonify({
             "status": "ok",
             "message": "Session fully reset",
             "alpha": state.cost_model.alpha,
             "beta": state.cost_model.beta,
-            "prior_source": state.cost_model.alpha_prior_source
+            "prior_source": state.cost_model.alpha_prior_source,
+            "pool_total": len(state.clean_pool)
         })
     except Exception as e:
         logger.error(f"Failed to reset session: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/export', methods=['GET'])

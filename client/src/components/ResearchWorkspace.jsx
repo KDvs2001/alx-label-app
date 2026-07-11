@@ -312,7 +312,11 @@ const ResearchWorkspace = () => {
                     beta: mData.beta,
                     step: history.length * 5,
                     accuracy_history: mData.accuracy_history,
-                    cumulative_costs: cumulativeCosts
+                    cumulative_costs: cumulativeCosts,
+                    pool_remaining: mData.pool_remaining,
+                    pool_total: mData.pool_total,
+                    ece: mData.ece,
+                    last_bg_auto_labeled_count: mData.last_bg_auto_labeled_count
                 });
             }
         } catch (e) {
@@ -405,6 +409,7 @@ const ResearchWorkspace = () => {
 
         // Log for Cost Model Inputs table
         const interaction = {
+            taskId: currentTask.id,
             text: taskText, label, time_taken: timeTaken,
             len: textLength,
             logL: Math.log1p(textLength).toFixed(2),
@@ -516,7 +521,7 @@ const ResearchWorkspace = () => {
         }
     };
 
-    const handleContestantIdSubmit = async (id, action) => {
+    const handleContestantIdSubmit = async (id, action, config) => {
 
         if (action === 'resume') {
             try {
@@ -572,7 +577,9 @@ const ResearchWorkspace = () => {
             // Reset ML service state (backbone, cost model, history)
             try {
                 await fetch(`${API_URL}/reset`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config || {})
                 });
                 // ML service state reset for new annotator
             } catch (error) {
@@ -801,6 +808,7 @@ const ResearchWorkspace = () => {
                             interactionLog={interactionLog}
                             shadowMetrics={shadowMetrics}
                             onShowAlphaBetaPanel={() => setShowAlphaBetaPanel(true)}
+                            annotationCount={annotationCount}
                         />
                     </div>
                 </div>

@@ -23,7 +23,7 @@ jobs:
           git config --global user.name "Deployment Bot"
           
           # 1. Clone the specific HF Space
-          git clone https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/my-ml-service hf_space
+          git clone https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/ML_space hf_space
           
           # 2. Clear existing files in Space (to avoid conflicts)
           cd hf_space
@@ -36,4 +36,4 @@ jobs:
           # 4. Push changes
           git add .
           git commit -m "Sync from GitHub" --allow-empty
-          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/my-ml-service main
+          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/ML_space main
