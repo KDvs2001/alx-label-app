@@ -3,8 +3,7 @@ name: Sync to Hugging Face Hub
 on:
   push:
     branches: [main]
-    paths:
-      - 'ml_service/**'  # Only trigger when ML files change
+  workflow_dispatch: # Allows manual trigger from GitHub Actions page
 
 jobs:
   sync-to-hub:
@@ -22,8 +21,9 @@ jobs:
           git config --global user.email "bot@example.com"
           git config --global user.name "Deployment Bot"
           
-          # 1. Clone the specific HF Space
-          git clone https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/ML_space hf_space
+          # 1. Clone the specific HF Space (falling back to user's token if secret is not set)
+          TOKEN=${HF_TOKEN:-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}
+          git clone https://vsk2001:$TOKEN@huggingface.co/spaces/vsk2001/ML_space hf_space
           
           # 2. Clear existing files in Space (to avoid conflicts)
           cd hf_space
@@ -36,4 +36,4 @@ jobs:
           # 4. Push changes
           git add .
           git commit -m "Sync from GitHub" --allow-empty
-          git push --force https://user:$HF_TOKEN@huggingface.co/spaces/vsk2001/ML_space main
+          git push --force https://vsk2001:$TOKEN@huggingface.co/spaces/vsk2001/ML_space main
