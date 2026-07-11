@@ -1,12 +1,7 @@
-
 numpy
 scikit-learn
 requests
-torch
-setfit
-datasets
 scipy
 joblib
-redis
 flask
 flask-cors
