@@ -32,6 +32,7 @@ jobs:
           
           # 3. Copy contents of ml_service (from parent repo) to Root of Space
           cp -r ../ml_service/* .
+          cp ../Dockerfile .
           
           # 4. Push changes
           git add .
