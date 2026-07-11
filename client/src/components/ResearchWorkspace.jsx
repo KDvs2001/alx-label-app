@@ -505,11 +505,18 @@ const ResearchWorkspace = () => {
     };
 
     // Global keyboard event listener for rapid, mouse-free annotation labeling
+    // Keys 1..N map to each label in order; spacebar toggles the guidelines panel
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (submitting || !currentTask || showRoundTransition) return;
-            if (e.key === '1') handleAnnotate('Negative');
-            if (e.key === '2') handleAnnotate('Positive');
+            // Resolve the same label list that TaskCard uses so shortcuts always match buttons
+            const activeLabels = (datasetConfig?.labels?.length >= 2)
+                ? datasetConfig.labels
+                : ['Class A', 'Class B'];
+            const keyIndex = parseInt(e.key, 10) - 1; // '1' → 0, '2' → 1, etc.
+            if (!isNaN(keyIndex) && keyIndex >= 0 && keyIndex < activeLabels.length) {
+                handleAnnotate(activeLabels[keyIndex]);
+            }
             // Element.matches() prevents hotkeys from firing if the user is simultaneously typing in a text field
             // CITATION: Element.matches() - check if element would be selected by specified CSS selector
             // SOURCE: MDN Web Docs (n.d.). "Element.matches()"
@@ -525,7 +532,7 @@ const ResearchWorkspace = () => {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [currentTask, submitting, showRoundTransition]);
+    }, [currentTask, submitting, showRoundTransition, datasetConfig]);
 
     // Session Management Functions
     const saveSession = async (count = annotationCount, ids = labeledTaskIds, newAnnotation = null) => {
@@ -594,7 +601,7 @@ const ResearchWorkspace = () => {
 
                     const recConfig = {
                         datasetName: data.session.datasetName || 'imdb',
-                        labels: data.session.labels || ['Negative', 'Positive'],
+                        labels: data.session.labels || null,
                         uploadedTexts: data.session.uploadedTexts || null
                     };
                     setDatasetConfig(recConfig);
@@ -847,6 +854,61 @@ const ResearchWorkspace = () => {
                         isAutoLabeling={isAutoLabeling}
                     />
 
+                    {/* ── Live Pool Countdown Bar ─────────────────────────────────
+                        Shows the annotation pool shrinking in real-time.
+                        Metrics are derived from backend: pool_total, pool_remaining, auto_label_threshold.
+                        No hardcoded numbers — every value comes from live ML server state.
+                    ───────────────────────────────────────────────────────────── */}
+                    {metrics.pool_total > 0 && (() => {
+                        const pTotal = metrics.pool_total;
+                        const pRemaining = metrics.pool_remaining ?? pTotal;
+                        const autoLabeled = Math.max(0, pTotal - pRemaining - annotationCount);
+                        const processedPct = Math.min(100, Math.round(((annotationCount + autoLabeled) / pTotal) * 100));
+                        const manualPct = Math.min(100, (annotationCount / pTotal) * 100);
+                        const autoPct = Math.min(100 - manualPct, (autoLabeled / pTotal) * 100);
+                        const urgencyColor = pRemaining > pTotal * 0.6
+                            ? 'border-slate-700/40 bg-slate-900/60'
+                            : pRemaining > pTotal * 0.3
+                                ? 'border-blue-700/30 bg-blue-950/20'
+                                : 'border-emerald-700/40 bg-emerald-950/20';
+                        return (
+                            <div className={`shrink-0 rounded-xl border p-3 ${urgencyColor} transition-all duration-700`}>
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                            Pool: <span className="text-white font-black text-sm">{pRemaining}</span>
+                                            <span className="text-slate-500 font-normal"> / {pTotal} remaining</span>
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-[10px]">
+                                        {autoLabeled > 0 && (
+                                            <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                                                {autoLabeled} auto-pruned
+                                            </span>
+                                        )}
+                                        <span className="font-mono font-black text-slate-300">{processedPct}% done</span>
+                                    </div>
+                                </div>
+                                {/* Segmented Pool Bar */}
+                                <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden flex">
+                                    <div
+                                        style={{ width: `${manualPct}%` }}
+                                        className="bg-blue-500 transition-all duration-700 ease-in-out"
+                                        title={`Manually annotated: ${annotationCount}`}
+                                    />
+                                    <div
+                                        style={{ width: `${autoPct}%` }}
+                                        className="bg-emerald-400 transition-all duration-700 ease-in-out"
+                                        title={`Auto-pruned by model: ${autoLabeled}`}
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })()}
+
+
                     <div className="flex-1 min-h-0 relative">
                         {/* Task Card Container - Flex-1 ensures it grows natively */}
                         <div className="absolute inset-0 flex flex-col">
@@ -872,6 +934,7 @@ const ResearchWorkspace = () => {
                                 onAnnotate={handleAnnotate}
                                 onRetry={fetchNextBatch}
                                 elapsedTime={elapsedTime}
+                                labels={datasetConfig?.labels}
                             />
                         </div>
                         {/* Pause Overlay - freezes the workspace visually during Viva explanations */}
@@ -967,27 +1030,31 @@ const ResearchWorkspace = () => {
                                                     Approve
                                                 </button>
                                                 {/* Correct Buttons (alternative labels) */}
-                                                {datasetConfig?.labels ? (
-                                                    datasetConfig.labels
-                                                        .filter(lbl => lbl !== task.predicted_label)
-                                                        .map(lbl => (
+                                                {(() => {
+                                                    // Use datasetConfig labels if available, otherwise derive alternatives from predicted label
+                                                    const knownLabels = datasetConfig?.labels;
+                                                    const alternatives = knownLabels
+                                                        ? knownLabels.filter(lbl => lbl !== task.predicted_label)
+                                                        : [];
+                                                    return alternatives.length > 0
+                                                        ? alternatives.map(lbl => (
                                                             <button
                                                                 key={lbl}
                                                                 onClick={() => handleVerify(task.id, 'correct', lbl)}
                                                                 className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-lg transition-all"
                                                             >
-                                                                Correct to {lbl}
+                                                                Correct → {lbl}
                                                             </button>
                                                         ))
-                                                ) : (
-                                                    // Fallback if labels are not loaded yet
-                                                    <button
-                                                        onClick={() => handleVerify(task.id, 'correct', task.predicted_label === 'Positive' ? 'Negative' : 'Positive')}
-                                                        className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-lg transition-all"
-                                                    >
-                                                        Correct label
-                                                    </button>
-                                                )}
+                                                        : (
+                                                            <button
+                                                                onClick={() => handleVerify(task.id, 'reject')}
+                                                                className="px-3 py-1 bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-lg transition-all"
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        );
+                                                })()}
                                             </div>
                                         </div>
                                     </div>

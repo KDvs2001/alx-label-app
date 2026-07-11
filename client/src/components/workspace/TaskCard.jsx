@@ -4,17 +4,55 @@ import React from 'react';
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { CheckCircle, AlertCircle, Activity, Clock } from 'lucide-react';
+import { CheckCircle, AlertCircle, Activity, Clock, Tag } from 'lucide-react';
+
+/**
+ * Per-slot visual styles so the first label is always visually distinct from the second,
+ * and any additional labels get sensible colours.
+ * This intentionally avoids hardcoding Negative=red / Positive=green so the UI
+ * stays meaningful for ANY domain (e.g. spam/ham, relevant/irrelevant, toxic/safe).
+ */
+const LABEL_STYLES = [
+    {
+        bg: 'bg-rose-100 hover:bg-rose-200 border-rose-300 text-rose-700',
+        icon: <AlertCircle size={20} className="group-hover:scale-110 transition shrink-0" />,
+    },
+    {
+        bg: 'bg-green-100 hover:bg-green-200 border-green-300 text-green-700',
+        icon: <CheckCircle size={20} className="group-hover:scale-110 transition shrink-0" />,
+    },
+    {
+        bg: 'bg-blue-100 hover:bg-blue-200 border-blue-300 text-blue-700',
+        icon: <Tag size={20} className="group-hover:scale-110 transition shrink-0" />,
+    },
+    {
+        bg: 'bg-amber-100 hover:bg-amber-200 border-amber-300 text-amber-700',
+        icon: <Tag size={20} className="group-hover:scale-110 transition shrink-0" />,
+    },
+    {
+        bg: 'bg-purple-100 hover:bg-purple-200 border-purple-300 text-purple-700',
+        icon: <Tag size={20} className="group-hover:scale-110 transition shrink-0" />,
+    },
+];
 
 /**
  * TaskCard Component
  * Core annotation interface for the CAL-Log framework.
- * This component intentionally isolates the binary classification action from the broader statistical
- * dashboards (Spy Window) to strictly minimize cognitive load and preserve the evaluator's "flow state".
- * High signal-to-noise ratio is maintained to ensure the measured 'time_taken' accurately reflects 
- * reading comprehension rather than UI navigation time.
+ * This component intentionally isolates the binary (or multi-class) classification action
+ * from the broader statistical dashboards (Spy Window) to strictly minimize cognitive load
+ * and preserve the evaluator's "flow state".
+ * High signal-to-noise ratio is maintained to ensure the measured 'time_taken' accurately
+ * reflects reading comprehension rather than UI navigation time.
+ *
+ * @param {string[]} labels  - Array of label strings from the user's dataset config.
+ *                             Falls back to ['Class A', 'Class B'] if not provided.
  */
-const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime }) => {
+const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime, labels }) => {
+    // Resolve the actual label list — never fall back to hardcoded Negative/Positive
+    const resolvedLabels = (Array.isArray(labels) && labels.length >= 2)
+        ? labels
+        : ['Class A', 'Class B'];
+
     // strips HTML tags and noise from the raw dataset text so the reading time measurement
     // reflects actual comprehension rather than time spent parsing broken markup
     const cleanText = (text) => {
@@ -60,6 +98,13 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
     // optional chaining tries currentTask.data.text first, falls back to currentTask.text
     const displayText = cleanText(currentTask?.data?.text || currentTask?.text);
 
+    // Choose grid layout based on number of labels
+    const gridCols = resolvedLabels.length === 2
+        ? 'grid-cols-2'
+        : resolvedLabels.length === 3
+            ? 'grid-cols-3'
+            : 'grid-cols-2';
+
     return (
         <div className="tour-step-task-card flex-1 bg-white text-slate-900 rounded-2xl p-8 shadow-2xl flex flex-col relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500" />
@@ -77,41 +122,33 @@ const TaskCard = ({ currentTask, submitting, onAnnotate, onRetry, elapsedTime })
                 </div>
             </div>
 
-
-
             <div className="overflow-y-auto mb-3 max-h-96">
                 <p className="text-xl leading-relaxed font-medium">
                     {displayText}
                 </p>
             </div>
 
-            {/* 
-              * binary classification buttons bound to keyboard shortcuts (1 and 2)
+            {/*
+              * Dynamic label classification buttons bound to keyboard shortcuts (1..N)
               * disabled={submitting} prevents double-clicks while the server processes the annotation
               */}
-            <div className="grid grid-cols-2 gap-4">
-                <button
-                    onClick={() => onAnnotate('Negative')}
-                    disabled={submitting}
-                    className="p-4 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-xl border border-red-300 transition-all flex items-center justify-center gap-2 group"
-                >
-                    {/* group-hover:scale-110 makes the icon grow when the user hovers the button */}
-                    {/* CITATION: CSS transform: scale() - grow or shrink an element on hover */}
-                    {/* SOURCE: MDN Web Docs (n.d.). "scale()" */}
-                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/CSS/transform-function/scale */}
-                    <AlertCircle size={20} className="group-hover:scale-110 transition" />
-                    <span>Negative</span>
-                    <span className="text-xs opacity-70 ml-1">(Press 1)</span>
-                </button>
-                <button
-                    onClick={() => onAnnotate('Positive')}
-                    disabled={submitting}
-                    className="p-4 bg-green-100 hover:bg-green-200 text-green-700 font-bold rounded-xl border border-green-300 transition-all flex items-center justify-center gap-2 group"
-                >
-                    <span>Positive</span>
-                    <span className="text-xs opacity-70 ml-1">(Press 2)</span>
-                    <CheckCircle size={20} className="group-hover:scale-110 transition" />
-                </button>
+            <div className={`grid ${gridCols} gap-4`}>
+                {resolvedLabels.map((labelName, idx) => {
+                    const style = LABEL_STYLES[idx % LABEL_STYLES.length];
+                    return (
+                        <button
+                            key={labelName}
+                            onClick={() => onAnnotate(labelName)}
+                            disabled={submitting}
+                            className={`p-4 ${style.bg} font-bold rounded-xl border transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                            {idx === 0 && style.icon}
+                            <span>{labelName}</span>
+                            <span className="text-xs opacity-70 ml-1">(Press {idx + 1})</span>
+                            {idx > 0 && style.icon}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
