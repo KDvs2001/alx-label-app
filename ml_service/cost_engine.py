@@ -1,5 +1,8 @@
 import numpy as np
 import logging
+import os
+
+from difficulty_model import SemanticDifficultyRegressor
 
 # named logger for this module so log output shows "CostEngine" as the source
 # CITATION: logging.getLogger() — create a named logger per module
@@ -21,28 +24,63 @@ class AdaptiveCostModel:
     - beta represents reading speed multiplier (higher = slower reader)
     """
     
-    def __init__(self):
-        self.alpha = 5.0  # Cold start (mutable, will be overwritten by regression)
-        self.beta = 3.0   # Cold start (mutable, will be overwritten by regression)
+    def __init__(self, alpha_prior=None, beta_prior=None, use_semantic_cost=None, gamma=None, difficulty_model=None):
+        self.alpha = float(alpha_prior if alpha_prior is not None else 5.0)
+        self.beta = float(beta_prior if beta_prior is not None else 3.0)
+        self.alpha_prior_source = "session_prior" if alpha_prior is not None or beta_prior is not None else "default"
         self.user_history = []
+        self.use_semantic_cost = (
+            str(os.environ.get("CALLOG_USE_SEMANTIC_COST", "0")).lower() in {"1", "true", "yes"}
+            if use_semantic_cost is None else bool(use_semantic_cost)
+        )
+        self.gamma = float(gamma if gamma is not None else os.environ.get("CALLOG_GAMMA", 6.0))
+        self.difficulty_model = difficulty_model or SemanticDifficultyRegressor()
 
     def _heuristic_cost(self, log_length: float) -> float:
         """Calculate cost: C(x) = alpha + beta * log(1 + L(x))"""
         return self.alpha + (self.beta * log_length)
 
-    def predict(self, text_lengths: list) -> np.ndarray:
+    def predict(self, text_lengths: list, texts=None) -> np.ndarray:
         """Predict annotation cost for a list of text lengths."""
         # log1p(x) = ln(1 + x), more numerically stable than log(1+x) for small x
         # CITATION: np.log1p() — natural log of (1 + x) with better precision near zero
         # SOURCE: NumPy (n.d.). "numpy.log1p"
         # URL: https://numpy.org/doc/stable/reference/generated/numpy.log1p.html
         log_lengths = np.log1p(text_lengths)
-        predicted_costs = [self._heuristic_cost(l) for l in log_lengths]
+        predicted_costs = np.array([self._heuristic_cost(l) for l in log_lengths], dtype=float)
+        if self.use_semantic_cost and texts is not None and self.difficulty_model.available:
+            difficulties = self.difficulty_model.predict(texts)
+            predicted_costs = predicted_costs + (self.gamma * difficulties)
         # wrap the result as a numpy array so callers get vectorised operations
         # CITATION: np.array() — create an ndarray from a Python list
         # SOURCE: NumPy (n.d.). "numpy.array"
         # URL: https://numpy.org/doc/stable/reference/generated/numpy.array.html
         return np.array(predicted_costs)
+
+    def predict_with_breakdown(self, texts: list):
+        lengths = [len(t.split()) for t in texts]
+        log_lengths = np.log1p(lengths)
+        base_costs = np.array([self._heuristic_cost(l) for l in log_lengths], dtype=float)
+        difficulties = (
+            self.difficulty_model.predict(texts)
+            if self.use_semantic_cost and self.difficulty_model.available
+            else np.zeros(len(texts), dtype=float)
+        )
+        semantic_penalty = self.gamma * difficulties
+        total_costs = base_costs + semantic_penalty
+        return {
+            "costs": total_costs,
+            "base_costs": base_costs,
+            "semantic_difficulty": difficulties,
+            "semantic_penalty": semantic_penalty,
+            "semantic_enabled": bool(self.use_semantic_cost and self.difficulty_model.available),
+            "gamma": self.gamma,
+        }
+
+    def set_priors(self, alpha_prior: float, beta_prior: float, source: str = "session_prior"):
+        self.alpha = float(max(1.0, min(15.0, alpha_prior)))
+        self.beta = float(max(0.1, min(15.0, beta_prior)))
+        self.alpha_prior_source = source
 
     def update(self, new_interaction_logs: list):
         """

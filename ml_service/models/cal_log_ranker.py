@@ -64,9 +64,10 @@ class CALLogRanker:
         # CITATION: str.split() - split a string into a list of words by whitespace
         # SOURCE: Python Software Foundation (n.d.). "str.split"
         # URL: https://docs.python.org/3/library/stdtypes.html#str.split
+        if hasattr(self.cost_model, "predict_with_breakdown"):
+            return self.cost_model.predict_with_breakdown(texts)["costs"]
         lengths = [len(t.split()) for t in texts]
-        costs = self.cost_model.predict(lengths)
-        return costs
+        return self.cost_model.predict(lengths, texts=texts)
     
     def rank_by_cal_log(
         self, 
@@ -89,7 +90,12 @@ class CALLogRanker:
         
         # Calculate components
         entropy = self.calculate_entropy(probabilities)
-        costs = self.calculate_costs(texts)
+        cost_breakdown = (
+            self.cost_model.predict_with_breakdown(texts)
+            if hasattr(self.cost_model, "predict_with_breakdown")
+            else {"costs": self.calculate_costs(texts)}
+        )
+        costs = cost_breakdown["costs"]
         
         # the CAL-Log formula: Score = Uncertainty / Expected Time.
         # this naturally adapts to the user's fatigue. if the user slows down
@@ -137,7 +143,12 @@ class CALLogRanker:
                     "phase": "CAL-Log Active",
                     "cost_analysis": {
                         "predicted_seconds": float(costs[idx]),
-                        "context_penalty": "Adaptive"
+                        "base_seconds": float(cost_breakdown.get("base_costs", costs)[idx]),
+                        "semantic_difficulty": float(cost_breakdown.get("semantic_difficulty", np.zeros(len(tasks)))[idx]),
+                        "semantic_penalty": float(cost_breakdown.get("semantic_penalty", np.zeros(len(tasks)))[idx]),
+                        "semantic_enabled": bool(cost_breakdown.get("semantic_enabled", False)),
+                        "gamma": float(cost_breakdown.get("gamma", 0.0)),
+                        "context_penalty": "Adaptive + semantic difficulty" if cost_breakdown.get("semantic_enabled", False) else "Adaptive"
                     },
                     "math_proof": {
                         "entropy": float(entropy[idx]),

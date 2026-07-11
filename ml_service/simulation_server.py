@@ -16,6 +16,18 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from utilities.simple_backbone import SimpleBackbone
 from cost_engine import AdaptiveCostModel
+from difficulty_model import (
+    OBSERVATIONS_PATH,
+    bootstrap_cost_labels,
+    estimate_priors_from_observations,
+    load_dataset_sample,
+    load_observations,
+    record_annotation_observation,
+    read_jsonl,
+    train_self_trained_model,
+    write_jsonl,
+)
+from prior_engine import estimate_cost_priors, load_priors, save_priors
 from models.cal_log_ranker import CALLogRanker
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -40,7 +52,7 @@ def index():
     return jsonify({
         "service": "CAL-Log Simulation Server",
         "status": "running",
-        "endpoints": ["/predict", "/annotate", "/reset", "/health",
+        "endpoints": ["/predict", "/annotate", "/reset", "/health", "/session/init-priors", "/session/train-cost-model",
                       "/spy/selection", "/spy/history", "/spy/metrics", "/spy/task_log"]
     })
 
@@ -57,6 +69,15 @@ HISTORY_PATH = os.path.join(_BASE_DIR, "spy_history.json")
 SELECTION_PATH = os.path.join(_BASE_DIR, "spy_selection.json")
 TASK_LOG_PATH = os.path.join(_BASE_DIR, "spy_task_log.json")
 
+
+def build_cost_model():
+    use_priors = str(os.environ.get("CALLOG_USE_SESSION_PRIORS", "0")).lower() in {"1", "true", "yes"}
+    priors = load_priors() if use_priors else {}
+    return AdaptiveCostModel(
+        alpha_prior=priors.get("alpha_prior"),
+        beta_prior=priors.get("beta_prior"),
+    )
+
 # singleton state object shared by all route handlers - instantiated once when the server boots.
 # flask's dev server is single-threaded so this is safe without locking.
 # CITATION: module-level globals in Flask - shared state across request handlers
@@ -64,7 +85,7 @@ TASK_LOG_PATH = os.path.join(_BASE_DIR, "spy_task_log.json")
 # URL: https://stackoverflow.com/questions/32815451/are-global-variables-thread-safe-in-flask
 class SimulationState:
     def __init__(self):
-        self.cost_model = AdaptiveCostModel()
+        self.cost_model = build_cost_model()
         
         # 1. Initialize Backbone
         # We exclusively use SimpleBackbone (TF-IDF + SGD) for the active learning simulation loop.
@@ -234,7 +255,7 @@ class SimulationState:
         """Write default spy files on startup so the frontend doesn't 404."""
         try:
             # always start fresh for a new user
-            initial_history = [{"step": 0, "alpha": 5.0, "beta": 3.0}]
+            initial_history = [{"step": 0, "alpha": self.cost_model.alpha, "beta": self.cost_model.beta}]
             with open(HISTORY_PATH, "w") as f: 
                 json.dump(initial_history, f)
             # .copy() so mutating self.history later doesn't touch the original list
@@ -242,7 +263,7 @@ class SimulationState:
             # SOURCE: Stack Overflow (2010). "How to clone a list in Python"
             # URL: https://stackoverflow.com/questions/2612802/how-to-clone-or-copy-a-list
             self.history = initial_history.copy()
-            logger.info("History reset to initial values (alpha=5.0, beta=3.0)")
+            logger.info(f"History reset to initial values (alpha={self.cost_model.alpha:.2f}, beta={self.cost_model.beta:.2f})")
             
             if not os.path.exists(SELECTION_PATH):
                 with open(SELECTION_PATH, "w") as f: json.dump({}, f)
@@ -269,9 +290,78 @@ def health():
         "status": "ok", 
         "alpha": state.cost_model.alpha, 
         "beta": state.cost_model.beta,
+        "prior_source": state.cost_model.alpha_prior_source,
+        "semantic_cost": {
+            "enabled": state.cost_model.use_semantic_cost,
+            "gamma": state.cost_model.gamma,
+            "model": state.cost_model.difficulty_model.metadata()
+        },
         "mode": "Real Research",
         "accuracy_history": getattr(state, 'accuracy_history', [])
     })
+
+@app.route('/session/init-priors', methods=['POST'])
+def init_priors():
+    """Local cold-start prior estimation from previous sessions or corpus bootstrap features."""
+    payload = request.json or {}
+    limit = int(payload.get("sample_size", 300))
+    persist = bool(payload.get("persist", True))
+    apply_to_session = bool(payload.get("apply", True))
+    min_observations = int(payload.get("min_observations", 20))
+
+    observations = load_observations()
+    if len(observations) >= min_observations:
+        priors = estimate_priors_from_observations(observations)
+    else:
+        texts = payload.get("texts")
+        if texts:
+            records = [{"id": idx, "text": str(text), "label": None} for idx, text in enumerate(texts[:limit])]
+        else:
+            records = load_dataset_sample(limit=limit)
+        labels = bootstrap_cost_labels(records)
+        priors = estimate_cost_priors(records, labels)
+        priors["source"] = "transparent_corpus_bootstrap"
+        priors["observation_count"] = len(observations)
+    if persist:
+        save_priors(priors)
+    if apply_to_session:
+        state.cost_model.set_priors(priors["alpha_prior"], priors["beta_prior"], source=priors["source"])
+        state.ranker = CALLogRanker(state.cost_model)
+        state.history = [{"step": state.step, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta}]
+        try:
+            with open(HISTORY_PATH, "w") as f:
+                json.dump(state.history, f)
+        except Exception:
+            pass
+
+    return jsonify(priors)
+
+@app.route('/session/train-cost-model', methods=['POST'])
+def train_cost_model():
+    """Train the local semantic difficulty model from accumulated annotation observations."""
+    payload = request.json or {}
+    imported = payload.get("observations") or []
+    if imported:
+        existing = load_observations()
+        write_jsonl(OBSERVATIONS_PATH, existing + imported)
+
+    observations = load_observations()
+    if len(observations) < int(payload.get("min_observations", 20)):
+        return jsonify({
+            "status": "insufficient_data",
+            "observations": len(observations),
+            "required": int(payload.get("min_observations", 20)),
+            "message": "Collect more annotation sessions, then train again."
+        }), 400
+
+    priors = estimate_priors_from_observations(observations)
+    save_priors(priors)
+    metrics = train_self_trained_model(observations)
+
+    state.cost_model.set_priors(priors["alpha_prior"], priors["beta_prior"], source=priors["source"])
+    state.cost_model.difficulty_model = state.cost_model.difficulty_model.__class__()
+    state.ranker = CALLogRanker(state.cost_model)
+    return jsonify({"status": "ok", "priors": priors, "difficulty_model": metrics})
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -481,7 +571,13 @@ def predict():
         "cost": top['transparency_report']['cost_analysis']['predicted_seconds'],
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta,
-        "reasoning": f"Score ({top['score']:.3f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s) - where Cost = alpha({state.cost_model.alpha:.1f}) + beta({state.cost_model.beta:.2f}) * log(1+L)",
+        "reasoning": f"Score ({top['score']:.3f}) = Entropy ({top['transparency_report']['math_proof']['entropy']:.3f}) / Cost ({top['transparency_report']['cost_analysis']['predicted_seconds']:.1f}s) - where Cost = alpha({state.cost_model.alpha:.1f}) + beta({state.cost_model.beta:.2f}) * log(1+L) + semantic_penalty({top['transparency_report']['cost_analysis'].get('semantic_penalty', 0.0):.2f})",
+        "semantic_cost": {
+            "enabled": top['transparency_report']['cost_analysis'].get('semantic_enabled', False),
+            "difficulty": top['transparency_report']['cost_analysis'].get('semantic_difficulty', 0.0),
+            "penalty": top['transparency_report']['cost_analysis'].get('semantic_penalty', 0.0),
+            "gamma": top['transparency_report']['cost_analysis'].get('gamma', 0.0)
+        },
         "task_stats": {
             "length": t_len,
             "percentile": round(pct, 1),
@@ -623,10 +719,12 @@ def annotate():
     # our alpha/beta parameters dynamically shift to match their current physical fatigue level.
     interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
     state.interaction_buffer.append(interaction)  # Keep rolling history
+    record_annotation_observation(text=text, time_seconds=time_taken, label=label)
     
     if state.steps_since_update >= 5:
-        logger.info(f"Updating Cost Model with {len(state.interaction_buffer)} interactions (rolling)...")
-        state.cost_model.update(state.interaction_buffer)  # Pass full rolling history
+        recent_interactions = state.interaction_buffer[-5:]
+        logger.info(f"Updating Cost Model with {len(recent_interactions)} recent interactions...")
+        state.cost_model.update(recent_interactions)
         state.steps_since_update = 0
         # Do not clear interaction_buffer, cost_engine uses a rolling window
         # of the last 5 internally. Keeping the full buffer ensures continuity.
@@ -645,13 +743,15 @@ def annotate():
     if hasattr(state, 'last_shadow_picks'):
         # Random Choice
         rnd_task = state.last_shadow_picks['random']
-        rnd_lbl = state.id_to_label.get(rnd_task['id'], 0) 
-        state.pending_labels_random = getattr(state, 'pending_labels_random', []) + [(rnd_task['text'], rnd_lbl)]
+        if rnd_task:
+            rnd_lbl = state.id_to_label.get(rnd_task['id'], 0) 
+            state.pending_labels_random = getattr(state, 'pending_labels_random', []) + [(rnd_task['text'], rnd_lbl)]
         
         # Entropy Choice
         ent_task = state.last_shadow_picks['entropy']
-        ent_lbl = state.id_to_label.get(ent_task['id'], 0)
-        state.pending_labels_entropy = getattr(state, 'pending_labels_entropy', []) + [(ent_task['text'], ent_lbl)]
+        if ent_task:
+            ent_lbl = state.id_to_label.get(ent_task['id'], 0)
+            state.pending_labels_entropy = getattr(state, 'pending_labels_entropy', []) + [(ent_task['text'], ent_lbl)]
     
     # BUFFER USER LABELS
     # Convert label to integer: 'Positive' -> 1, 'Negative' -> 0
@@ -752,7 +852,7 @@ def reset_session():
     """Reset ALL state for a new contestant, complete fresh start."""
     try:
         # 1. Reset cost model to cold-start defaults
-        state.cost_model = AdaptiveCostModel()
+        state.cost_model = build_cost_model()
         state.ranker = CALLogRanker(state.cost_model)
         
         # 2. Re-initialize backbone models (fresh weights, no previous training)
@@ -785,7 +885,7 @@ def reset_session():
             del state.last_shadow_picks
         
         # 6. Reset history to initial state
-        state.history = [{"step": 0, "alpha": 5.0, "beta": 3.0}]
+        state.history = [{"step": 0, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta}]
         state.accuracy_history = [{'step': 0, 'cal_log': 0.5, 'random': 0.5, 'entropy': 0.5}]
         state.cumulative_costs = {'cal_log': [], 'entropy': [], 'random': []}
         
@@ -799,7 +899,7 @@ def reset_session():
                     with open(fpath, "w") as f:
                         json.dump({
                             "accuracy_history": state.accuracy_history,
-                            "step": 0, "alpha": 5.0, "beta": 3.0
+                            "step": 0, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta
                         }, f)
                 else:
                     with open(fpath, "w") as f:
@@ -815,8 +915,9 @@ def reset_session():
         return jsonify({
             "status": "ok",
             "message": "Session fully reset",
-            "alpha": 5.0,
-            "beta": 3.0
+            "alpha": state.cost_model.alpha,
+            "beta": state.cost_model.beta,
+            "prior_source": state.cost_model.alpha_prior_source
         })
     except Exception as e:
         logger.error(f"Failed to reset session: {e}")
