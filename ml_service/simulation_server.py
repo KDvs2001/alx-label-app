@@ -107,6 +107,8 @@ class SimulationState:
         self.last_bg_auto_labeled_count = 0
         self.round_size = 10
         self.verification_queue = {} # Maps taskId (int) -> dict of task details (text, label, confidence, etc.)
+        self.auto_label_threshold = 0.95
+        self.auto_label_threshold_mode = 'dynamic'
 
         # Initialize Files (Prevent 404s on Frontend)
         self._init_files()
@@ -324,7 +326,8 @@ def health():
         "last_bg_auto_labeled_count": last_bg_auto_labeled_count,
         "pool_remaining": pool_remaining,
         "pool_total": len(state.pool) if hasattr(state, 'pool') else 1000,
-        "verification_queue": verification_queue_list
+        "verification_queue": verification_queue_list,
+        "auto_label_threshold": getattr(state, 'auto_label_threshold', 0.95)
     })
 
 @app.route('/session/init-priors', methods=['POST'])
@@ -788,10 +791,19 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                 ece_val = round(float(ece_val), 3)
             except Exception as e:
                 logger.warning(f"Background Thread: Failed to calculate ECE in validation: {e}")
+
+            # DYNAMIC CONFIDENCE THRESHOLD ADAPTATION (Self-Tuning Engine)
+            # Adjust the auto-labeling confidence threshold dynamically based on validation accuracy and Expected Calibration Error (ECE)
+            if getattr(state, 'auto_label_threshold_mode', 'dynamic') == 'dynamic':
+                acc_val = scores.get('cal_log', 0.5)
+                # Scale threshold between 0.85 and 0.98 based on accuracy and ECE
+                raw_threshold = 0.98 - (acc_val - 0.5) * 0.2 + (ece_val * 0.1)
+                state.auto_label_threshold = round(max(0.85, min(0.98, raw_threshold)), 3)
+                logger.info(f"Self-Tuning Engine: Dynamically adjusted Auto-Pruning Threshold to {state.auto_label_threshold} based on Accuracy={acc_val:.2f}, ECE={ece_val:.3f}")
             
             # AUTOMATIC HIGH-CONFIDENCE AUTO-LABELING (Background Active Pruning)
             auto_labeled_count = 0
-            available = [t for t in state.clean_pool if t['id'] not in state.labeled_ids]
+            available = [t for t in state.clean_pool if t['id'] not in state.labeled_ids and t['id'] not in state.verification_queue]
             
             if available:
                 try:
@@ -801,8 +813,8 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                         prob = probs[idx]
                         max_conf = np.max(prob)
                         
-                        # Auto-label with 98% confidence
-                        if max_conf >= 0.98:
+                        # Auto-label with dynamic confidence threshold
+                        if max_conf >= state.auto_label_threshold:
                             pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
                             state.verification_queue[task['id']] = {
                                 'id': task['id'],
@@ -922,21 +934,16 @@ def annotate():
         setattr(state, 'pending_labels_random', [])
         setattr(state, 'pending_labels_entropy', [])
         
-        # Spawn daemonized background thread to prevent UI freezing
-        t = threading.Thread(
-            target=bg_train_worker,
-            args=(
-                cal_log_data, 
-                random_data, 
-                entropy_data, 
-                state.test_set, 
-                state.step, 
-                state.cost_model.alpha, 
-                state.cost_model.beta
-            )
+        # Run synchronously to ensure metrics and active pruning are completed before response
+        bg_train_worker(
+            cal_log_data, 
+            random_data, 
+            entropy_data, 
+            state.test_set, 
+            state.step, 
+            state.cost_model.alpha, 
+            state.cost_model.beta
         )
-        t.daemon = True
-        t.start()
         
         state.steps_since_train = 0
         triggered_training = True
@@ -965,6 +972,13 @@ def reset_session():
         state.last_bg_auto_labeled_count = 0
         state.round_size = int(payload.get("roundSize", 10))
         state.verification_queue = {}
+        thresh_val = payload.get("autoLabelThreshold", "dynamic")
+        if thresh_val == "dynamic":
+            state.auto_label_threshold_mode = "dynamic"
+            state.auto_label_threshold = 0.95
+        else:
+            state.auto_label_threshold_mode = "static"
+            state.auto_label_threshold = float(thresh_val)
 
         # 1. Reset cost model to cold-start defaults
         state.cost_model = build_cost_model()
@@ -1212,8 +1226,8 @@ def auto_label():
             prob = probs[idx]
             max_conf = np.max(prob)
             
-            # If the model is extremely confident (>98%), place it in the verification queue
-            if max_conf >= 0.98:
+            # If the model is confident enough, place it in the verification queue
+            if max_conf >= state.auto_label_threshold:
                 pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
                 state.verification_queue[task['id']] = {
                     'id': task['id'],

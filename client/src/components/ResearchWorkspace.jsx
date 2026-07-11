@@ -91,6 +91,7 @@ const ResearchWorkspace = () => {
 
     // Active Learning & Verification Queue States
     const [roundSize, setRoundSize] = useState(10);
+    const [autoLabelThreshold, setAutoLabelThreshold] = useState('dynamic');
     const [currentRound, setCurrentRound] = useState(1);
     const [showRoundTransition, setShowRoundTransition] = useState(false);
     const [verificationQueue, setVerificationQueue] = useState([]);
@@ -326,7 +327,8 @@ const ResearchWorkspace = () => {
                     pool_remaining: mData.pool_remaining,
                     pool_total: mData.pool_total,
                     ece: mData.ece,
-                    last_bg_auto_labeled_count: mData.last_bg_auto_labeled_count
+                    last_bg_auto_labeled_count: mData.last_bg_auto_labeled_count,
+                    auto_label_threshold: mData.auto_label_threshold
                 });
                 if (mData.verification_queue) {
                     setVerificationQueue(mData.verification_queue);
@@ -505,7 +507,7 @@ const ResearchWorkspace = () => {
     // Global keyboard event listener for rapid, mouse-free annotation labeling
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (submitting || !currentTask) return;
+            if (submitting || !currentTask || showRoundTransition) return;
             if (e.key === '1') handleAnnotate('Negative');
             if (e.key === '2') handleAnnotate('Positive');
             // Element.matches() prevents hotkeys from firing if the user is simultaneously typing in a text field
@@ -523,7 +525,7 @@ const ResearchWorkspace = () => {
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [currentTask, submitting]);
+    }, [currentTask, submitting, showRoundTransition]);
 
     // Session Management Functions
     const saveSession = async (count = annotationCount, ids = labeledTaskIds, newAnnotation = null) => {
@@ -545,6 +547,7 @@ const ResearchWorkspace = () => {
                 payload.labels = datasetConfig.labels;
                 payload.uploadedTexts = datasetConfig.uploadedTexts;
                 payload.roundSize = roundSize;
+                payload.autoLabelThreshold = autoLabelThreshold;
             }
             // Include full annotation data if provided
             if (newAnnotation) {
@@ -584,6 +587,8 @@ const ResearchWorkspace = () => {
                     // Recover dataset config
                     const rSize = data.session.roundSize || 10;
                     setRoundSize(rSize);
+                    const thresh = data.session.autoLabelThreshold || 'dynamic';
+                    setAutoLabelThreshold(thresh);
                     setCurrentRound(Math.floor(data.session.annotationCount / rSize) + 1);
                     setShowRoundTransition(false);
 
@@ -602,7 +607,8 @@ const ResearchWorkspace = () => {
                             body: JSON.stringify({
                                 ...recConfig,
                                 seedType: 'unlabeled',
-                                roundSize: rSize
+                                roundSize: rSize,
+                                autoLabelThreshold: thresh
                             })
                         });
                     } catch (e) {
@@ -616,6 +622,8 @@ const ResearchWorkspace = () => {
             // Both 'fresh' AND null (brand new user) need a full reset
             const rSize = config?.roundSize || 10;
             setRoundSize(rSize);
+            const thresh = config?.autoLabelThreshold || 'dynamic';
+            setAutoLabelThreshold(thresh);
             setCurrentRound(1);
             setShowRoundTransition(false);
 
@@ -1010,56 +1018,82 @@ const ResearchWorkspace = () => {
             {/* Round Transition Screen Overlay */}
             {showRoundTransition && (
                 <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
-                    <div className="bg-slate-900 border border-slate-700/80 rounded-2xl p-8 max-w-lg w-full shadow-2xl relative overflow-hidden flex flex-col gap-6">
+                    <div className="bg-slate-900 border border-slate-700/80 rounded-2xl p-8 max-w-lg w-full shadow-2xl relative overflow-hidden flex flex-col gap-5">
                         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
-                        
+
                         <div className="text-center">
                             <div className="w-16 h-16 rounded-full bg-blue-500/10 border-2 border-blue-500/50 flex items-center justify-center mx-auto mb-4 text-blue-400">
                                 <Activity size={32} className="animate-pulse" />
                             </div>
                             <h2 className="text-3xl font-extrabold text-white">Round {currentRound} Complete!</h2>
                             <p className="text-sm text-slate-400 mt-2">
-                                CAL-Log has successfully completed this active learning iteration.
+                                Model retrained. CAL-Log re-ranked the pool — see what changed below.
                             </p>
                         </div>
 
-                        {/* Round Performance Cards */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* 4-stat grid */}
+                        <div className="grid grid-cols-2 gap-3">
                             <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-center">
-                                <span className="text-xs text-slate-400 block mb-1">Model Accuracy</span>
+                                <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Model Accuracy</span>
                                 <span className="text-2xl font-bold text-green-400">
                                     {metrics.accuracy_history && metrics.accuracy_history.length > 0
                                         ? (metrics.accuracy_history[metrics.accuracy_history.length - 1].cal_log * 100).toFixed(0) + '%'
-                                        : '50%'}
+                                        : '—'}
                                 </span>
                             </div>
                             <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-center">
-                                <span className="text-xs text-slate-400 block mb-1">Workload Pruned</span>
+                                <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Tasks Remaining</span>
                                 <span className="text-2xl font-bold text-blue-400">
-                                    {metrics.last_bg_auto_labeled_count || 0} tasks
+                                    {metrics.pool_remaining ?? '—'}
                                 </span>
+                                {metrics.pool_total && (
+                                    <span className="text-[10px] text-slate-500 block">of {metrics.pool_total} total</span>
+                                )}
+                            </div>
+                            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-center">
+                                <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Pruned This Round</span>
+                                <span className="text-2xl font-bold text-purple-400">
+                                    {metrics.last_bg_auto_labeled_count || 0}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block">auto-labeled tasks removed</span>
+                            </div>
+                            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-center">
+                                <span className="text-[10px] text-slate-400 uppercase tracking-wider block mb-1">Pruning Threshold</span>
+                                <span className="text-2xl font-bold text-amber-400">
+                                    {metrics.auto_label_threshold
+                                        ? (metrics.auto_label_threshold * 100).toFixed(0) + '%'
+                                        : '—'}
+                                </span>
+                                <span className="text-[10px] text-slate-500 block">self-tuned by CAL-Log</span>
                             </div>
                         </div>
 
-                        {/* Cost Parameter Adaptation */}
-                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4">
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">CAL-Log Adaptive Feedback</span>
-                            <div className="flex flex-col gap-2 text-sm text-slate-300">
+                        {/* CAL-Log Adaptation breakdown */}
+                        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 flex flex-col gap-2">
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">CAL-Log Adaptive Cost Model</span>
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-slate-300">
                                 <div className="flex justify-between">
-                                    <span>Setup Overhead (α):</span>
+                                    <span className="text-slate-400">Setup Overhead (α)</span>
                                     <span className="font-mono font-bold">{metrics.alpha ? metrics.alpha.toFixed(2) : '5.00'}s</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>Reading Factor (β):</span>
+                                    <span className="text-slate-400">Reading Factor (β)</span>
                                     <span className="font-mono font-bold text-amber-400">{metrics.beta ? metrics.beta.toFixed(2) : '3.00'}s</span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Calibration (ECE)</span>
+                                    <span className="font-mono font-bold text-rose-400">{metrics.ece ? metrics.ece.toFixed(3) : '—'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Round Size</span>
+                                    <span className="font-mono font-bold">{roundSize} tasks</span>
+                                </div>
                             </div>
-                            <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
-                                As you annotated, CAL-Log mapped your reading speed (β) and overhead (α) to adaptively filter out exhausting, redundant tasks.
+                            <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                                CAL-Log scores each task as <span className="font-mono text-slate-400">Entropy(x) / (α + β·log(len))</span> — tasks that are informative AND fast to read rank highest. The confidence threshold above is self-tuned each round from your accuracy and ECE — no hardcoded values.
                             </p>
                         </div>
 
-                        {/* Continue Button */}
                         <button
                             onClick={() => {
                                 setShowRoundTransition(false);
@@ -1067,9 +1101,9 @@ const ResearchWorkspace = () => {
                                 pollMetrics();
                                 fetchNextBatch();
                             }}
-                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all"
+                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all text-sm"
                         >
-                            Start Round {currentRound + 1}
+                            Start Round {currentRound + 1} →
                         </button>
                     </div>
                 </div>

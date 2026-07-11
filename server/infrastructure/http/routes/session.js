@@ -39,6 +39,7 @@ router.post('/save', async (req, res) => {
         if (req.body.labels) updateOps.labels = req.body.labels;
         if (req.body.uploadedTexts) updateOps.uploadedTexts = req.body.uploadedTexts;
         if (req.body.roundSize) updateOps.roundSize = req.body.roundSize;
+        if (req.body.autoLabelThreshold) updateOps.autoLabelThreshold = req.body.autoLabelThreshold;
 
         // $set replaces scalar fields, $push appends to the annotations array.
         // doing both in one call makes it atomic — no read-modify-write race conditions
@@ -112,7 +113,8 @@ router.get('/load/:contestantId', async (req, res) => {
                 datasetName: session.datasetName,
                 labels: session.labels,
                 uploadedTexts: session.uploadedTexts,
-                roundSize: session.roundSize
+                roundSize: session.roundSize,
+                autoLabelThreshold: session.autoLabelThreshold || 0.95
             }
         });
     } catch (error) {

@@ -25,6 +25,7 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
     const [seedType, setSeedType] = useState('unlabeled'); // 'unlabeled', 'labeled_seed'
     const [seedCount, setSeedCount] = useState(10);
     const [roundSize, setRoundSize] = useState(10);
+    const [autoLabelThreshold, setAutoLabelThreshold] = useState('dynamic');
 
     // Warmup polling
     useEffect(() => {
@@ -137,7 +138,8 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
             seedType,
             seedCount: seedType === 'labeled_seed' ? seedCount : 0,
             uploadedTexts: datasetSource === 'custom' ? customTexts : null,
-            roundSize
+            roundSize,
+            autoLabelThreshold
         };
         onSubmit(contestantId, 'fresh', config);
     };
@@ -346,6 +348,27 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
                             </select>
                             <p className="text-[10px] text-slate-500 mt-1">
                                 Retraining and workload pruning occur automatically at the end of each round.
+                            </p>
+                        </div>
+
+                        <div className="mb-6 text-left">
+                            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                Auto-Pruning Confidence Threshold
+                            </label>
+                            <select
+                                value={autoLabelThreshold}
+                                onChange={(e) => setAutoLabelThreshold(e.target.value === 'dynamic' ? 'dynamic' : Number(e.target.value))}
+                                className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-blue-500 transition"
+                            >
+                                <option value="dynamic">Dynamic Self-Tuning (Recommended)</option>
+                                <option value={0.80}>80% (Aggressive pruning, higher speed)</option>
+                                <option value={0.85}>85% (Moderate pruning)</option>
+                                <option value={0.90}>90% (Balanced)</option>
+                                <option value={0.95}>95% (Conservative)</option>
+                                <option value={0.98}>98% (Strict precision)</option>
+                            </select>
+                            <p className="text-[10px] text-slate-500 mt-1">
+                                Sets the minimum model confidence required to automatically label and filter redundant tasks.
                             </p>
                         </div>
 
