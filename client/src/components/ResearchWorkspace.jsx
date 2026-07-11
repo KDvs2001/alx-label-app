@@ -85,6 +85,9 @@ const ResearchWorkspace = () => {
     const [isPaused, setIsPaused] = useState(false);
     const pauseStartTimeRef = useRef(null);
     const totalPauseTimeRef = useRef(0);
+    
+    // Dataset Configuration State
+    const [datasetConfig, setDatasetConfig] = useState(null);
 
     // Vite exposes environment variables via import.meta.env instead of process.env
     // CITATION: Env Variables and Modes - exposing variables in Vite
@@ -502,6 +505,12 @@ const ResearchWorkspace = () => {
                 cumulativeRandomCost,
                 cumulativeCalLogCost
             };
+            // Include dataset config if available
+            if (datasetConfig) {
+                payload.datasetName = datasetConfig.datasetName;
+                payload.labels = datasetConfig.labels;
+                payload.uploadedTexts = datasetConfig.uploadedTexts;
+            }
             // Include full annotation data if provided
             if (newAnnotation) {
                 payload.newAnnotation = newAnnotation;
@@ -536,12 +545,35 @@ const ResearchWorkspace = () => {
                     setCumulativeEntropyCost(data.session.cumulativeEntropyCost || 0);
                     setCumulativeRandomCost(data.session.cumulativeRandomCost || 0);
                     setCumulativeCalLogCost(data.session.cumulativeCalLogCost || 0);
+
+                    // Recover dataset config
+                    const recConfig = {
+                        datasetName: data.session.datasetName || 'imdb',
+                        labels: data.session.labels || ['Negative', 'Positive'],
+                        uploadedTexts: data.session.uploadedTexts || null
+                    };
+                    setDatasetConfig(recConfig);
+
+                    // Reset ML server with recovered config to reload tasks correctly
+                    try {
+                        await fetch(`${API_URL}/reset`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                ...recConfig,
+                                seedType: 'unlabeled'
+                            })
+                        });
+                    } catch (e) {
+                        console.error('Failed to sync ML server on resume:', e);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load session:', error);
             }
         } else {
             // Both 'fresh' AND null (brand new user) need a full reset
+            setDatasetConfig(config);
             setAnnotationCount(0);
             setLabeledTaskIds([]);
             labeledIdsRef.current = [];

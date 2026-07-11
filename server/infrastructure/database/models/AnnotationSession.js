@@ -64,6 +64,16 @@ const AnnotationSessionSchema = new mongoose.Schema({
     labeledTaskIds: [{
         type: Number
     }],
+    datasetName: {
+        type: String,
+        default: 'imdb'
+    },
+    labels: [{
+        type: String
+    }],
+    uploadedTexts: [{
+        type: String
+    }],
     // embed annotation history directly inside the session doc.
     // each session has ~50 annotations max, well within Mongo's 16MB doc limit,
     // so embedding beats a separate collection + JOIN here.

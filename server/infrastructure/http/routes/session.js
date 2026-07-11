@@ -35,6 +35,10 @@ router.post('/save', async (req, res) => {
             lastUpdated: Date.now()
         };
 
+        if (req.body.datasetName) updateOps.datasetName = req.body.datasetName;
+        if (req.body.labels) updateOps.labels = req.body.labels;
+        if (req.body.uploadedTexts) updateOps.uploadedTexts = req.body.uploadedTexts;
+
         // $set replaces scalar fields, $push appends to the annotations array.
         // doing both in one call makes it atomic — no read-modify-write race conditions
         // CITATION: $push — append an element to an array field in a single atomic update
@@ -103,7 +107,10 @@ router.get('/load/:contestantId', async (req, res) => {
                 cumulativeRandomCost: session.cumulativeRandomCost || 0,
                 cumulativeCalLogCost: session.cumulativeCalLogCost || 0,
                 annotations: session.annotations || [],
-                lastUpdated: session.lastUpdated
+                lastUpdated: session.lastUpdated,
+                datasetName: session.datasetName,
+                labels: session.labels,
+                uploadedTexts: session.uploadedTexts
             }
         });
     } catch (error) {
