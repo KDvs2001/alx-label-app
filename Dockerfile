@@ -19,13 +19,14 @@ RUN apt-get update && apt-get install -y \
 USER user
 
 # Copy requirements FIRST to leverage Docker cache
-COPY --chown=user ml_service/requirements.txt .
+# (On Hugging Face, files are at the root of the repository, not inside ml_service/)
+COPY --chown=user requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --user -r requirements.txt --timeout 1000
 
 # Copy the ML service code to the app directory
-COPY --chown=user ml_service/ $HOME/app/
+COPY --chown=user . $HOME/app/
 
 # Set the port for HF Spaces (simulation_server.py reads PORT env var)
 ENV PORT=7860
