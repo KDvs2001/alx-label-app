@@ -9,7 +9,7 @@ import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle, Pause, P
  * WorkspaceHeader Component
  * Global control strip. Enforces experimental timeline constraints and data export requirements.
  */
-const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause }) => {
+const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause, onAutoLabel, isAutoLabeling }) => {
     return (
         <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
             <div className="flex items-center gap-3">
@@ -71,6 +71,17 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                         className="tour-step-feedback-btn flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded border border-blue-700 transition-colors font-bold"
                     >
                         <CheckCircle size={14} /> Finish Session
+                    </button>
+                )}
+                {contestantId && onAutoLabel && (
+                    <button
+                        onClick={onAutoLabel}
+                        disabled={isAutoLabeling}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-900 text-white text-xs rounded border border-rose-700 transition-colors font-bold transition-all disabled:opacity-50"
+                        title="Automatically label tasks where the model confidence is >= 98%"
+                    >
+                        <Brain size={14} className={isAutoLabeling ? "animate-spin" : ""} /> 
+                        {isAutoLabeling ? 'Auto-Labeling...' : 'Auto-Label (>=98%)'}
                     </button>
                 )}
                 {contestantId && onExport && (

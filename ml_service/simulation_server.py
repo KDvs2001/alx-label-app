@@ -699,6 +699,66 @@ def get_spy_task_log():
         except: pass
     return jsonify([])
 
+import threading
+
+# Thread-safety lock to serialize background training and evaluations
+training_lock = threading.Lock()
+
+def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_step, alpha, beta):
+    """Worker function to train active learning models and evaluate accuracy in a background thread."""
+    with training_lock:
+        try:
+            logger.info(f"Background Thread: Retraining all models for step {current_step}...")
+            
+            def commit_train(name, data):
+                if not data:
+                    logger.warning(f"Background Thread: No data to train '{name}' model.")
+                    return
+                X = [d[0] for d in data]
+                y = [d[1] for d in data]
+                state.models[name].partial_fit(X, y)
+                logger.info(f"Background Thread: Trained '{name}' on {len(X)} samples.")
+
+            commit_train('cal_log', cal_log_data)
+            commit_train('random', random_data)
+            commit_train('entropy', entropy_data)
+
+            # VALIDATION PHASE (Evaluate against held-out test set)
+            scores = {}
+            X_test = [t['text'] for t in test_set]
+            y_test = [t['label'] for t in test_set]
+            
+            for name, model in state.models.items():
+                try:
+                    preds = model.predict(X_test)
+                    acc = np.mean([1 if p == y else 0 for p, y in zip(preds, y_test)])
+                    scores[name] = round(acc, 3)
+                except Exception as e:
+                    logger.warning(f"Background Thread: Validation failed for '{name}': {e}")
+                    scores[name] = 0.5
+            
+            scores['step'] = current_step
+            state.accuracy_history.append(scores)
+            
+            # Persist metrics to file
+            try:
+                metrics_data = {
+                    "accuracy_history": state.accuracy_history,
+                    "step": current_step,
+                    "alpha": alpha,
+                    "beta": beta
+                }
+                with open(METRICS_PATH, "w") as f:
+                    json.dump(metrics_data, f)
+                logger.info(f"Background Thread: Successfully updated metrics file for step {current_step}.")
+            except Exception as e:
+                logger.error(f"Background Thread: Failed to write metrics: {e}")
+                
+        except Exception as e:
+            logger.error(f"Background Thread: Retraining failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+
 @app.route('/annotate', methods=['POST'])
 def annotate():
     # parse the JSON body sent by the React frontend
@@ -759,92 +819,41 @@ def annotate():
     state.pending_labels_cal_log = getattr(state, 'pending_labels_cal_log', []) + [(text, label_int)]
 
     # Retrain Cycle (Every 5 - SYNCED with Alpha/Beta updates)
-    trained = False
+    triggered_training = False
     if state.steps_since_train >= 5:
-        logger.info("Retraining ALL Models...")
+        # Shallow copy buffer lists and clear main thread buffers to prevent race conditions during training
+        cal_log_data = getattr(state, 'pending_labels_cal_log', []).copy()
+        random_data = getattr(state, 'pending_labels_random', []).copy()
+        entropy_data = getattr(state, 'pending_labels_entropy', []).copy()
         
-        # helper to train one model and clear its buffer
-        # CITATION: setattr(obj, name, value) - dynamically set an attribute by name
-        # SOURCE: Stack Overflow (2011). "Use of setattr in Python"
-        # URL: https://stackoverflow.com/questions/7604636/use-of-setattr-in-python
-        def commit_train(name, buffer_name):
-            data = getattr(state, buffer_name, [])
-            if not data:
-                logger.warning(f"   No data for {name} model")
-                return
-            X = [d[0] for d in data]
-            y = [d[1] for d in data]
-            logger.info(f"   Training {name}: {len(X)} samples, labels: {set(y)}")
-            # incremental training via partial_fit (online learning)
-            # CITATION: partial_fit() - train incrementally without reprocessing old data
-            # SOURCE: scikit-learn (n.d.). "SGDClassifier"
-            # URL: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.SGDClassifier.html
-            state.models[name].partial_fit(X, y)
-            setattr(state, buffer_name, [])
-            
-        try:
-            commit_train('cal_log', 'pending_labels_cal_log')
-            commit_train('random', 'pending_labels_random')
-            commit_train('entropy', 'pending_labels_entropy')
-            trained = True
-            logger.info("All models retrained successfully")
-        except Exception as e:
-            logger.error(f"Training failed: {e}")
-            # dump the full stack trace so we can actually debug it
-            # CITATION: traceback.format_exc() - capture exception traceback as a string
-            # SOURCE: Stack Overflow (2011). "Logging exception with traceback in Python"
-            # URL: https://stackoverflow.com/questions/1483429/how-do-i-print-an-exception-in-python
-            import traceback
-            logger.error(traceback.format_exc())
-
+        setattr(state, 'pending_labels_cal_log', [])
+        setattr(state, 'pending_labels_random', [])
+        setattr(state, 'pending_labels_entropy', [])
         
-        # VALIDATION PHASE
-        scores = {}
-        X_test = [t['text'] for t in state.test_set]
-        y_test = [t['label'] for t in state.test_set]
-        
-        # run predictions against the held-out test set and compare with zip
-        # CITATION: zip() - iterate over two lists in parallel for element-wise comparison
-        # SOURCE: Stack Overflow (2009). "Iterate over two lists in parallel"
-        # URL: https://stackoverflow.com/questions/1663807/how-to-iterate-through-two-lists-in-parallel
-        for name, model in state.models.items():
-            try:
-                preds = model.predict(X_test)
-                acc = np.mean([1 if p == y else 0 for p, y in zip(preds, y_test)])
-                scores[name] = round(acc, 3)
-            except Exception as e:
-                logger.warning(f"Validation failed for '{name}': {e}")
-                scores[name] = 0.5
-            
-        
-        scores['step'] = state.step
-        state.accuracy_history.append(scores)
-        
-        # persist accuracy and cost data so the frontend can poll it
-        # CITATION: json.dump() - serialise a Python dict straight into a file
-        # SOURCE: Stack Overflow (2012). "Writing JSON to a file in Python"
-        # URL: https://stackoverflow.com/questions/12309269/how-do-i-write-json-data-to-a-file
-        try:
-            metrics_data = {
-                "accuracy_history": state.accuracy_history,
-                "step": state.step,
-                "alpha": state.cost_model.alpha,
-                "beta": state.cost_model.beta
-            }
-            with open(METRICS_PATH, "w") as f:
-                json.dump(metrics_data, f)
-            logger.info(f"Metrics written to file: step={state.step}, alpha={state.cost_model.alpha:.2f}, beta={state.cost_model.beta:.2f}")
-        except Exception as e:
-            logger.error(f"Failed to write metrics: {e}")
+        # Spawn daemonized background thread to prevent UI freezing
+        t = threading.Thread(
+            target=bg_train_worker,
+            args=(
+                cal_log_data, 
+                random_data, 
+                entropy_data, 
+                state.test_set, 
+                state.step, 
+                state.cost_model.alpha, 
+                state.cost_model.beta
+            )
+        )
+        t.daemon = True
+        t.start()
         
         state.steps_since_train = 0
-        trained = True
+        triggered_training = True
         
     return jsonify({
         "status": "ok", 
         "alpha": state.cost_model.alpha,
         "beta": state.cost_model.beta, 
-        "trained": trained
+        "trained": triggered_training
     })
 
 @app.route('/reset', methods=['POST'])
@@ -921,6 +930,104 @@ def reset_session():
         })
     except Exception as e:
         logger.error(f"Failed to reset session: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/export', methods=['GET'])
+def export_labels():
+    """Export all recorded observations in a standard Label Studio compatible JSON format."""
+    try:
+        observations = load_observations()
+        export_data = []
+        for idx, obs in enumerate(observations):
+            text = obs.get("text", "")
+            label = obs.get("label", "Unlabeled")
+            time_seconds = obs.get("time_seconds", 0.0)
+            
+            # Standard Label Studio JSON output structure
+            export_data.append({
+                "id": obs.get("task_id") or idx,
+                "data": {
+                    "text": text
+                },
+                "annotations": [
+                    {
+                        "id": idx,
+                        "lead_time": time_seconds,
+                        "result": [
+                            {
+                                "from_name": "sentiment",
+                                "to_name": "text",
+                                "type": "choices",
+                                "value": {
+                                    "choices": [label]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            })
+        return jsonify(export_data)
+    except Exception as e:
+        logger.error(f"Failed to export labels: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/auto-label', methods=['POST'])
+def auto_label():
+    """Dynamically auto-annotate tasks in the pool where the model confidence is exceptionally high (> 98%).
+    This serves as a high-value weak supervision differentiator compared to standard labeling platforms.
+    """
+    try:
+        payload = request.json or {}
+        labeled_ids = set()
+        for lid in payload.get('labeled_task_ids', []):
+            labeled_ids.add(int(lid) if isinstance(lid, (int, float)) else lid)
+            
+        available = [t for t in state.clean_pool if t['id'] not in labeled_ids]
+        
+        if not available:
+            return jsonify({"status": "exhausted", "count": 0, "records": []})
+            
+        texts = [t['text'] for t in available]
+        probs = state.backbone.predict_proba(texts)
+        
+        auto_labeled_count = 0
+        auto_labels_record = []
+        
+        for idx, task in enumerate(available):
+            prob = probs[idx]
+            max_conf = np.max(prob)
+            
+            # If the model is extremely confident (>98%), auto-annotate it to save human effort
+            if max_conf >= 0.98:
+                pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
+                
+                # Record machine observation with minimal lead time (0.1s)
+                record_annotation_observation(
+                    text=task['text'], 
+                    time_seconds=0.1, 
+                    label=pred_label,
+                    task_id=task['id']
+                )
+                auto_labels_record.append({
+                    "id": task['id'],
+                    "text": task['text'][:50] + "...",
+                    "label": pred_label,
+                    "confidence": round(float(max_conf), 4)
+                })
+                auto_labeled_count += 1
+                
+                # Retrain backbone on it incrementally
+                label_int = 1 if pred_label == 'Positive' else 0
+                state.backbone.partial_fit([task['text']], [label_int])
+                
+        logger.info(f"Auto-labeled {auto_labeled_count} tasks with confidence >= 98%.")
+        return jsonify({
+            "status": "success",
+            "count": auto_labeled_count,
+            "records": auto_labels_record
+        })
+    except Exception as e:
+        logger.error(f"Auto-labeling failed: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":

@@ -34,6 +34,7 @@ const ResearchWorkspace = () => {
     const [showGuidelines, setShowGuidelines] = useState(false);
     const [showAlphaBetaPanel, setShowAlphaBetaPanel] = useState(false);
     const [toast, setToast] = useState(null); // { message, type }
+    const [isAutoLabeling, setIsAutoLabeling] = useState(false);
 
     // Session Management State
     const [contestantId, setContestantId] = useState(null);
@@ -316,6 +317,47 @@ const ResearchWorkspace = () => {
             }
         } catch (e) {
             // Ignore poll errors
+        }
+    };
+
+    const handleAutoLabel = async () => {
+        if (isAutoLabeling) return;
+        setIsAutoLabeling(true);
+        try {
+            const response = await fetch(`${API_URL}/auto-label`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    labeled_task_ids: labeledIdsRef.current
+                })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                const count = data.count;
+                if (count > 0) {
+                    const newIds = data.records.map(r => r.id);
+                    const updatedLabeledIds = [...labeledIdsRef.current, ...newIds];
+                    labeledIdsRef.current = updatedLabeledIds;
+                    setLabeledTaskIds(updatedLabeledIds);
+                    setAnnotationCount(prev => prev + count);
+                    
+                    // Display success toast
+                    setToast({ message: `Successfully auto-labeled ${count} high-confidence tasks!`, type: "success" });
+                    
+                    // Retrain/refresh pool
+                    pollMetrics();
+                    fetchNextBatch();
+                } else {
+                    setToast({ message: "No tasks found with >= 98% confidence to auto-label.", type: "warning" });
+                }
+            } else {
+                setToast({ message: "Auto-labeling failed: " + data.message, type: "error" });
+            }
+        } catch (error) {
+            console.error("Auto-labeling error:", error);
+            setToast({ message: "Network error during auto-labeling.", type: "error" });
+        } finally {
+            setIsAutoLabeling(false);
         }
     };
 
@@ -708,6 +750,8 @@ const ResearchWorkspace = () => {
                         onEndSession={() => setShowSummary(true)}
                         isPaused={isPaused}
                         onTogglePause={handleTogglePause}
+                        onAutoLabel={handleAutoLabel}
+                        isAutoLabeling={isAutoLabeling}
                     />
 
                     <div className="flex-1 min-h-0 relative">
