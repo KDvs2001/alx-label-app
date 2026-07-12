@@ -3,7 +3,7 @@
 // SOURCE: React Router (n.d.). "react-router-dom"
 // URL: https://reactrouter.com/en/main/start/overview
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from "react-router-dom";
 import ImpactDashboard from "./pages/ImpactDashboard";
 import ResearchWorkspace from "./components/ResearchWorkspace";
 import ManagerDashboardPage from "./pages/ManagerDashboardPage";
@@ -12,18 +12,18 @@ import LoginPage from "./pages/LoginPage";
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User } from "lucide-react";
+import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User, Sun, Moon } from "lucide-react";
 
 // controls navigation between the public impact dashboard and the private evaluator workspace
-const Navbar = ({ role, username, onSignOut }) => {
+const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="bg-slate-900 border-b border-slate-800 px-6 py-4">
+    <nav className="bg-slate-900 border-b border-slate-800 px-6 py-4 transition-colors duration-300">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-bold text-xl text-white hover:text-blue-400 transition">
-          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white text-sm font-black">
+          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white text-sm font-black animate-pulse">
             CAL
           </div>
           CAL-Log Portal
@@ -42,7 +42,7 @@ const Navbar = ({ role, username, onSignOut }) => {
           {role && (
             <Link
               to="/workspace"
-              className={`flex items-center gap-1.5 text-xs transition-colors ${isActive('/workspace') ? 'text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 animate-pulse' : 'text-slate-400 hover:text-white px-2 py-1.5'}`}
+              className={`flex items-center gap-1.5 text-xs transition-colors ${isActive('/workspace') ? 'text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700' : 'text-slate-400 hover:text-white px-2 py-1.5'}`}
             >
               <Edit3 size={14} />
               Annotator Workspace
@@ -70,6 +70,15 @@ const Navbar = ({ role, username, onSignOut }) => {
             Docs
           </a>
 
+          {/* Theme Switcher Button */}
+          <button
+            onClick={onToggleTheme}
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition"
+            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+          >
+            {theme === 'light' ? <Moon size={14} className="text-amber-400" /> : <Sun size={14} className="text-amber-400 animate-spin-slow" />}
+          </button>
+
           {/* Sign In / Sign Out controls */}
           {role ? (
             <div className="flex items-center gap-3 border-l border-slate-850 pl-3">
@@ -79,7 +88,7 @@ const Navbar = ({ role, username, onSignOut }) => {
               </span>
               <button
                 onClick={onSignOut}
-                className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-1.5 rounded-lg border border-slate-700 transition"
+                className="flex items-center gap-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-rose-400 px-3 py-1.5 rounded-lg border border-slate-700 transition font-bold"
               >
                 <LogOut size={13} />
                 Sign Out
@@ -114,6 +123,7 @@ const ManagerRoute = ({ role, children }) => {
 function App() {
   const [role, setRole] = useState(() => sessionStorage.getItem("cal_log_role") || null);
   const [username, setUsername] = useState(() => sessionStorage.getItem("cal_log_username") || null);
+  const [theme, setTheme] = useState(() => localStorage.getItem("cal_log_theme") || "dark");
 
   const handleLogin = (selectedRole, selectedUser) => {
     setRole(selectedRole);
@@ -135,10 +145,20 @@ function App() {
     window.location.href = '/';
   };
 
+  const handleToggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem("cal_log_theme", newTheme);
+  };
+
   return (
     <Router>
-      <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30 flex flex-col">
-        <Navbar role={role} username={username} onSignOut={handleSignOut} />
+      <div className={`min-h-screen font-sans flex flex-col transition-all duration-350 ${
+        theme === 'light' 
+          ? 'theme-light bg-slate-50 text-slate-800' 
+          : 'theme-dark bg-slate-950 text-slate-200'
+      }`}>
+        <Navbar role={role} username={username} onSignOut={handleSignOut} theme={theme} onToggleTheme={handleToggleTheme} />
         <main className="flex-grow flex flex-col">
           <Routes>
             <Route path="/" element={<ImpactDashboard />} />
