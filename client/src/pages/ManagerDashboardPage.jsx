@@ -268,11 +268,11 @@ const ManagerDashboardPage = () => {
         );
     }
     return (
-        <div className="min-h-screen bg-slate-950 text-white p-6 pb-12 transition-all duration-300">
+        <div className="min-h-screen bg-slate-950 text-white p-4 md:p-6 pb-12 transition-all duration-300">
             
             {/* Toast Notification */}
             {toast && (
-                <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg border shadow-xl flex items-center gap-2 animate-bounce ${
+                <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg border shadow-xl flex items-center gap-2 animate-bounce max-w-sm ${
                     toast.type === 'success' 
                         ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300' 
                         : 'bg-rose-950/80 border-rose-500 text-rose-300'
@@ -285,35 +285,35 @@ const ManagerDashboardPage = () => {
             <SimpleExplanationModal isOpen={showExplanation} onClose={() => setShowExplanation(false)} />
 
             {/* Header Area */}
-            <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-6">
+            <div className="max-w-7xl mx-auto mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-5 md:pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                    <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
                         CAL-Log Control Center
                     </h1>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-sm text-slate-400 mt-1">
                         Configure active parameters, trigger active weak supervision, and audit cognitive workload stats.
                     </p>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3">
                     <button
                         onClick={() => setShowExplanation(true)}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg text-xs font-semibold border border-slate-700 transition"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-blue-400 rounded-lg text-sm font-semibold border border-slate-700 transition"
                     >
-                        <HelpCircle size={14} /> Explain Math
+                        <HelpCircle size={15} /> Explain Math
                     </button>
                     <button
                         onClick={handleAutoLabel}
                         disabled={isAutoLabeling}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg border border-rose-700 transition disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-lg border border-rose-700 transition disabled:opacity-50"
                     >
-                        <Brain size={14} className={isAutoLabeling ? "animate-spin" : ""} /> Bulk Auto-Label
+                        <Brain size={15} className={isAutoLabeling ? "animate-spin" : ""} /> Bulk Auto-Label
                     </button>
                     <button
                         onClick={handleExport}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg border border-purple-700 transition"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-lg border border-purple-700 transition"
                     >
-                        <Download size={14} /> Export Observations
+                        <Download size={15} /> Export
                     </button>
                 </div>
             </div>
@@ -324,12 +324,12 @@ const ManagerDashboardPage = () => {
                 {/* 1. Labor & Budget Savings Card */}
                 <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-emerald-500/30 transition-all duration-300">
                     <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Labor & Financial ROI</span>
+                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Labor & Financial ROI</span>
                         <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><DollarSign size={16} /></div>
                     </div>
                     <div className="mt-1">
-                        <h2 className="text-3xl font-black text-white">{dollarsSaved} USD</h2>
-                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                        <h2 className="text-2xl md:text-3xl font-black text-white">{dollarsSaved} USD</h2>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                             Estimated saved: <span className="text-emerald-400 font-bold">{timeSavedHours}h</span> of manual reading latency.
                         </p>
                     </div>
@@ -338,7 +338,7 @@ const ManagerDashboardPage = () => {
                 {/* 2. Annotator Speed & Pacing Card */}
                 <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-amber-500/30 transition-all duration-300">
                     <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Cognitive Load & Pacing</span>
+                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Cognitive Load & Pacing</span>
                         <div className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><Activity size={16} /></div>
                     </div>
                     <div className="mt-1">
@@ -351,7 +351,7 @@ const ManagerDashboardPage = () => {
                                 {metrics?.cognitive_pacing_active ? "Pacing Active" : "Optimal (Active)"}
                             </span>
                         </div>
-                        <p className="text-[10px] text-slate-500 mt-1.5">
+                        <p className="text-xs text-slate-500 mt-1.5">
                             Speed: <span className="font-mono text-white font-bold">{(metrics?.beta || 3.0).toFixed(2)}s</span> (Base: {(metrics?.baseline_beta || 3.0).toFixed(2)}s)
                         </p>
                     </div>
@@ -360,12 +360,12 @@ const ManagerDashboardPage = () => {
                 {/* 3. Expected Calibration Error Card */}
                 <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-blue-500/30 transition-all duration-300">
                     <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Calibration Error (ECE)</span>
+                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Calibration Error (ECE)</span>
                         <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={16} /></div>
                     </div>
                     <div className="mt-1">
-                        <h2 className="text-3xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
-                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                        <h2 className="text-2xl md:text-3xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                             Auto-labeling limit: <span className="text-amber-400 font-bold">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
                         </p>
                     </div>
@@ -374,14 +374,14 @@ const ManagerDashboardPage = () => {
                 {/* 4. Active Pruning Efficiency Card */}
                 <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-purple-500/30 transition-all duration-300">
                     <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Workload Reduction</span>
+                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Workload Reduction</span>
                         <div className="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><Layers size={16} /></div>
                     </div>
                     <div className="mt-1">
-                        <h2 className="text-3xl font-black text-white">
+                        <h2 className="text-2xl md:text-3xl font-black text-white">
                             {Math.round(autoPrunedCount / poolTotal * 100)}% Saved
                         </h2>
-                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                             Pruned <span className="text-purple-400 font-bold">{autoPrunedCount}</span> redundant texts out of {poolTotal} pool.
                         </p>
                     </div>

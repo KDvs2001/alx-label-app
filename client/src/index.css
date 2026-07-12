@@ -4,8 +4,9 @@
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  line-height: 1.6;
   font-weight: 400;
+  font-size: 16px;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -14,7 +15,15 @@
 }
 
 body {
-  @apply bg-gray-50 text-slate-800 min-h-screen antialiased;
+  @apply bg-slate-950 text-slate-200 min-h-screen antialiased;
+  font-size: 1rem;
+}
+
+/* Make the tiniest tailwind text classes slightly bigger on mobile */
+@media (max-width: 640px) {
+  .text-xs { font-size: 0.8rem !important; }
+  .text-\[10px\] { font-size: 0.75rem !important; }
+  .text-\[9px\] { font-size: 0.7rem !important; }
 }
 
 /* Custom Scrollbar for a premium feel */

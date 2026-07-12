@@ -29,7 +29,7 @@ const ResearchWorkspace = () => {
     const [selectionLogic, setSelectionLogic] = useState(null);
     const [metrics, setMetrics] = useState({ alpha: 5.0, beta: 3.0, step: 0 });
     const [shadowMetrics, setShadowMetrics] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => !!sessionStorage.getItem('contestantId'));
     const [loadingStage, setLoadingStage] = useState(0);
     const [submitting, setSubmitting] = useState(false);
     const [showGuidelines, setShowGuidelines] = useState(false);
@@ -114,13 +114,11 @@ const ResearchWorkspace = () => {
         }
     }, [toast]);
 
-    // On mount, auto-trigger session loading if already signed in
-    useEffect(() => {
-        const cachedId = sessionStorage.getItem('contestantId');
-        if (cachedId) {
-            handleContestantIdSubmit(cachedId, 'resume', null);
-        }
-    }, []);
+    // On mount, if already signed in via sessionStorage, skip the modal and go directly.
+    // The contestantId is seeded from sessionStorage in useState initializer above,
+    // so the existing useEffect([contestantId]) at line 125 will call fetchNextBatch automatically.
+    // NOTE: We do NOT call handleContestantIdSubmit here because that triggers a full ML /reset,
+    // which causes the double "Waking up ML Service" loop seen after login.
 
     // 1. Initial Load & Polling (only after contestant ID is set)
     useEffect(() => {

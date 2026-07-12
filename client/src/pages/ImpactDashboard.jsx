@@ -78,18 +78,18 @@ const ImpactDashboard = () => {
     );
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white p-8">
+        <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8">
             {/* Header */}
-            <div className="max-w-7xl mx-auto mb-12 flex justify-between items-end">
+            <div className="max-w-7xl mx-auto mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                     {/* bg-clip-text applies the text-transparent gradient solely to the text characters */}
                     {/* CITATION: CSS Background-clip property */}
                     {/* SOURCE: MDN Web Docs (n.d.). "background-clip" */}
                     {/* URL: https://developer.mozilla.org/en-US/docs/Web/CSS/background-clip */}
-                    <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent mb-4">
+                    <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent mb-3 md:mb-4">
                         CAL-Log Impact
                     </h1>
-                    <p className="text-slate-400 text-xl max-w-2xl leading-relaxed">
+                    <p className="text-slate-400 text-base md:text-xl max-w-2xl leading-relaxed">
                         Quantifying the value of Cost-Aware Active Learning through ROI analysis and parameter impact simulation.
                     </p>
                 </div>
@@ -136,15 +136,15 @@ const ImpactDashboard = () => {
 
                 {/* 2. ROI Calculator (Hero Component) */}
                 <section>
-                    <div className="flex items-center gap-4 mb-8">
+                    <div className="flex items-center gap-4 mb-6 md:mb-8">
                         <div className="h-px bg-slate-800 flex-grow"></div>
-                        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                        <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
                             <DollarSign className="text-green-400" />
                             Real-World ROI Calculator
                         </h2>
                         <div className="h-px bg-slate-800 flex-grow"></div>
                     </div>
-                    <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm">
+                    <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-4 md:p-8 backdrop-blur-sm">
                         {/* React Suspense delays rendering the component until its chunk is fully loaded over the network */}
                         {/* CITATION: React Suspense/lazy behaviour mapping */}
                         {/* SOURCE: Stack Overflow (2019). "React suspense/lazy delay?" */}
@@ -157,15 +157,15 @@ const ImpactDashboard = () => {
 
                 {/* 3. Impact Analysis (The "Trade-offs") */}
                 <section>
-                    <div className="flex items-center gap-4 mb-8">
+                    <div className="flex items-center gap-4 mb-6 md:mb-8">
                         <div className="h-px bg-slate-800 flex-grow"></div>
-                        <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                        <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
                             <TrendingDown className="text-blue-400" />
                             Parameter Sensitivity Analysis
                         </h2>
                         <div className="h-px bg-slate-800 flex-grow"></div>
                     </div>
-                    <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm">
+                    <div className="bg-slate-900/30 border border-slate-800 rounded-3xl p-4 md:p-8 backdrop-blur-sm">
                         <Suspense fallback={<div className="text-slate-400 animate-pulse text-center p-10">Loading Impact Analysis...</div>}>
                             <ParameterImpactExplainer />
                         </Suspense>
