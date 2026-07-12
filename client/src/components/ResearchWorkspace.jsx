@@ -358,7 +358,7 @@ const ResearchWorkspace = () => {
                     setIsVerifying(true);
                     pollMetrics();
                 } else {
-                    setToast({ message: "No tasks met the 98% confidence threshold for auto-labeling.", type: "warning" });
+                    setToast({ message: `No tasks met the ${metrics.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) : '95'}% confidence threshold for auto-labeling.`, type: "warning" });
                 }
             } else {
                 setToast({ message: "Auto-labeling failed: " + data.message, type: "error" });
@@ -852,6 +852,8 @@ const ResearchWorkspace = () => {
                         onTogglePause={handleTogglePause}
                         onAutoLabel={handleAutoLabel}
                         isAutoLabeling={isAutoLabeling}
+                        autoLabelThreshold={metrics.auto_label_threshold || (autoLabelThreshold === 'dynamic' ? null : autoLabelThreshold)}
+                        datasetConfig={datasetConfig}
                     />
 
                     {/* ── Live Pool Countdown Bar ─────────────────────────────────

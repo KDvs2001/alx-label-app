@@ -9,7 +9,7 @@ import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle, Pause, P
  * WorkspaceHeader Component
  * Global control strip. Enforces experimental timeline constraints and data export requirements.
  */
-const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause, onAutoLabel, isAutoLabeling }) => {
+const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause, onAutoLabel, isAutoLabeling, autoLabelThreshold, datasetConfig }) => {
     return (
         <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
             <div className="flex items-center gap-3">
@@ -18,7 +18,9 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                 </div>
                 <div>
                     <h1 className="text-xl font-bold">Research Workspace</h1>
-                    <p className="text-xs text-slate-400">Dataset: IMDB (Sentiment Analysis)</p>
+                    <p className="text-xs text-slate-400">
+                        Dataset: {datasetConfig?.datasetName ? (datasetConfig.datasetName === 'ag_news' ? 'AG News (Categorization)' : datasetConfig.datasetName === 'rotten_tomatoes' ? 'Rotten Tomatoes (Sentiment)' : datasetConfig.datasetName === 'custom' ? 'Custom Dataset' : datasetConfig.datasetName) : 'IMDB (Sentiment Analysis)'}
+                    </p>
                 </div>
             </div>
             <div className="flex items-center gap-4">
@@ -78,10 +80,10 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                         onClick={onAutoLabel}
                         disabled={isAutoLabeling}
                         className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-900 text-white text-xs rounded border border-rose-700 transition-colors font-bold transition-all disabled:opacity-50"
-                        title="Automatically label tasks where the model confidence is >= 98%"
+                        title={`Automatically label tasks where the model confidence is >= ${autoLabelThreshold ? (autoLabelThreshold * 100).toFixed(0) : '95'}%`}
                     >
                         <Brain size={14} className={isAutoLabeling ? "animate-spin" : ""} /> 
-                        {isAutoLabeling ? 'Auto-Labeling...' : 'Auto-Label (>=98%)'}
+                        {isAutoLabeling ? 'Auto-Labeling...' : `Auto-Label (>=${autoLabelThreshold ? (autoLabelThreshold * 100).toFixed(0) : '95'}%)`}
                     </button>
                 )}
                 {contestantId && onExport && (

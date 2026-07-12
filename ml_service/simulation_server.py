@@ -286,6 +286,24 @@ class SimulationState:
 
 state = SimulationState()
 
+def get_label_index(label_val):
+    """Dynamically map a label string or value to its integer index using state.custom_labels."""
+    custom_labels = getattr(state, 'custom_labels', ["Negative", "Positive"])
+    if label_val in custom_labels:
+        return custom_labels.index(label_val)
+    # If it is already an int or can be cast, return it
+    try:
+        val_int = int(label_val)
+        if 0 <= val_int < len(custom_labels):
+            return val_int
+    except (ValueError, TypeError):
+        pass
+    # Fallback to standard Positive/Negative mapping
+    if str(label_val).strip().lower() == 'positive':
+        return 1
+    return 0
+
+
 # health check endpoint - the frontend polls this to know the server is alive
 # CITATION: @app.route() - register a URL rule with Flask's routing system
 # SOURCE: Pallets Projects (n.d.). "Flask Quickstart"
@@ -815,7 +833,9 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                         
                         # Auto-label with dynamic confidence threshold
                         if max_conf >= state.auto_label_threshold:
-                            pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
+                            pred_idx = int(np.argmax(prob))
+                            custom_labels = getattr(state, 'custom_labels', ["Negative", "Positive"])
+                            pred_label = custom_labels[pred_idx] if pred_idx < len(custom_labels) else str(pred_idx)
                             state.verification_queue[task['id']] = {
                                 'id': task['id'],
                                 'text': task['text'],
@@ -918,8 +938,8 @@ def annotate():
             state.pending_labels_entropy = getattr(state, 'pending_labels_entropy', []) + [(ent_task['text'], ent_lbl)]
     
     # BUFFER USER LABELS
-    # Convert label to integer: 'Positive' -> 1, 'Negative' -> 0
-    label_int = 1 if label == 'Positive' else 0
+    # Convert label dynamically based on custom labels mapping
+    label_int = get_label_index(label)
     state.pending_labels_cal_log = getattr(state, 'pending_labels_cal_log', []) + [(text, label_int)]
 
     # Retrain Cycle (Every 5 - SYNCED with Alpha/Beta updates)
@@ -1228,7 +1248,9 @@ def auto_label():
             
             # If the model is confident enough, place it in the verification queue
             if max_conf >= state.auto_label_threshold:
-                pred_label = "Positive" if np.argmax(prob) == 1 else "Negative"
+                pred_idx = int(np.argmax(prob))
+                custom_labels = getattr(state, 'custom_labels', ["Negative", "Positive"])
+                pred_label = custom_labels[pred_idx] if pred_idx < len(custom_labels) else str(pred_idx)
                 state.verification_queue[task['id']] = {
                     'id': task['id'],
                     'text': task['text'],
@@ -1243,7 +1265,7 @@ def auto_label():
                 })
                 auto_labeled_count += 1
                 
-        logger.info(f"Auto-labeled {auto_labeled_count} tasks with confidence >= 98% and queued for verification.")
+        logger.info(f"Auto-labeled {auto_labeled_count} tasks with confidence >= {state.auto_label_threshold * 100:.1f}% and queued for verification.")
         return jsonify({
             "status": "success",
             "count": auto_labeled_count,
@@ -1276,7 +1298,7 @@ def verify_task():
                         task_id=tid
                     )
                     state.labeled_ids.add(tid)
-                    lbl_int = 1 if lbl == 'Positive' else 0
+                    lbl_int = get_label_index(lbl)
                     state.backbone.partial_fit([task['text']], [lbl_int])
                     count += 1
             return jsonify({"status": "success", "message": f"Approved all {count} tasks."})
@@ -1302,7 +1324,7 @@ def verify_task():
                 task_id=task_id
             )
             state.labeled_ids.add(task_id)
-            lbl_int = 1 if lbl == 'Positive' else 0
+            lbl_int = get_label_index(lbl)
             state.backbone.partial_fit([task['text']], [lbl_int])
             return jsonify({"status": "success", "message": f"Task {task_id} approved."})
             
@@ -1316,7 +1338,7 @@ def verify_task():
                 task_id=task_id
             )
             state.labeled_ids.add(task_id)
-            lbl_int = 1 if corrected_label == 'Positive' else 0
+            lbl_int = get_label_index(corrected_label)
             state.backbone.partial_fit([task['text']], [lbl_int])
             logger.info(f"Retrained model on human correction for task {task_id} (corrected to {corrected_label})")
             return jsonify({"status": "success", "message": f"Task {task_id} corrected."})
@@ -1325,8 +1347,10 @@ def verify_task():
             return jsonify({"status": "error", "message": f"Invalid action: {action}"}), 400
             
     except Exception as e:
-        logger.error(f"Verification failed: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        import traceback
+        err_msg = traceback.format_exc()
+        logger.error(f"Verification failed:\n{err_msg}")
+        return jsonify({"status": "error", "message": str(e), "traceback": err_msg}), 500
 
 if __name__ == "__main__":
     # host='0.0.0.0' makes the server reachable outside the container.
