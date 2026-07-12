@@ -5,11 +5,12 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
 import ImpactDashboard from "./pages/ImpactDashboard";
 import ResearchWorkspace from "./components/ResearchWorkspace";
+import ManagerDashboardPage from "./pages/ManagerDashboardPage";
 // lucide-react provides tree-shakable SVG icon components
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Terminal, TrendingUp, Eye, BookOpen } from "lucide-react";
+import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen } from "lucide-react";
 
 // controls navigation between the public impact dashboard and the private evaluator workspace
 const Navbar = () => {
@@ -21,35 +22,42 @@ const Navbar = () => {
     <nav className="bg-slate-900 border-b border-slate-800 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-bold text-xl text-white hover:text-blue-400 transition">
-          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white">
-            <Terminal size={18} />
+          <div className="w-8 h-8 rounded bg-blue-600 flex items-center justify-center text-white text-sm font-black">
+            CAL
           </div>
-          CAL-Log Research Tool
+          CAL-Log Portal
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 font-semibold">
           {/* template literal toggles text colour based on whether this route is currently active */}
           <Link
             to="/"
-            className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+            className={`flex items-center gap-1.5 text-xs transition-colors ${isActive('/') || isActive('/impact') ? 'text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700' : 'text-slate-400 hover:text-white px-2 py-1.5'}`}
           >
-            <TrendingUp size={16} />
-            Impact
+            <TrendingUp size={14} />
+            Impact Calculator
           </Link>
           <Link
-            to="/spy"
-            className={`flex items-center gap-2 text-sm font-medium transition-colors ${isActive('/spy') ? 'text-white' : 'text-slate-400 hover:text-white'}`}
+            to="/workspace"
+            className={`flex items-center gap-1.5 text-xs transition-colors ${isActive('/workspace') ? 'text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 animate-pulse' : 'text-slate-400 hover:text-white px-2 py-1.5'}`}
           >
-            <Eye size={16} />
-            Spy Window
+            <Edit3 size={14} />
+            Annotator Workspace
+          </Link>
+          <Link
+            to="/dashboard"
+            className={`flex items-center gap-1.5 text-xs transition-colors ${isActive('/dashboard') ? 'text-white bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700' : 'text-slate-400 hover:text-white px-2 py-1.5'}`}
+          >
+            <ShieldAlert size={14} />
+            Manager Dashboard
           </Link>
           <a
             href="https://cal-log-docs.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm font-medium transition-colors text-slate-400 hover:text-white"
+            className="flex items-center gap-1.5 text-xs transition-colors text-slate-400 hover:text-white px-2 py-1.5"
           >
-            <BookOpen size={16} />
-            Documentation
+            <BookOpen size={14} />
+            Docs
           </a>
         </div>
       </div>
@@ -66,7 +74,9 @@ function App() {
           {/* Routes handles the rendering of the correct page component based on the URL */}
           <Routes>
             <Route path="/" element={<ImpactDashboard />} />
-            <Route path="/spy" element={<ResearchWorkspace />} />
+            <Route path="/workspace" element={<ResearchWorkspace />} />
+            <Route path="/dashboard" element={<ManagerDashboardPage />} />
+            <Route path="/spy" element={<ManagerDashboardPage />} />
             <Route path="/impact" element={<ImpactDashboard />} />
             {/* catch-all route redirects any unknown paths back to the impact dashboard */}
             <Route path="*" element={<ImpactDashboard />} />
