@@ -425,25 +425,39 @@ const ManagerDashboardPage = () => {
                     {/* Reviewer FAQ: Collapse & Parameter Diagnostics */}
                     <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm">
                         <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-                            <Info size={14} className="text-blue-400" /> Reviewer Diagnostics: Noise & Collapse Safeguards
+                            <Info size={14} className="text-blue-400" /> Reviewer Diagnostics: Cognitive Noise & Collapse Safeguards
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                             <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1">Q1: What if the algorithm collapses?</h4>
+                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Q1: What happens if the algorithm collapses?
+                                </h4>
                                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                                    If labels get noisy and the model begins to collapse, ECE spikes. The system automatically detects this drift and raises the auto-label threshold (e.g. to 99% or disables it), stopping all auto-labeling until manual inputs stabilize.
+                                    If labels get noisy and the model begins to collapse, ECE (Expected Calibration Error) spikes. The system automatically detects this drift and raises the auto-label confidence threshold (up to 99% or suspends it entirely). This locks auto-labeling, requiring human validation.
                                 </p>
                             </div>
                             <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1">Q2: Are alpha/beta pre-configured?</h4>
+                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Q2: Are alpha/beta pre-configured?
+                                </h4>
                                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                                    No. The backend uses online Ordinary Least Squares (OLS) regression to dynamically fit your exact reading speed (&beta;) and setup time (&alpha;) in real time. It requires zero manual configuration per annotator.
+                                    No. The backend uses online Ordinary Least Squares (OLS) regression to dynamically fit your exact reading speed (&beta;) and setup time (&alpha;) in real time. It automatically calibrates per-annotator within the first 5 manual labels.
                                 </p>
                             </div>
                             <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1">Q3: What are the noise limitations?</h4>
+                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Q3: How do you handle timing cognitive noise?
+                                </h4>
                                 <p className="text-[10px] text-slate-500 leading-relaxed">
-                                    To block timing outliers (e.g. getting a coffee), our client drops the top 20% longest response times before baseline estimation. However, malicious annotators entering 50% random garbage labels can still skew model bounds, requiring audit verification.
+                                    Reading time varies because of task difficulty (cognitive friction). The OLS residual (actual time minus predicted length-time) measures this cognitive load. If actual speed drops below 1.5x baseline, the system detects fatigue and switches to easy recovery pacing.
+                                </p>
+                            </div>
+                            <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Q4: How do you handle labeling decision noise?
+                                </h4>
+                                <p className="text-[10px] text-slate-500 leading-relaxed">
+                                    Fatigued users make lazy errors (decision noise). We filter physical outliers (dropping top 20% longest times) to protect the pacing baseline, and use the Human-in-the-Loop double validation queue to verify and clean noisy model auto-labels.
                                 </p>
                             </div>
                         </div>
