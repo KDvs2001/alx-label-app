@@ -73,7 +73,8 @@ class CALLogRanker:
         self, 
         tasks: List[Dict[str, Any]], 
         probabilities: np.ndarray,
-        penalties: np.ndarray = None
+        penalties: np.ndarray = None,
+        pacing_mode: bool = False
     ) -> List[Dict[str, Any]]:
         """
         Rank tasks by CAL-Log score (Entropy / Cost).
@@ -82,6 +83,7 @@ class CALLogRanker:
             tasks: List of task dictionaries with 'taskId' and 'text'
             probabilities: Model predictions, shape (n_tasks, n_classes)
             penalties: Optional redundancy penalties, shape (n_tasks,)
+            pacing_mode: If True, prioritize low cognitive load tasks to allow annotator recovery
         
         Returns:
             ranked_tasks: Sorted list with scores and transparency reports
@@ -98,13 +100,11 @@ class CALLogRanker:
         costs = cost_breakdown["costs"]
         
         # the CAL-Log formula: Score = Uncertainty / Expected Time.
-        # this naturally adapts to the user's fatigue. if the user slows down
-        # (beta goes up), the cost of long texts skyrockets, pushing shorter
-        # punchier tasks to the top without any hardcoded rules.
-        # CITATION: numpy element-wise division - divide two arrays element by element
-        # SOURCE: NumPy (n.d.). "numpy.divide"
-        # URL: https://numpy.org/doc/stable/reference/generated/numpy.divide.html
-        scores = entropy / costs
+        # If in pacing recovery mode, penalize cost quadratically to force short, simple texts.
+        if pacing_mode:
+            scores = entropy / (costs ** 2)
+        else:
+            scores = entropy / costs
         
         # Apply deduplication penalties if provided
         if penalties is not None:
@@ -140,7 +140,7 @@ class CALLogRanker:
                     "confidence": float(np.max(probabilities[idx]))
                 },
                 "transparency_report": {
-                    "phase": "CAL-Log Active",
+                    "phase": "CAL-Log Pacing (Recovery Mode)" if pacing_mode else "CAL-Log Active",
                     "cost_analysis": {
                         "predicted_seconds": float(costs[idx]),
                         "base_seconds": float(cost_breakdown.get("base_costs", costs)[idx]),

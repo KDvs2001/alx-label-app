@@ -109,6 +109,8 @@ class SimulationState:
         self.verification_queue = {} # Maps taskId (int) -> dict of task details (text, label, confidence, etc.)
         self.auto_label_threshold = 0.95
         self.auto_label_threshold_mode = 'dynamic'
+        self.cognitive_pacing_active = False
+        self.baseline_beta = None
 
         # Initialize Files (Prevent 404s on Frontend)
         self._init_files()
@@ -345,7 +347,9 @@ def health():
         "pool_remaining": pool_remaining,
         "pool_total": len(state.pool) if hasattr(state, 'pool') else 1000,
         "verification_queue": verification_queue_list,
-        "auto_label_threshold": getattr(state, 'auto_label_threshold', 0.95)
+        "auto_label_threshold": getattr(state, 'auto_label_threshold', 0.95),
+        "cognitive_pacing_active": getattr(state, 'cognitive_pacing_active', False),
+        "baseline_beta": getattr(state, 'baseline_beta', None)
     })
 
 @app.route('/session/init-priors', methods=['POST'])
@@ -480,7 +484,7 @@ def predict():
     
     # Get Probs & Rank (on candidates)
     probs = state.backbone.predict_proba(texts)
-    ranked_candidates = state.ranker.rank_by_cal_log(normalized_candidates, probs)
+    ranked_candidates = state.ranker.rank_by_cal_log(normalized_candidates, probs, pacing_mode=state.cognitive_pacing_active)
     
     # Client gets top 25 (improves React rendering latency as well)
     ranked_results = ranked_candidates[:25]
@@ -861,7 +865,9 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                     "beta": beta,
                     "ece": ece_val,
                     "last_bg_auto_labeled_count": auto_labeled_count,
-                    "pool_remaining": len(available) - auto_labeled_count
+                    "pool_remaining": len(available) - auto_labeled_count,
+                    "cognitive_pacing_active": getattr(state, 'cognitive_pacing_active', False),
+                    "baseline_beta": getattr(state, 'baseline_beta', None)
                 }
                 with open(METRICS_PATH, "w") as f:
                     json.dump(metrics_data, f)
@@ -913,6 +919,22 @@ def annotate():
         # Do not clear interaction_buffer, cost_engine uses a rolling window
         # of the last 5 internally. Keeping the full buffer ensures continuity.
         logger.info(f"Cost Model Updated - Current values: alpha={state.cost_model.alpha:.2f}, beta={state.cost_model.beta:.2f}")
+        
+        # Cognitive Pacing Scheduler Check
+        if getattr(state, 'baseline_beta', None) is None:
+            if len(state.cost_model.user_history) >= 5:
+                state.baseline_beta = float(state.cost_model.beta)
+                logger.info(f"Cognitive Pacing: Established baseline reading factor (beta) = {state.baseline_beta:.2f}")
+        else:
+            if state.cost_model.beta > state.baseline_beta * 1.5:
+                if not state.cognitive_pacing_active:
+                    state.cognitive_pacing_active = True
+                    logger.info("Cognitive Pacing: Fatigue detected! Pacing Scheduler enabled (quadratically penalizing task cost).")
+            elif state.cost_model.beta <= state.baseline_beta * 1.2:
+                if state.cognitive_pacing_active:
+                    state.cognitive_pacing_active = False
+                    logger.info("Cognitive Pacing: Reading speed recovered. Resuming standard CAL-Log Active Selection.")
+
         try:
             state.history.append({"step": state.step, "alpha": state.cost_model.alpha, "beta": state.cost_model.beta})
             with open(HISTORY_PATH, "w") as f: json.dump(state.history, f)
@@ -1134,6 +1156,8 @@ def reset_session():
         state.steps_since_update = 0
         state.steps_since_train = 0
         state.selected_task_lengths = []
+        state.cognitive_pacing_active = False
+        state.baseline_beta = None
         
         # 6. Clear all buffers
         state.interaction_buffer = []

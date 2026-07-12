@@ -3,3 +3,5 @@
 {"task_id": 500, "session_id": null, "text": "Test task.", "label": "Positive", "time_seconds": 0.1, "word_count": 2, "log_word_count": 1.0986122886681098, "bootstrap_difficulty": 0.024741107593529956}
 {"task_id": 428, "session_id": null, "text": "Peace talks sign historic agreement - Topic Report 428.", "label": "Positive", "time_seconds": 0.1, "word_count": 9, "log_word_count": 2.302585092994046, "bootstrap_difficulty": 0.0468297027512123}
 {"task_id": 500, "session_id": null, "text": "Test task.", "label": "Positive", "time_seconds": 0.1, "word_count": 2, "log_word_count": 1.0986122886681098, "bootstrap_difficulty": 0.024741107593529956}
+{"task_id": 428, "session_id": null, "text": "Peace talks sign historic agreement - Topic Report 428.", "label": "Positive", "time_seconds": 0.1, "word_count": 9, "log_word_count": 2.302585092994046, "bootstrap_difficulty": 0.0468297027512123}
+{"task_id": 500, "session_id": null, "text": "Test task.", "label": "Positive", "time_seconds": 0.1, "word_count": 2, "log_word_count": 1.0986122886681098, "bootstrap_difficulty": 0.024741107593529956}

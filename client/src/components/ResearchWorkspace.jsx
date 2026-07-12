@@ -187,6 +187,25 @@ const ResearchWorkspace = () => {
         }
     }, [currentTask]);
 
+    // Cognitive Pacing State Transition Toast Notification
+    const prevPacingActiveRef = useRef(false);
+    useEffect(() => {
+        if (metrics?.cognitive_pacing_active !== undefined) {
+            if (metrics.cognitive_pacing_active && !prevPacingActiveRef.current) {
+                setToast({ 
+                    message: "Cognitive Pacing Active: Fatigue detected. Prioritizing short, simple recovery texts.", 
+                    type: "warning" 
+                });
+            } else if (!metrics.cognitive_pacing_active && prevPacingActiveRef.current) {
+                setToast({ 
+                    message: "Reading speed recovered. Resuming standard CAL-Log active learning.", 
+                    type: "success" 
+                });
+            }
+            prevPacingActiveRef.current = !!metrics.cognitive_pacing_active;
+        }
+    }, [metrics?.cognitive_pacing_active]);
+
     // Pause/Resume toggle handler
     const handleTogglePause = useCallback(() => {
         setIsPaused(prev => {
@@ -328,7 +347,9 @@ const ResearchWorkspace = () => {
                     pool_total: mData.pool_total,
                     ece: mData.ece,
                     last_bg_auto_labeled_count: mData.last_bg_auto_labeled_count,
-                    auto_label_threshold: mData.auto_label_threshold
+                    auto_label_threshold: mData.auto_label_threshold,
+                    cognitive_pacing_active: mData.cognitive_pacing_active,
+                    baseline_beta: mData.baseline_beta
                 });
                 if (mData.verification_queue) {
                     setVerificationQueue(mData.verification_queue);

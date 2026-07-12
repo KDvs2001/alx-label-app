@@ -124,6 +124,13 @@ const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowM
         ? (metrics.auto_label_threshold * 100).toFixed(0) + '%'
         : 'Tuning…';
 
+    // ─── COGNITIVE PACING STATE ───────────────────────────────────────────────
+    const currentBeta = metrics?.beta || 3.0;
+    const baselineBeta = metrics?.baseline_beta;
+    const pacingActive = !!metrics?.cognitive_pacing_active;
+    const stressRatio = baselineBeta ? (currentBeta / baselineBeta) : 1.0;
+    const stressPercent = Math.min(100, Math.round(stressRatio * 50));
+
     return (
         <div className="flex flex-col gap-5 pb-8">
 
@@ -320,6 +327,56 @@ const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowM
                                 )}
                             </div>
                         )}
+                    </div>
+
+                    {/* ─── COGNITIVE PACING SCHEDULER card ────────────────────── */}
+                    <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 text-left">
+                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <Activity size={12} className={pacingActive ? "text-amber-400 animate-pulse" : "text-emerald-400"} />
+                            Cognitive Pacing Scheduler
+                        </h3>
+
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <span className="relative flex h-2 w-2">
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${pacingActive ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${pacingActive ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                </span>
+                                <span className="text-xs font-bold text-slate-200 animate-pulse">
+                                    {pacingActive ? "Pacing Active (Recovery Mode)" : "Optimal (Active Learning)"}
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-500 bg-slate-800 px-2 py-0.5 rounded">
+                                β Base: {baselineBeta ? baselineBeta.toFixed(2) : "Calibrating..."}
+                            </span>
+                        </div>
+
+                        {/* Cognitive Stress Index Gauge */}
+                        <div className="space-y-1 mb-3">
+                            <div className="flex justify-between text-[10px] text-slate-400">
+                                <span>Cognitive Workload Index</span>
+                                <span className={`font-black ${stressRatio >= 1.5 ? "text-amber-400" : "text-emerald-400"}`}>
+                                    {stressRatio.toFixed(1)}x
+                                </span>
+                            </div>
+                            <div className="h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800 flex">
+                                <div 
+                                    style={{ width: `${stressPercent}%` }}
+                                    className={`h-full transition-all duration-500 rounded-full ${
+                                        pacingActive 
+                                            ? "bg-gradient-to-r from-amber-500 to-rose-500" 
+                                            : "bg-gradient-to-r from-emerald-500 to-blue-500"
+                                    }`}
+                                />
+                            </div>
+                        </div>
+
+                        <p className="text-[10px] text-slate-400 leading-relaxed">
+                            {pacingActive 
+                                ? "CAL-Log has detected annotator reading speed decline. We have automatically switched task selection to recovery mode, prioritizing short, simple sentences to lower cognitive load and prevent labeling errors."
+                                : "Your cognitive pace is within the optimal zone. CAL-Log is ranking tasks normally to optimize information-per-second."
+                            }
+                        </p>
                     </div>
 
                     {/* ④ MODEL HEALTH — calibration + live threshold */}
