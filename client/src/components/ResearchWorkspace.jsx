@@ -12,6 +12,7 @@ import AlphaBetaImpactPanel from './workspace/AlphaBetaImpactPanel';
 import SessionSummary from './workspace/SessionSummary';
 import EvaluatorTour from './workspace/EvaluatorTour';
 import FatigueTrackerModal from './workspace/FatigueTrackerModal';
+import SimpleExplanationModal from './workspace/SimpleExplanationModal';
 import { Pause, Play, X, Settings, Activity } from 'lucide-react';
 
 /**
@@ -33,6 +34,7 @@ const ResearchWorkspace = () => {
     const [submitting, setSubmitting] = useState(false);
     const [showGuidelines, setShowGuidelines] = useState(false);
     const [showAlphaBetaPanel, setShowAlphaBetaPanel] = useState(false);
+    const [showExplanationModal, setShowExplanationModal] = useState(false);
     const [toast, setToast] = useState(null); // { message, type }
     const [isAutoLabeling, setIsAutoLabeling] = useState(false);
 
@@ -830,6 +832,11 @@ const ResearchWorkspace = () => {
                 }}
             />
 
+            <SimpleExplanationModal
+                isOpen={showExplanationModal}
+                onClose={() => setShowExplanationModal(false)}
+            />
+
             {(!loading && !showContestantModal && currentTask) && (
                 <EvaluatorTour
                     key={contestantId}
@@ -875,6 +882,7 @@ const ResearchWorkspace = () => {
                         isAutoLabeling={isAutoLabeling}
                         autoLabelThreshold={metrics.auto_label_threshold || (autoLabelThreshold === 'dynamic' ? null : autoLabelThreshold)}
                         datasetConfig={datasetConfig}
+                        onToggleExplanation={() => setShowExplanationModal(prev => !prev)}
                     />
 
                     {/* ── Live Pool Countdown Bar ─────────────────────────────────

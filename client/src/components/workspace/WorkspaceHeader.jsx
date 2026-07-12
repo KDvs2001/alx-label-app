@@ -3,13 +3,13 @@ import React from 'react';
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle, Pause, Play } from 'lucide-react';
+import { Brain, BookOpen, Save, User, ArrowLeft, Download, CheckCircle, Pause, Play, HelpCircle } from 'lucide-react';
 
 /**
  * WorkspaceHeader Component
  * Global control strip. Enforces experimental timeline constraints and data export requirements.
  */
-const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause, onAutoLabel, isAutoLabeling, autoLabelThreshold, datasetConfig }) => {
+const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSaveAndExit, onExport, onEndSession, isPaused, onTogglePause, onAutoLabel, isAutoLabeling, autoLabelThreshold, datasetConfig, onToggleExplanation }) => {
     return (
         <div className="flex justify-between items-center bg-slate-900 p-4 rounded-xl border border-slate-800">
             <div className="flex items-center gap-3">
@@ -43,6 +43,12 @@ const WorkspaceHeader = ({ historyCount, onToggleGuidelines, contestantId, onSav
                     className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded border border-slate-700 transition-colors"
                 >
                     <BookOpen size={14} /> Guidelines
+                </button>
+                <button
+                    onClick={onToggleExplanation}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-blue-400 hover:text-white text-xs rounded border border-slate-700 transition-colors font-semibold"
+                >
+                    <HelpCircle size={14} /> How it Works
                 </button>
                 {contestantId && onTogglePause && (
                     <button
