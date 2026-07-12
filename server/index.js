@@ -60,6 +60,7 @@ connectDB();
 app.use("/api/experiments", require("./infrastructure/http/routes/experiment"));
 app.use("/api/session", require("./infrastructure/http/routes/session"));
 app.use("/api/feedback", require("./infrastructure/http/routes/feedback"));
+app.use("/api/projects", require("./infrastructure/http/routes/projects"));
 
 app.get("/", (req, res) => {
   res.send("Research Tool API is Running...");

@@ -8,11 +8,13 @@ import ImpactDashboard from "./pages/ImpactDashboard";
 import ResearchWorkspace from "./components/ResearchWorkspace";
 import ManagerDashboardPage from "./pages/ManagerDashboardPage";
 import LoginPage from "./pages/LoginPage";
+import AnnotatorBoardPage from "./pages/AnnotatorBoardPage";
+import ProjectManagementPage from "./pages/ProjectManagementPage";
 // lucide-react provides tree-shakable SVG icon components
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User, Sun, Moon, Menu, X } from "lucide-react";
+import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User, Sun, Moon, Menu, X, Layers, FolderPlus } from "lucide-react";
 
 // controls navigation between the public impact dashboard and the private evaluator workspace
 const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
@@ -40,17 +42,30 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
 
         {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-2 font-semibold">
-          <Link to="/" className={navLinkClass('/') || navLinkClass('/impact')}>
+          <Link to="/" className={navLinkClass('/')}>  
             <TrendingUp size={15} /> Impact
           </Link>
+          {/* Annotator Board — visible to all logged-in users */}
+          {role && (
+            <Link to="/board" className={navLinkClass('/board')}>
+              <Layers size={15} /> My Board
+            </Link>
+          )}
+          {/* Direct workspace access */}
           {role && (
             <Link to="/workspace" className={navLinkClass('/workspace')}>
               <Edit3 size={15} /> Workspace
             </Link>
           )}
+          {/* Manager-only links */}
           {role === 'manager' && (
             <Link to="/dashboard" className={navLinkClass('/dashboard')}>
               <ShieldAlert size={15} /> Dashboard
+            </Link>
+          )}
+          {role === 'manager' && (
+            <Link to="/projects" className={navLinkClass('/projects')}>
+              <FolderPlus size={15} /> Projects
             </Link>
           )}
           <a
@@ -116,6 +131,11 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
             <TrendingUp size={15} /> Impact Calculator
           </Link>
           {role && (
+            <Link to="/board" onClick={() => setMobileOpen(false)} className={navLinkClass('/board')}>
+              <Layers size={15} /> My Board
+            </Link>
+          )}
+          {role && (
             <Link to="/workspace" onClick={() => setMobileOpen(false)} className={navLinkClass('/workspace')}>
               <Edit3 size={15} /> Annotator Workspace
             </Link>
@@ -123,6 +143,11 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
           {role === 'manager' && (
             <Link to="/dashboard" onClick={() => setMobileOpen(false)} className={navLinkClass('/dashboard')}>
               <ShieldAlert size={15} /> Manager Dashboard
+            </Link>
+          )}
+          {role === 'manager' && (
+            <Link to="/projects" onClick={() => setMobileOpen(false)} className={navLinkClass('/projects')}>
+              <FolderPlus size={15} /> Projects
             </Link>
           )}
           <a
@@ -214,6 +239,15 @@ function App() {
           <Routes>
             <Route path="/" element={<ImpactDashboard />} />
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+            {/* Annotator Board — Jira-style Kanban */}
+            <Route
+              path="/board"
+              element={
+                <AnnotatorRoute role={role}>
+                  <AnnotatorBoardPage username={username} />
+                </AnnotatorRoute>
+              }
+            />
             <Route 
               path="/workspace" 
               element={
@@ -229,6 +263,15 @@ function App() {
                   <ManagerDashboardPage />
                 </ManagerRoute>
               } 
+            />
+            {/* Project Management — manager only */}
+            <Route
+              path="/projects"
+              element={
+                <ManagerRoute role={role}>
+                  <ProjectManagementPage username={username} />
+                </ManagerRoute>
+              }
             />
             {/* backwards compatibility spy route */}
             <Route 

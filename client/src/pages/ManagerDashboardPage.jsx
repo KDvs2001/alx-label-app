@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
     Activity, Brain, Clock, DollarSign, Database, Download, 
-    RefreshCw, Layers, ShieldCheck, TrendingUp, Info, HelpCircle, User, ArrowLeft 
+    RefreshCw, Layers, ShieldCheck, TrendingUp, Info, HelpCircle, User, ArrowLeft,
+    FolderOpen, Users, BarChart2, CheckCircle2, ArrowRight, Pause, Play
 } from 'lucide-react';
 import SpyAnalysis from '../components/workspace/SpyAnalysis';
 import SimpleExplanationModal from '../components/workspace/SimpleExplanationModal';
@@ -49,6 +50,28 @@ const ManagerDashboardPage = () => {
     const [roundSize, setRoundSize] = useState(10);
     const [autoLabelThreshold, setAutoLabelThreshold] = useState('dynamic');
     const [customTexts, setCustomTexts] = useState('');
+
+    // Project overview state
+    const SERVER_URL = (import.meta.env.VITE_SERVER_URL || '').replace(/\/$/, '');
+    const [projectStats, setProjectStats] = useState([]);
+    const [loadingProjects, setLoadingProjects] = useState(false);
+
+    const fetchProjectStats = useCallback(async () => {
+        setLoadingProjects(true);
+        try {
+            const res = await fetch(`${SERVER_URL}/api/projects/stats/all`);
+            if (res.ok) {
+                const data = await res.json();
+                setProjectStats(Array.isArray(data) ? data : []);
+            }
+        } catch (e) {
+            console.error('Failed to fetch project stats:', e);
+        } finally {
+            setLoadingProjects(false);
+        }
+    }, [SERVER_URL]);
+
+    useEffect(() => { fetchProjectStats(); }, [fetchProjectStats]);
 
     // Toast auto-clear
     useEffect(() => {
@@ -632,6 +655,89 @@ const ManagerDashboardPage = () => {
                 </div>
 
             </div>
+
+            {/* ── PROJECT OVERVIEW SECTION ──────────────────────────────── */}
+            <div className="max-w-7xl mx-auto mt-8">
+                <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-purple-500/10 rounded-lg">
+                                <FolderOpen size={16} className="text-purple-400" />
+                            </div>
+                            <h3 className="font-bold text-white text-base">Project Overview</h3>
+                            <span className="text-xs text-slate-500 font-semibold">({projectStats.length} total)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={fetchProjectStats}
+                                className="p-1.5 hover:bg-slate-700 rounded-lg transition text-slate-400 hover:text-white"
+                                title="Refresh"
+                            >
+                                <RefreshCw size={14} className={loadingProjects ? 'animate-spin' : ''} />
+                            </button>
+                            <a
+                                href="/projects"
+                                className="flex items-center gap-1.5 text-xs font-bold text-purple-400 hover:text-purple-300 px-3 py-1.5 bg-purple-500/10 rounded-lg border border-purple-500/20 transition"
+                            >
+                                Manage Projects <ArrowRight size={12} />
+                            </a>
+                        </div>
+                    </div>
+
+                    {loadingProjects ? (
+                        <div className="space-y-2">
+                            {[1,2].map(i => <div key={i} className="h-14 bg-slate-800/60 rounded-xl animate-pulse" />)}
+                        </div>
+                    ) : projectStats.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-slate-600 gap-2">
+                            <FolderOpen size={28} strokeWidth={1.3} />
+                            <p className="text-sm font-semibold">No projects yet</p>
+                            <a href="/projects" className="text-xs text-purple-400 hover:underline">Create your first project →</a>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {projectStats.map(p => {
+                                const pct = p.total > 0 ? Math.round((p.labeled / p.total) * 100) : 0;
+                                const statusColor = {
+                                    active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                                    paused: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                                    completed: 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+                                }[p.status] || 'text-slate-400 bg-slate-700 border-slate-600';
+
+                                return (
+                                    <div key={p.projectId} className="flex items-center gap-4 p-3 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-700 transition">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                <span className="font-bold text-white text-sm">{p.name}</span>
+                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor}`}>{p.status}</span>
+                                                <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                    <Users size={11} /> {p.annotatorCount}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                                    <div
+                                                        className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
+                                                        style={{ width: `${pct}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{p.labeled}/{p.total} ({pct}%)</span>
+                                            </div>
+                                            <div className="flex gap-1.5 mt-1.5 flex-wrap">
+                                                {(p.labelTypes || []).map(l => (
+                                                    <span key={l} className="text-xs bg-slate-800 border border-slate-700 text-slate-400 px-1.5 py-0.5 rounded-full">{l}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {pct === 100 && <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
         </div>
     );
 };

@@ -123,7 +123,33 @@ const ResearchWorkspace = () => {
     // 1. Initial Load & Polling (only after contestant ID is set)
     useEffect(() => {
         if (contestantId) {
-            fetchNextBatch();
+            // Check if the workspace was launched from the Kanban board with a specific project config.
+            // If so, we must reset the ML service with that project's corpus BEFORE fetching tasks.
+            // This ensures the ML service is seeded with the correct texts and label types.
+            // CITATION: sessionStorage — stores data for the duration of the page session
+            // SOURCE: MDN Web Docs (n.d.). "Window.sessionStorage"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
+            const projectConfigStr = sessionStorage.getItem('cal_log_project_config');
+            if (projectConfigStr) {
+                try {
+                    const config = JSON.parse(projectConfigStr);
+                    sessionStorage.removeItem('cal_log_project_config'); // consume once
+                    setDatasetConfig(config);
+                    // Reset ML service with project corpus, then fetch first batch
+                    fetch(`${API_URL}/reset`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    })
+                    .then(() => fetchNextBatch())
+                    .catch(() => fetchNextBatch()); // still try even if reset fails
+                } catch {
+                    fetchNextBatch(); // corrupted config — fall through
+                }
+            } else {
+                fetchNextBatch();
+            }
+
             const interval = setInterval(pollMetrics, 2000); // Poll graphs every 2s
             return () => {
                 clearInterval(interval);
