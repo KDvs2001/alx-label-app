@@ -39,10 +39,10 @@ const ResearchWorkspace = () => {
     const [isAutoLabeling, setIsAutoLabeling] = useState(false);
 
     // Session Management State
-    const [contestantId, setContestantId] = useState(null);
+    const [contestantId, setContestantId] = useState(() => sessionStorage.getItem('contestantId') || null);
     const [annotationCount, setAnnotationCount] = useState(0);
     const [labeledTaskIds, setLabeledTaskIds] = useState([]);
-    const [showContestantModal, setShowContestantModal] = useState(true);
+    const [showContestantModal, setShowContestantModal] = useState(() => !sessionStorage.getItem('contestantId'));
     const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
     const [hasUnsavedWork, setHasUnsavedWork] = useState(false);
 
@@ -113,6 +113,14 @@ const ResearchWorkspace = () => {
             return () => clearTimeout(timer);
         }
     }, [toast]);
+
+    // On mount, auto-trigger session loading if already signed in
+    useEffect(() => {
+        const cachedId = sessionStorage.getItem('contestantId');
+        if (cachedId) {
+            handleContestantIdSubmit(cachedId, 'resume', null);
+        }
+    }, []);
 
     // 1. Initial Load & Polling (only after contestant ID is set)
     useEffect(() => {
@@ -644,6 +652,42 @@ const ResearchWorkspace = () => {
                     } catch (e) {
                         console.error('Failed to sync ML server on resume:', e);
                     }
+                } else {
+                    // Fallback to default IMDb sentiment configuration if no session exists yet
+                    const defaultConfig = {
+                        datasetName: 'imdb',
+                        labels: ['Negative', 'Positive'],
+                        seedType: 'unlabeled',
+                        seedCount: 0,
+                        uploadedTexts: null,
+                        roundSize: 10,
+                        autoLabelThreshold: 'dynamic'
+                    };
+                    setRoundSize(10);
+                    setAutoLabelThreshold('dynamic');
+                    setCurrentRound(1);
+                    setShowRoundTransition(false);
+                    setDatasetConfig(defaultConfig);
+                    setAnnotationCount(0);
+                    setLabeledTaskIds([]);
+                    labeledIdsRef.current = [];
+                    setFullAnnotations([]);
+                    setCumulativeTimeSaved(0);
+                    setCumulativeEntropyCost(0);
+                    setCumulativeRandomCost(0);
+                    setCumulativeCalLogCost(0);
+                    setHistory([]);
+                    setMetrics({ alpha: 5.0, beta: 3.0, step: 0 });
+
+                    try {
+                        await fetch(`${API_URL}/reset`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(defaultConfig)
+                        });
+                    } catch (e) {
+                        console.error('Failed to sync fallback defaults on ML server:', e);
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load session:', error);
@@ -799,6 +843,7 @@ const ResearchWorkspace = () => {
             <ContestantIdModal
                 isOpen={showContestantModal}
                 onSubmit={handleContestantIdSubmit}
+                onClose={() => window.location.href = '/'}
             />
 
             {/* Loading Overlay */}
