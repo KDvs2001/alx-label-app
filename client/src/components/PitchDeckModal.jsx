@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Award, Brain, BarChart2, Lightbulb, Lock, ArrowRight, ShieldCheck, Database, Layers, Cpu, Users, Smartphone, Zap } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Award, Brain, BarChart2, Lightbulb, Lock, ArrowRight, ShieldCheck, Database, Layers, Cpu, Users, Zap, Clock, AlertTriangle, Play } from 'lucide-react';
 
 const PitchDeckModal = ({ isOpen, onClose }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -7,6 +7,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('pitch_deck_auth') === 'true');
     const [errorMsg, setErrorMsg] = useState('');
     const [isLight, setIsLight] = useState(() => document.body.classList.contains('theme-light'));
+    const [activeFormulaTab, setActiveFormulaTab] = useState('hx');
 
     // Dynamic theme detection
     useEffect(() => {
@@ -29,219 +30,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
         }
     };
 
-    const slides = [
-        {
-            title: "Understanding of the Problem",
-            subtitle: "The Trillion-Dollar Bottleneck in AI Development",
-            icon: Lightbulb,
-            iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
-            content: (
-                <div className="space-y-6">
-                    <div className={`p-5 rounded-2xl border text-center transition-all ${
-                        isLight ? 'bg-rose-50 border-rose-200' : 'bg-rose-950/20 border-rose-500/20'
-                    }`}>
-                        <p className={`text-lg md:text-xl font-bold ${isLight ? 'text-rose-800' : 'text-rose-300'} leading-relaxed`}>
-                            Teaching an AI to read means paying people to label thousands of examples by hand. <span className="text-rose-500 font-extrabold underline block mt-1.5">It eats over 80% of an AI project's budget, and most of that spend is wasted.</span>
-                        </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
-                        <div className={`p-6 rounded-2xl border hover:scale-102 hover:border-rose-500/40 hover:shadow-lg transition-all duration-300 flex flex-col gap-3 relative overflow-hidden ${
-                            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                        }`}>
-                            <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 font-black text-sm shrink-0">1</div>
-                            <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-base`}>Picks the Wrong Data <span className="text-xs text-rose-500 font-extrabold block uppercase tracking-wider mt-0.5">selection</span></h4>
-                            <p className="text-xs text-slate-400 leading-relaxed mt-1">Tools pick redundant, low-value examples to label, so effort goes to data the model learns nothing from.</p>
-                        </div>
-                        <div className={`p-6 rounded-2xl border hover:scale-102 hover:border-rose-500/40 hover:shadow-lg transition-all duration-300 flex flex-col gap-3 relative overflow-hidden ${
-                            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                        }`}>
-                            <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 font-black text-sm shrink-0">2</div>
-                            <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-base`}>Ignores Real Effort <span className="text-xs text-rose-500 font-extrabold block uppercase tracking-wider mt-0.5">cost-blind</span></h4>
-                            <p className="text-xs text-slate-400 leading-relaxed mt-1">A two-second tweet and a four-minute review are treated as equal cost, so long texts quietly drain the budget.</p>
-                        </div>
-                        <div className={`p-6 rounded-2xl border hover:scale-102 hover:border-rose-500/40 hover:shadow-lg transition-all duration-300 flex flex-col gap-3 relative overflow-hidden ${
-                            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                        }`}>
-                            <div className="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center text-rose-500 font-black text-sm shrink-0">3</div>
-                            <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-base`}>Blind and Rigid <span className="text-xs text-rose-500 font-extrabold block uppercase tracking-wider mt-0.5">no trust</span></h4>
-                            <p className="text-xs text-slate-400 leading-relaxed mt-1">Tools give confidence you can't trust, never adapt to the person, and can't explain why they chose an example.</p>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: "Project Overview",
-            subtitle: "CAL-Log is That Smarter Way",
-            icon: Layers,
-            iconColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
-            content: (
-                <div className="space-y-6">
-                    <div className={`p-5 rounded-2xl text-center border transition-all ${
-                        isLight ? 'bg-indigo-50 border-indigo-200' : 'bg-indigo-950/20 border-indigo-500/20'
-                    }`}>
-                        <p className={`text-base font-bold ${isLight ? 'text-indigo-950' : 'text-indigo-300'} leading-relaxed`}>
-                            It is a <span className="text-indigo-500 font-extrabold underline">plug-in for the labeling tools teams already use</span>: it decides which example a person should label next.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                        <div className="space-y-4">
-                            <div className="flex gap-3.5 items-start">
-                                <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 font-black text-[10px] shrink-0 mt-0.5 uppercase tracking-wider">Analogy</div>
-                                <p className={`text-sm ${isLight ? 'text-slate-600' : 'text-slate-400'} leading-relaxed`}>
-                                    <span className="font-extrabold text-slate-300">Think of a smart teacher:</span> instead of drilling you on all 1,000 flashcards, they hand you the one that teaches you the most.
-                                </p>
-                            </div>
-                            <div className="flex gap-3.5 items-start">
-                                <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 font-black text-[10px] shrink-0 mt-0.5 uppercase tracking-wider">Outcome</div>
-                                <p className={`text-sm ${isLight ? 'text-slate-600' : 'text-slate-400'} leading-relaxed`}>
-                                    Same AI quality, a fraction of the time and cost, with <span className="underline font-bold">no change</span> to how the team already works.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Large Metric Cards */}
-                        <div className="grid grid-cols-3 gap-3.5">
-                            <div className={`p-4 rounded-2xl border text-center transition-all hover:scale-105 duration-300 ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900 border-slate-800'
-                            }`}>
-                                <div className="text-3xl md:text-4xl font-black text-rose-500">3.88x</div>
-                                <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-wider leading-tight">faster to a good model</p>
-                            </div>
-                            <div className={`p-4 rounded-2xl border text-center transition-all hover:scale-105 duration-300 ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900 border-slate-800'
-                            }`}>
-                                <div className="text-3xl md:text-4xl font-black text-rose-500">59%</div>
-                                <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-wider leading-tight">less labeling cost</p>
-                            </div>
-                            <div className={`p-4 rounded-2xl border text-center transition-all hover:scale-105 duration-300 ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900 border-slate-800'
-                            }`}>
-                                <div className="text-3xl md:text-4xl font-black text-rose-500">10 / 7</div>
-                                <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-wider leading-tight">datasets / rivals beaten</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: "Business Environment",
-            subtitle: "Market Scale & Commerical Viability",
-            icon: BarChart2,
-            iconColor: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
-            content: (
-                <div className="space-y-6">
-                    <div className={`p-5 rounded-2xl border text-center transition-all ${
-                        isLight ? 'bg-rose-50 border-rose-200' : 'bg-rose-950/20 border-rose-500/20'
-                    }`}>
-                        <p className={`text-base font-bold ${isLight ? 'text-rose-800' : 'text-rose-350'} leading-relaxed`}>
-                            The data-labeling market is worth billions and growing fast. <span className="text-rose-500 font-extrabold underline block mt-1">Meta paid $14B for a single labeling company in 2025.</span>
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-                        {[
-                            { title: "Same Model, Half the Bill", desc: "It cuts the single biggest AI cost, human labeling, by well over half.", num: "1", color: "text-blue-400 border-blue-500/25 bg-blue-500/5" },
-                            { title: "Cheap to Run & Scale", desc: "Auto-scaling cloud services with tiny overhead per user, and near-zero cost when idle.", num: "2", color: "text-purple-400 border-purple-500/25 bg-purple-500/5" },
-                            { title: "Clear Go-To-Market", desc: "Licensed as a paid plug-in for platforms teams already use, like Label Studio: new value, no new tool to buy.", num: "3", color: "text-amber-400 border-amber-500/25 bg-amber-500/5" },
-                            { title: "Validated Demand", desc: "31+ external experts confirmed it is commercially useful for real annotation work.", num: "4", color: "text-emerald-400 border-emerald-500/25 bg-emerald-500/5" }
-                        ].map(card => (
-                            <div key={card.title} className={`p-5 rounded-2xl border hover:scale-102 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col gap-2 relative overflow-hidden ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                            }`}>
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs border ${card.color}`}>{card.num}</div>
-                                <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-sm mt-1.5`}>{card.title}</h4>
-                                <p className="text-xs text-slate-400 leading-relaxed mt-0.5">{card.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: "Compatibility & Interoperability",
-            subtitle: "Zero Friction Integration Into Existing Developer Stacks",
-            icon: Cpu,
-            iconColor: "text-purple-500 bg-purple-500/10 border-purple-500/20",
-            content: (
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[
-                            { title: "Works Anywhere", desc: "Runs in any browser; ships in Docker for any computer or cloud.", icon: Smartphone, color: "text-blue-400 bg-blue-500/10" },
-                            { title: "Easy to Connect", desc: "Clean, standard APIs that any system can talk to.", icon: Zap, color: "text-indigo-400 bg-indigo-500/10" },
-                            { title: "Drops Into Your Tools", desc: "Installs as a plug-in for Label Studio and reads any common data file.", icon: Layers, color: "text-purple-400 bg-purple-500/10" },
-                            { title: "No Lock-In", desc: "The underlying AI model can be swapped out freely.", icon: Brain, color: "text-rose-400 bg-rose-500/10" }
-                        ].map(card => (
-                            <div key={card.title} className={`p-5 rounded-2xl border hover:scale-102 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col gap-2 relative overflow-hidden ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                            }`}>
-                                <div className={`p-2 rounded-xl w-10 h-10 flex items-center justify-center shrink-0 ${card.color}`}>
-                                    <card.icon size={18} />
-                                </div>
-                                <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-sm mt-1.5`}>{card.title}</h4>
-                                <p className="text-xs text-slate-400 leading-relaxed mt-0.5">{card.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: "User Requirements",
-            subtitle: "Human-Centric Workspace Calibrated for Annotators",
-            icon: Users,
-            iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-            content: (
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[
-                            { title: "Built Around Real Users", desc: "Designed from interviews and feedback with real annotators.", color: "border-blue-500/20 bg-blue-500/5 text-blue-400" },
-                            { title: "Protects the Annotator", desc: "Tiredness alerts and resumable sessions keep the work humane.", color: "border-indigo-500/20 bg-indigo-500/5 text-indigo-400" },
-                            { title: "Always Transparent", desc: "A live window shows exactly why each text was chosen.", color: "border-purple-500/20 bg-purple-500/5 text-purple-400" },
-                            { title: "Shows Real Impact", desc: "A dashboard reports the time and money saved each session.", color: "border-rose-500/20 bg-rose-500/5 text-rose-400" }
-                        ].map(card => (
-                            <div key={card.title} className={`p-5 rounded-2xl border hover:scale-102 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col gap-2.5 relative overflow-hidden ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                            }`}>
-                                <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-sm`}>{card.title}</h4>
-                                <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        },
-        {
-            title: "Content & Standards",
-            subtitle: "Validated Engineering and Peer-Reviewed Science Core",
-            icon: ShieldCheck,
-            iconColor: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-            content: (
-                <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {[
-                            { title: "Proven on Real Data", desc: "Tested against 7 leading methods on 10 public datasets, with honest, repeatable results.", color: "border-emerald-500/25 bg-emerald-500/5 text-emerald-400" },
-                            { title: "Engineering Standards", desc: "Clean architecture, documented APIs, and code-quality audits throughout.", color: "border-teal-500/25 bg-teal-500/5 text-teal-400" },
-                            { title: "Privacy & Compliance", desc: "GDPR-aligned by design: no trackers, no personal data, checked by independent scanners.", color: "border-cyan-500/25 bg-cyan-500/5 text-cyan-400" },
-                            { title: "Peer-Reviewed Quality", desc: "4 papers accepted, including an A* at ACL 2026, plus ICAIIC, IEEE SCSE and IEEE CSNT.", color: "border-indigo-500/25 bg-indigo-500/5 text-indigo-400" }
-                        ].map(card => (
-                            <div key={card.title} className={`p-5 rounded-2xl border hover:scale-102 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 flex flex-col gap-2.5 relative overflow-hidden ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-                            }`}>
-                                <h4 className={`font-black ${isLight ? 'text-slate-800' : 'text-white'} text-sm`}>{card.title}</h4>
-                                <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        }
-    ];
-
-    const nextSlide = () => setCurrentSlide(prev => (prev < slides.length - 1 ? prev + 1 : prev));
+    const nextSlide = () => setCurrentSlide(prev => (prev < 5 ? prev + 1 : prev));
     const prevSlide = () => setCurrentSlide(prev => (prev > 0 ? prev - 1 : prev));
 
     // Keyboard navigation (Left/Right Arrows)
@@ -258,22 +47,20 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
-    const CurrentIcon = slides[currentSlide].icon;
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-0 md:p-6 animate-fade-in">
-            <div className={`w-full h-full md:max-w-6xl md:max-h-[680px] md:rounded-3xl shadow-2xl relative flex flex-col justify-between overflow-hidden text-left transition-all ${
-                isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-white'
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-0 md:p-6 animate-fade-in">
+            <div className={`w-full h-full md:max-w-5xl md:max-h-[640px] md:rounded-3xl shadow-2xl relative flex flex-col justify-between overflow-hidden text-left transition-all ${
+                isLight ? 'bg-slate-50 text-slate-900 border border-slate-200' : 'bg-slate-950 text-white border border-slate-900'
             }`}>
                 {/* Visual Top Glow */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-rose-500 z-20" />
+                <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-500 z-20" />
                 
                 {/* Close Button */}
                 <button 
                     onClick={onClose}
-                    className={`absolute top-4 right-4 p-2 rounded-xl transition z-30 border ${
+                    className={`absolute top-4 right-4 p-2.5 rounded-xl transition z-30 border ${
                         isLight 
-                            ? 'bg-slate-100 border-slate-205 text-slate-650 hover:bg-slate-200' 
+                            ? 'bg-slate-100 border-slate-250 text-slate-600 hover:bg-slate-200' 
                             : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
                     }`}
                     title="Exit Presentation"
@@ -288,7 +75,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             <Lock size={30} className="animate-pulse" />
                         </div>
                         <div>
-                            <h3 className={`text-xl font-black ${isLight ? 'text-slate-850' : 'text-white'}`}>CAL-Log Product Presentation</h3>
+                            <h3 className={`text-xl font-black ${isLight ? 'text-slate-850' : 'text-white'}`}>CAL-Log Presentation</h3>
                             <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Please enter the pitch presentation passkey to unlock the slides.</p>
                         </div>
                         <form onSubmit={handlePasswordSubmit} className="w-full max-w-xs space-y-3">
@@ -314,42 +101,304 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                         </form>
                     </div>
                 ) : (
-                    /* Full-Screen Slides Presentation View */
+                    /* Sliding Carousel slides presentation */
                     <>
-                        {/* Slide Header */}
-                        <div className={`p-6 md:p-8 pb-4 border-b flex justify-between items-center ${
-                            isLight ? 'border-slate-200/80 bg-white' : 'border-slate-905 bg-slate-950'
-                        }`}>
-                            <div className="flex items-center gap-3">
-                                <div className={`p-2.5 rounded-xl border ${slides[currentSlide].iconColor}`}>
-                                    <CurrentIcon size={24} />
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
-                                        Slide {currentSlide + 1} of {slides.length}
-                                    </span>
-                                    <h2 className={`text-2xl md:text-3xl font-black mt-1 ${isLight ? 'text-slate-800' : 'text-white'} tracking-tight`}>{slides[currentSlide].title}</h2>
-                                    <p className="text-xs font-semibold text-slate-400 mt-0.5">{slides[currentSlide].subtitle}</p>
+                        {/* Slide Content Wrapper */}
+                        <div className="flex-grow flex flex-col min-h-0 relative">
+                            {/* Inner Sliding Viewport */}
+                            <div className="flex-1 overflow-hidden relative">
+                                <div 
+                                    className="flex h-full transition-transform duration-500 ease-out"
+                                    style={{ transform: `translate3d(-${currentSlide * 100}%, 0, 0)` }}
+                                >
+                                    
+                                    {/* ── SLIDE 1: THE PAIN ────────────────────────────────────────── */}
+                                    <div className="w-full shrink-0 p-8 flex flex-col justify-center gap-6">
+                                        <div className="max-w-2xl">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded">The Pain Point</span>
+                                            <h2 className={`text-3xl md:text-4xl font-black mt-2 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                                Data Labeling is <span className="text-rose-500">Slow, Hard, and Expensive</span>
+                                            </h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            <div className="lg:col-span-7 space-y-4">
+                                                <p className="text-sm md:text-base text-slate-400 leading-relaxed font-semibold">
+                                                    Imagine forcing human annotators to read 10,000 documents by hand. It is a slow, mind-numbing task.
+                                                </p>
+                                                <div className="flex gap-3 items-center">
+                                                    <div className="p-2 bg-rose-500/10 rounded-xl text-rose-500 border border-rose-500/20"><AlertTriangle size={20} /></div>
+                                                    <p className={`text-sm font-bold ${isLight ? 'text-slate-800' : 'text-slate-300'}`}>Tired humans make mistakes, introducing noise into the AI training set.</p>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Visual representation */}
+                                            <div className="lg:col-span-5 flex justify-center">
+                                                <div className={`p-5 rounded-2xl border w-full max-w-sm flex flex-col gap-3 relative ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900/60 border-slate-800'}`}>
+                                                    <div className="flex justify-between items-center text-xs text-slate-500 font-bold border-b border-slate-800/40 pb-2">
+                                                        <span>DOCUMENT QUEUE</span>
+                                                        <span className="text-rose-500 animate-pulse">OVERLOAD</span>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        {[
+                                                            { text: "Highly redundant duplicate article content...", opacity: "opacity-100" },
+                                                            { text: "Long, boring, repetitive dataset review text...", opacity: "opacity-70" },
+                                                            { text: "Another simple sentence requiring 0 cognitive effort...", opacity: "opacity-45" }
+                                                        ].map((item, idx) => (
+                                                            <div key={idx} className={`p-2.5 bg-slate-950 border border-slate-900 rounded-xl text-[11px] font-mono text-slate-400 ${item.opacity}`}>
+                                                                {item.text}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <div className="text-[10px] text-center text-slate-500 font-bold italic mt-1">Annotators spend 90% of their time reading trivial texts.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── SLIDE 2: THE WASTE ────────────────────────────────────────── */}
+                                    <div className="w-full shrink-0 p-8 flex flex-col justify-center gap-6">
+                                        <div className="max-w-2xl">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded">The Cost Leak</span>
+                                            <h2 className={`text-3xl md:text-4xl font-black mt-2 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                                Bleeding AI Budgets on <span className="text-rose-500">Useless Data</span>
+                                            </h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            <div className="lg:col-span-7 space-y-4">
+                                                <div className="bg-rose-500/10 border border-rose-500/20 p-4 rounded-xl text-center md:text-left">
+                                                    <p className={`text-base font-bold ${isLight ? 'text-rose-900' : 'text-rose-300'}`}>
+                                                        Human labeling accounts for <span className="text-rose-500 font-extrabold underline">80% of an AI project's budget</span>. Most of that is wasted paying humans to read texts the AI model is already confident about.
+                                                    </p>
+                                                </div>
+                                                <p className="text-xs md:text-sm text-slate-400 leading-relaxed font-semibold">
+                                                    Traditional tools are cost-blind. They treat a two-second tweet and a four-minute financial report as the same cost, draining your budget on low-value items.
+                                                </p>
+                                            </div>
+                                            
+                                            {/* Visual Progress Ring */}
+                                            <div className="lg:col-span-5 flex justify-center">
+                                                <div className={`p-6 rounded-2xl border w-full max-w-sm flex items-center justify-between gap-4 ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900/60 border-slate-800'}`}>
+                                                    <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
+                                                        <svg className="w-full h-full transform -rotate-90">
+                                                            <circle cx="56" cy="56" r="48" stroke="#1e293b" strokeWidth="10" fill="transparent" />
+                                                            <circle cx="56" cy="56" r="48" stroke="#f43f5e" strokeWidth="10" fill="transparent" strokeDasharray="301.6" strokeDashoffset="60.3" className="transition-all duration-1000" />
+                                                        </svg>
+                                                        <div className="absolute text-center">
+                                                            <span className="text-2xl font-black text-white">80%</span>
+                                                            <span className="text-[8px] text-slate-400 block font-bold uppercase">AI Budget</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <div className="text-xs font-bold text-white uppercase tracking-wider">Spent on Labeling</div>
+                                                        <p className="text-[11px] text-slate-450 leading-relaxed">Up to 70% of random samples provide no active learning signal, meaning you are literally paying to learn nothing.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── SLIDE 3: THE SOLUTION ─────────────────────────────────────── */}
+                                    <div className="w-full shrink-0 p-8 flex flex-col justify-center gap-6">
+                                        <div className="max-w-2xl">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2.5 py-1 rounded">The Innovation</span>
+                                            <h2 className={`text-3xl md:text-4xl font-black mt-2 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                                Meet CAL-Log: The <span className="text-indigo-400">Smart Teacher Heuristic</span>
+                                            </h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            <div className="lg:col-span-7 space-y-4">
+                                                <p className="text-sm md:text-base text-slate-450 leading-relaxed font-semibold">
+                                                    Instead of drilling a labeler on all 1,000 flashcards, CAL-Log acts as an intelligent plug-in, handing them **only the high-value cards** they need to see.
+                                                </p>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="flex gap-2">
+                                                        <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0 h-fit mt-0.5"><Zap size={14} /></div>
+                                                        <p className="text-xs text-slate-400 leading-relaxed">Dynamically filters redundant text data.</p>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0 h-fit mt-0.5"><Zap size={14} /></div>
+                                                        <p className="text-xs text-slate-400 leading-relaxed">Adapts tasks to individual reading speeds.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Visual Comparison */}
+                                            <div className="lg:col-span-5 flex justify-center">
+                                                <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+                                                    <div className={`p-4 rounded-xl border text-center ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900/40 border-slate-800'}`}>
+                                                        <div className="text-slate-500 font-black text-xs uppercase tracking-wider">Ordinary Tools</div>
+                                                        <div className="text-2xl font-black text-slate-600 mt-2">1,000</div>
+                                                        <p className="text-[10px] text-slate-550 mt-1">Random files drilled</p>
+                                                    </div>
+                                                    <div className={`p-4 rounded-xl border border-indigo-500/30 text-center bg-indigo-500/5`}>
+                                                        <div className="text-indigo-400 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-1">CAL-Log <Sparkles size={11} className="text-amber-400 animate-pulse" /></div>
+                                                        <div className="text-2xl font-black text-indigo-300 mt-2">CALIBRATED</div>
+                                                        <p className="text-[10px] text-indigo-450 mt-1">Targeted by cognitive style</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── SLIDE 4: THE MATH ─────────────────────────────────────────── */}
+                                    <div className="w-full shrink-0 p-8 flex flex-col justify-center gap-6">
+                                        <div className="max-w-2xl">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-500/10 px-2.5 py-1 rounded">Technically Advanced</span>
+                                            <h2 className={`text-3xl md:text-4xl font-black mt-2 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                                Algorithmic Brain: <span className="text-indigo-400">Human-Paced Active Learning</span>
+                                            </h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            <div className="lg:col-span-7 space-y-4">
+                                                <p className="text-xs md:text-sm text-slate-450 leading-relaxed font-semibold">
+                                                    The system scores every single text item before a human sees it, using a formula that balances learning value against reading time.
+                                                </p>
+                                                
+                                                {/* Interactive formula tabs */}
+                                                <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-900 w-fit">
+                                                    {['hx', 'log_l', 'alpha_beta'].map((tab) => (
+                                                        <button
+                                                            key={tab}
+                                                            onClick={() => setActiveFormulaTab(tab)}
+                                                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition ${
+                                                                activeFormulaTab === tab 
+                                                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/10' 
+                                                                    : 'text-slate-400 hover:text-white'
+                                                            }`}
+                                                        >
+                                                            {tab === 'hx' ? 'Model Learning' : tab === 'log_l' ? 'Word Length' : 'Cognitive Style'}
+                                                        </button>
+                                                    ))}
+                                                </div>
+
+                                                <div className="h-14">
+                                                    {activeFormulaTab === 'hx' && (
+                                                        <p className="text-xs text-indigo-300 italic leading-relaxed">
+                                                            <span className="font-bold text-white">H(x) (Model Entropy):</span> Scores how much information the model gains from this sample. Prevents training on easy data the model already understands.
+                                                        </p>
+                                                    )}
+                                                    {activeFormulaTab === 'log_l' && (
+                                                        <p className="text-xs text-indigo-300 italic leading-relaxed">
+                                                            <span className="font-bold text-white">log(1 + L) (Logarithmic Length):</span> Prevents chasing trivial one-liners. Ensures the budget is spent efficiently across short and long documents.
+                                                        </p>
+                                                    )}
+                                                    {activeFormulaTab === 'alpha_beta' && (
+                                                        <p className="text-xs text-indigo-300 italic leading-relaxed">
+                                                            <span className="font-bold text-white">α + β (Cognitive Style):</span> Calibrated during the Pilot Test. Routes complex text batches only to analysts, and fast skims to speed-readers.
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Formula Display */}
+                                            <div className="lg:col-span-5 flex justify-center">
+                                                <div className="p-5 rounded-2xl bg-slate-950 border border-slate-900 text-center w-full max-w-sm flex flex-col justify-center min-h-[140px]">
+                                                    <span className="text-[9px] font-black uppercase text-indigo-500 tracking-widest mb-1.5">The Equation</span>
+                                                    <code className="text-xl md:text-3xl font-mono text-indigo-400 font-black">
+                                                        {activeFormulaTab === 'hx' ? 'H(x)' : activeFormulaTab === 'log_l' ? 'log(1+L)' : 'α + β'}
+                                                    </code>
+                                                    <span className="text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-wider">ACL Peer-Reviewed Validation</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── SLIDE 5: THE TRACTION & ROI ─────────────────────────────────── */}
+                                    <div className="w-full shrink-0 p-8 flex flex-col justify-center gap-6">
+                                        <div className="max-w-2xl">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded">The Traction</span>
+                                            <h2 className={`text-3xl md:text-4xl font-black mt-2 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                                Proven Outcomes: <span className="text-emerald-400">Cut Costs in Half</span>
+                                            </h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            <div className="lg:col-span-6 space-y-4">
+                                                <p className="text-sm md:text-base text-slate-450 leading-relaxed font-semibold">
+                                                    We tested CAL-Log against 7 leading active learning models across 10 datasets. It beat them all.
+                                                </p>
+                                                
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                                                        <span>59% Less Labeling Costs</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                                                        <span>3.88x Faster Model Convergence</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Large Metrics Visual */}
+                                            <div className="lg:col-span-6 flex justify-center">
+                                                <div className={`p-6 rounded-2xl border w-full max-w-sm text-center relative overflow-hidden ${isLight ? 'bg-slate-100 border-slate-200' : 'bg-slate-900/60 border-slate-800'}`}>
+                                                    <div className="text-4xl md:text-5xl font-black text-emerald-400 tracking-tight">59% SAVED</div>
+                                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-2">Verified Commerical Labeling Cost Cut</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* ── SLIDE 6: COMPATIBILITY ────────────────────────────────────── */}
+                                    <div className="w-full shrink-0 p-8 flex flex-col justify-center gap-6">
+                                        <div className="max-w-2xl">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded">Enterprise Ready</span>
+                                            <h2 className={`text-3xl md:text-4xl font-black mt-2 leading-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                                                Compatible with <span className="text-emerald-400">Your Current Labeling Stack</span>
+                                            </h2>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                                            <div className="lg:col-span-7 space-y-4">
+                                                <p className="text-xs md:text-sm text-slate-450 leading-relaxed font-semibold">
+                                                    CAL-Log integrates as a plug-in. It operates in the background, telling your annotators what to label next through standard REST APIs.
+                                                </p>
+                                                <div className="grid grid-cols-2 gap-3.5 mt-2">
+                                                    <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/40 border-slate-800'}`}>
+                                                        <h4 className="font-bold text-xs text-white">Drops Into Label Studio</h4>
+                                                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Connects directly via API, serving as the sample selector.</p>
+                                                    </div>
+                                                    <div className={`p-3.5 rounded-xl border ${isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/40 border-slate-800'}`}>
+                                                        <h4 className="font-bold text-xs text-white">Works Anywhere</h4>
+                                                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Ships in Docker container, running in any cloud or locally.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Visual Flow diagram */}
+                                            <div className="lg:col-span-5 flex justify-center">
+                                                <div className="flex flex-col items-center gap-2 text-xs font-bold w-full max-w-sm">
+                                                    <div className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-center w-36">Raw Dataset</div>
+                                                    <div className="w-0.5 h-3 bg-indigo-500" />
+                                                    <div className="px-3 py-2 bg-indigo-600 rounded-xl text-center w-40 text-white font-extrabold shadow-lg shadow-indigo-500/10">CAL-Log API</div>
+                                                    <div className="w-0.5 h-3 bg-indigo-500" />
+                                                    <div className="px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-center w-36">Label Studio UI</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
 
-                        {/* Slide Body Content */}
-                        <div className="flex-grow p-6 md:p-8 overflow-y-auto">
-                            {slides[currentSlide].content}
-                        </div>
-
                         {/* Slide Footer Navigation */}
-                        <div className={`p-6 md:p-8 pt-4 border-t flex items-center justify-between ${
-                            isLight ? 'border-slate-200/80 bg-white' : 'border-slate-905 bg-slate-950'
+                        <div className={`p-6 md:p-8 pt-4 border-t flex items-center justify-between shrink-0 ${
+                            isLight ? 'border-slate-200/80 bg-white' : 'border-slate-900 bg-slate-950'
                         }`}>
                             <div className="flex gap-2.5">
-                                {slides.map((_, i) => (
+                                {[0, 1, 2, 3, 4, 5].map((idx) => (
                                     <span 
-                                        key={i} 
-                                        className={`w-2.5 h-2.5 rounded-full transition-all duration-350 ${
-                                            i === currentSlide ? 'bg-indigo-500 w-8' : 'bg-slate-800'
+                                        key={idx} 
+                                        className={`w-2.5 h-2.5 rounded-full transition-all duration-350 cursor-pointer ${
+                                            idx === currentSlide ? 'bg-indigo-500 w-8' : 'bg-slate-800'
                                         }`} 
+                                        onClick={() => setCurrentSlide(idx)}
                                     />
                                 ))}
                             </div>
@@ -360,17 +409,17 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                     className={`p-2.5 rounded-xl border transition disabled:opacity-30 ${
                                         isLight 
                                             ? 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200' 
-                                            : 'bg-slate-900 border-slate-805 text-slate-300 hover:text-white hover:bg-slate-800'
+                                            : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
                                     }`}
                                     title="Previous Slide"
                                 >
                                     <ChevronLeft size={18} />
                                 </button>
                                 <button
-                                    onClick={currentSlide === slides.length - 1 ? onClose : nextSlide}
-                                    className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10"
+                                    onClick={currentSlide === 5 ? onClose : nextSlide}
+                                    className="px-6 py-2.5 bg-gradient-to-r from-indigo-650 to-indigo-550 hover:from-indigo-600 hover:to-indigo-450 text-white text-xs font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10"
                                 >
-                                    {currentSlide === slides.length - 1 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={15} />
+                                    {currentSlide === 5 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={15} />
                                 </button>
                             </div>
                         </div>
