@@ -108,7 +108,9 @@ const ProjectRow = ({ project, onDelete, onToggleStatus }) => {
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 flex-wrap">
                         <span className="flex items-center gap-1"><FileText size={11} /> {project.total} texts</span>
-                        <span className="flex items-center gap-1"><Users size={11} /> {(project.assignedAnnotators || []).length} annotators</span>
+                        <span className="flex items-center gap-1">
+                            <Users size={11} /> Target: <span className="font-bold text-slate-300">{project.targetProfile || 'All'}</span>
+                        </span>
                         <span className="flex items-center gap-1"><BarChart2 size={11} /> {project.labeled || 0} labeled ({pct}%)</span>
                     </div>
                 </div>
@@ -143,12 +145,10 @@ const ProjectRow = ({ project, onDelete, onToggleStatus }) => {
                             </span>
                         ))}
                     </div>
-                    {(project.assignedAnnotators || []).length > 0 && (
-                        <div className="text-xs text-slate-400">
-                            <span className="font-bold text-slate-300">Assigned: </span>
-                            {project.assignedAnnotators.join(', ')}
-                        </div>
-                    )}
+                    <div className="text-xs text-slate-400 flex items-center gap-2">
+                        <span className="font-bold text-slate-300">Complexity: </span>
+                        <span>{project.complexityScore !== undefined ? project.complexityScore.toFixed(2) : 'N/A'}</span>
+                    </div>
                     {/* Progress bar */}
                     <div>
                         <div className="flex justify-between text-xs text-slate-500 mb-1">
@@ -182,8 +182,7 @@ const ProjectManagementPage = ({ username = 'admin' }) => {
         name: '',
         description: '',
         labelTypes: [],
-        textsRaw: '',
-        annotators: ''
+        textsRaw: ''
     });
     const [formError, setFormError] = useState('');
     const [saving, setSaving] = useState(false);
@@ -252,11 +251,6 @@ const ProjectManagementPage = ({ username = 'admin' }) => {
         if (form.labelTypes.length < 2) return setFormError('Add at least 2 label types (e.g. Positive, Negative).');
         if (texts.length === 0) return setFormError('Add at least one text to the corpus.');
 
-        const annotators = form.annotators
-            .split(/[\n,]/)
-            .map(s => s.trim())
-            .filter(Boolean);
-
         setSaving(true);
         try {
             const res = await fetch(`${SERVER_URL}/api/projects`, {
@@ -267,7 +261,6 @@ const ProjectManagementPage = ({ username = 'admin' }) => {
                     description: form.description.trim(),
                     labelTypes: form.labelTypes,
                     texts,
-                    assignedAnnotators: annotators,
                     createdBy: username
                 })
             });
@@ -275,7 +268,7 @@ const ProjectManagementPage = ({ username = 'admin' }) => {
             if (!res.ok) throw new Error('Server error');
 
             // Reset form
-            setForm({ name: '', description: '', labelTypes: [], textsRaw: '', annotators: '' });
+            setForm({ name: '', description: '', labelTypes: [], textsRaw: '' });
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 2500);
             showToast(`Project "${form.name.trim()}" created successfully!`);
@@ -403,19 +396,6 @@ const ProjectManagementPage = ({ username = 'admin' }) => {
                                         <Upload size={13} /> Upload file (.txt or .json)
                                     </button>
                                     <input ref={fileInputRef} type="file" accept=".txt,.json" onChange={handleFileUpload} className="hidden" />
-                                </Field>
-
-                                <Field
-                                    label="Assign Annotators"
-                                    hint="Enter usernames separated by commas or new lines."
-                                >
-                                    <textarea
-                                        value={form.annotators}
-                                        onChange={e => setForm(f => ({ ...f, annotators: e.target.value }))}
-                                        placeholder={"vihanga\njohn_doe\nannotator3"}
-                                        rows={3}
-                                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition resize-none font-mono"
-                                    />
                                 </Field>
 
                                 {formError && (

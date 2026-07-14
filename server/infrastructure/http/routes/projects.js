@@ -12,6 +12,7 @@ const express = require('express');
 const router = express.Router();
 const Project           = require('../../database/models/Project');
 const AnnotationSession = require('../../database/models/AnnotationSession');
+const AnnotatorProfile  = require('../../database/models/AnnotatorProfile');
 
 // POST /api/projects — create a new annotation project.
 // texts arrive as plain strings; we assign stable ids here so the session layer
@@ -21,7 +22,32 @@ const AnnotationSession = require('../../database/models/AnnotationSession');
 // URL: https://mongoosejs.com/docs/models.html#constructing-documents
 router.post('/', async (req, res) => {
     try {
-        const { name, description, labelTypes, texts, assignedAnnotators, createdBy } = req.body;
+        const { name, description, labelTypes, texts, createdBy } = req.body;
+
+        // POST to ML service to evaluate complexity
+        let complexityScore = 0.5;
+        let targetProfile = 'Moderate Reader';
+        try {
+            // CITATION: native fetch — make HTTP requests without external libraries
+            // SOURCE: MDN Web Docs (n.d.). "Fetch API"
+            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+            const mlResponse = await fetch('http://127.0.0.1:5000/evaluate_complexity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texts: texts || [] })
+            });
+            if (mlResponse.ok) {
+                const mlData = await mlResponse.json();
+                if (mlData.complexityScore !== undefined) {
+                    complexityScore = mlData.complexityScore;
+                }
+                if (mlData.targetProfile !== undefined) {
+                    targetProfile = mlData.targetProfile;
+                }
+            }
+        } catch (mlError) {
+            console.error('Error fetching complexity from ML server, using fallback:', mlError);
+        }
 
         // map raw strings to { id, text } sub-documents.
         // Date.now() + index makes ids unique even when texts are created in bulk.
@@ -35,7 +61,8 @@ router.post('/', async (req, res) => {
             description,
             labelTypes:          labelTypes          || [],
             texts:               textDocs,
-            assignedAnnotators:  assignedAnnotators  || [],
+            complexityScore,
+            targetProfile,
             createdBy
         });
 
@@ -95,9 +122,17 @@ router.get('/annotator/:username', async (req, res) => {
     try {
         const { username } = req.params;
 
+        const profile = await AnnotatorProfile.findOne({ username });
+        if (!profile || !profile.pilotCompleted) {
+            return res.json([]);
+        }
+
         // exclude soft-deleted projects; 'deleted' isn't in the enum but guard anyway
         const projects = await Project.find({
-            assignedAnnotators: username,
+            $or: [
+                { targetProfile: profile.readingStyle },
+                { targetProfile: 'All' }
+            ],
             status: { $ne: 'deleted' }
         });
 
@@ -199,7 +234,7 @@ router.get('/:id', async (req, res) => {
 // URL: https://mongoosejs.com/docs/api/model.html#Model.findOneAndUpdate()
 router.put('/:id', async (req, res) => {
     try {
-        const { name, description, labelTypes, assignedAnnotators, status } = req.body;
+        const { name, description, labelTypes, targetProfile, status } = req.body;
 
         const updated = await Project.findOneAndUpdate(
             { projectId: req.params.id },
@@ -208,7 +243,7 @@ router.put('/:id', async (req, res) => {
                     ...(name               !== undefined && { name }),
                     ...(description        !== undefined && { description }),
                     ...(labelTypes         !== undefined && { labelTypes }),
-                    ...(assignedAnnotators !== undefined && { assignedAnnotators }),
+                    ...(targetProfile !== undefined && { targetProfile }),
                     ...(status             !== undefined && { status }),
                     lastUpdated: Date.now()
                 }

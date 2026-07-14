@@ -60,8 +60,17 @@ const ProjectSchema = new mongoose.Schema({
     // SOURCE: Stack Overflow (2013). "Mongoose subdocuments vs nested schema"
     // URL: https://stackoverflow.com/questions/17254008/mongoose-subdocuments-vs-nested-schema
     texts: [TextItemSchema],
-    // list of annotator usernames authorised to work on this project
-    assignedAnnotators: [{ type: String }],
+    // AI-driven text complexity evaluation score
+    complexityScore: {
+        type: Number,
+        default: 0
+    },
+    // Required reader profile based on project complexity
+    targetProfile: {
+        type: String,
+        enum: ['Fast Skimmer', 'Moderate Reader', 'Careful Analyst', 'All'],
+        default: 'All'
+    },
     createdBy: {
         type: String,
         required: true

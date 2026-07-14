@@ -135,23 +135,44 @@ const KanbanColumn = ({ title, icon: Icon, color, count, children, emptyMsg }) =
     </div>
 );
 
+import PilotTestModal from '../components/workspace/PilotTestModal';
+
 // ─── Main Board Page ──────────────────────────────────────────────────────────
 /**
  * AnnotatorBoardPage Component
  * A Jira-style Kanban board that shows an annotator's assigned projects
  * in three columns: Pending, In Progress, and Done.
- * Clicking "Start" on a card seeds the workspace with that project's corpus and labels.
+ * Projects are dynamically assigned based on the user's reading style.
  */
 const AnnotatorBoardPage = ({ username }) => {
     const navigate = useNavigate();
     const [projects, setProjects] = useState([]);
+    const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showPilot, setShowPilot] = useState(false);
 
-    const fetchProjects = async () => {
+    const fetchData = async () => {
         setLoading(true);
         setError(null);
         try {
+            // Fetch Profile
+            const profileRes = await fetch(`${SERVER_URL}/api/session/profile/${username}`);
+            if (profileRes.ok) {
+                const profileData = await profileRes.json();
+                if (!profileData.exists || !profileData.profile.pilotCompleted) {
+                    setShowPilot(true);
+                    setLoading(false);
+                    return;
+                }
+                setProfile(profileData.profile);
+            } else {
+                setShowPilot(true);
+                setLoading(false);
+                return;
+            }
+
+            // Fetch Projects
             const res = await fetch(`${SERVER_URL}/api/projects/annotator/${username}`);
             if (!res.ok) throw new Error('Failed to load projects');
             const data = await res.json();
@@ -165,8 +186,13 @@ const AnnotatorBoardPage = ({ username }) => {
     };
 
     useEffect(() => {
-        if (username) fetchProjects();
+        if (username) fetchData();
     }, [username]);
+
+    const handlePilotComplete = () => {
+        setShowPilot(false);
+        fetchData();
+    };
 
     // ── Start / Continue annotating a project ────────────────────────────────
     const handleStartProject = (project) => {
@@ -222,7 +248,9 @@ const AnnotatorBoardPage = ({ username }) => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-950 text-white p-4 md:p-6 pb-16">
+        <div className="min-h-screen bg-slate-950 text-white p-4 md:p-6 pb-16 relative">
+            {showPilot && <PilotTestModal username={username} onComplete={handlePilotComplete} />}
+            
             <div className="max-w-7xl mx-auto">
 
                 {/* ── Page Header ───────────────────────────────────────────── */}
@@ -233,18 +261,23 @@ const AnnotatorBoardPage = ({ username }) => {
                                 <Layers size={16} className="text-blue-400" />
                             </div>
                             <span className="text-xs font-bold uppercase tracking-widest text-blue-400">Annotation Board</span>
+                            {profile && (
+                                <span className="ml-2 text-xs font-bold bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
+                                    {profile.readingStyle}
+                                </span>
+                            )}
                         </div>
                         <h1 className="text-2xl md:text-3xl font-black text-white">
                             Welcome back, <span className="capitalize bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">{username}</span>
                         </h1>
                         <p className="text-slate-400 text-sm mt-1">
                             {projects.length === 0
-                                ? 'No projects assigned yet. Ask your manager to add you to a project.'
-                                : `${projects.length} project${projects.length > 1 ? 's' : ''} · ${inProgress.length} active · ${done.length} completed`}
+                                ? 'No active projects match your profile right now.'
+                                : `Auto-assigned ${projects.length} project${projects.length > 1 ? 's' : ''} based on your reading style.`}
                         </p>
                     </div>
                     <button
-                        onClick={fetchProjects}
+                        onClick={fetchData}
                         className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition"
                     >
                         <RefreshCw size={14} /> Refresh Board

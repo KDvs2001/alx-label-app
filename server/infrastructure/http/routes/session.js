@@ -10,6 +10,8 @@
 const express = require('express');
 const router = express.Router();
 const AnnotationSession = require('../../database/models/AnnotationSession');
+const AnnotatorProfile  = require('../../database/models/AnnotatorProfile');
+
 
 // POST /api/session/save — upsert the evaluator's running session.
 // fires after each annotation so progress is never lost if the browser dies.
@@ -154,6 +156,51 @@ router.post('/reset/:contestantId', async (req, res) => {
     } catch (error) {
         console.error('Error resetting session:', error);
         res.status(500).json({ error: 'Failed to reset session' });
+    }
+});
+
+// GET /api/session/profile/:username — fetch annotator profile.
+router.get('/profile/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+        const profile = await AnnotatorProfile.findOne({ username });
+
+        if (!profile) {
+            return res.json({ exists: false });
+        }
+
+        res.json({ exists: true, profile });
+    } catch (error) {
+        console.error('Error loading annotator profile:', error);
+        res.status(500).json({ error: 'Failed to load annotator profile' });
+    }
+});
+
+// POST /api/session/pilot — save pilot results and mark it completed.
+router.post('/pilot', async (req, res) => {
+    try {
+        const { username, baselineSpeed, readingStyle } = req.body;
+
+        if (!username || !readingStyle) {
+            return res.status(400).json({ error: 'Username and readingStyle are required' });
+        }
+
+        const profile = await AnnotatorProfile.findOneAndUpdate(
+            { username },
+            {
+                $set: {
+                    baselineSpeed,
+                    readingStyle,
+                    pilotCompleted: true
+                }
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json({ success: true, profile });
+    } catch (error) {
+        console.error('Error saving pilot results:', error);
+        res.status(500).json({ error: 'Failed to save pilot results' });
     }
 });
 

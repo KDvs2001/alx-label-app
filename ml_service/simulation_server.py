@@ -415,6 +415,47 @@ def train_cost_model():
     state.ranker = CALLogRanker(state.cost_model)
     return jsonify({"status": "ok", "priors": priors, "difficulty_model": metrics})
 
+@app.route('/evaluate_complexity', methods=['POST'])
+def evaluate_complexity():
+    """
+    Evaluate the cognitive complexity of a batch of texts to determine reading profile.
+    """
+    payload = request.json or {}
+    texts = payload.get("texts", [])
+    if not texts:
+        return jsonify({"complexityScore": 0.0, "targetProfile": "Fast Skimmer"})
+
+    # Calculate word lengths for each text
+    # CITATION: split() - Split a string into a list where each word is a list item
+    # SOURCE: Python Software Foundation (n.d.). "str.split"
+    # URL: https://docs.python.org/3/library/stdtypes.html#str.split
+    lengths = [len(t.split()) for t in texts]
+    avg_length = sum(lengths) / len(texts)
+    
+    words = []
+    for t in texts:
+        words.extend(t.split())
+        
+    total_words = len(words)
+    unique_words = len(set(words))
+    
+    vocab_factor = unique_words / total_words if total_words > 0 else 0.0
+    length_factor = min(avg_length / 200, 1.0)
+    score = (length_factor + vocab_factor) / 2
+    
+    if score < 0.4:
+        target_profile = "Fast Skimmer"
+    elif score < 0.7:
+        target_profile = "Moderate Reader"
+    else:
+        target_profile = "Careful Analyst"
+        
+    return jsonify({
+        "complexityScore": float(score),
+        "targetProfile": target_profile
+    })
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     """Serve ranked tasks from the SERVER's own pool.
