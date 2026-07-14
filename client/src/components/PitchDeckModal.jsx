@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Award, Brain, BarChart2, Lightbulb, Lock, ArrowRight, ShieldCheck, Database, Layers, Cpu, Users, Zap, Clock, AlertTriangle, Play } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Award, Brain, BarChart2, Lightbulb, Lock, ArrowRight, ShieldCheck, Database, Layers, Cpu, Users, Zap, Clock, AlertTriangle, Play, Sparkles } from 'lucide-react';
 
 const PitchDeckModal = ({ isOpen, onClose }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
