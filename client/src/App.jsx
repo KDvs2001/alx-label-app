@@ -15,7 +15,7 @@ import PitchDeckModal from "./components/PitchDeckModal";
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
 // URL: https://lucide.dev/guide/packages/lucide-react
-import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User, Sun, Moon, Menu, X, Layers, FolderPlus } from "lucide-react";
+import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User, Sun, Moon, Menu, X, Layers, FolderPlus, Sparkles } from "lucide-react";
 
 // controls navigation between the public impact dashboard and the private evaluator workspace
 const Navbar = ({ role, username, onSignOut, theme, onToggleTheme, onOpenPitchDeck }) => {
