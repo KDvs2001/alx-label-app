@@ -369,6 +369,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             )
         }
     ];
+    const CurrentIcon = slides[currentSlide].icon;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-0 md:p-6 animate-fade-in">
