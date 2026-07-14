@@ -21,7 +21,7 @@ import { Pause, Play, X, Settings, Activity } from 'lucide-react';
  * Manages the state and communication between the frontend React application, 
  * the Node.js API, and the remote Python ML service.
  */
-const ResearchWorkspace = () => {
+const ResearchWorkspace = ({ onExit }) => {
     // core state for tracking the current task and ML parameters
     const [tasks, setTasks] = useState([]);
     const [currentTask, setCurrentTask] = useState(null);
@@ -780,11 +780,15 @@ const ResearchWorkspace = () => {
         await saveSession();
         setToast({ message: "Progress saved successfully!", type: "success" });
         setTimeout(() => {
-            // direct window location assignment used here instead of React Router to ensure a full DOM flush and state reset
-            // CITATION: React button onClick redirect using window.location
-            // SOURCE: Stack Overflow (2018). "React button onclick redirect page"
-            // URL: https://stackoverflow.com/questions/50644976/react-button-onclick-redirect-page
-            window.location.href = '/';
+            if (onExit) {
+                onExit();
+            } else {
+                // direct window location assignment used here instead of React Router to ensure a full DOM flush and state reset
+                // CITATION: React button onClick redirect using window.location
+                // SOURCE: Stack Overflow (2018). "React button onclick redirect page"
+                // URL: https://stackoverflow.com/questions/50644976/react-button-onclick-redirect-page
+                window.location.href = '/';
+            }
         }, 1500);
     };
 
@@ -848,7 +852,7 @@ const ResearchWorkspace = () => {
             cumulativeCalLogCost={cumulativeCalLogCost}
             annotations={fullAnnotations}
             contestantId={contestantId}
-            onHome={() => window.location.href = '/'}
+            onHome={onExit || (() => window.location.href = '/')}
             onExport={exportSessionData}
         />;
     }
@@ -867,7 +871,7 @@ const ResearchWorkspace = () => {
             <ContestantIdModal
                 isOpen={showContestantModal}
                 onSubmit={handleContestantIdSubmit}
-                onClose={() => window.location.href = '/'}
+                onClose={onExit || (() => window.location.href = '/')}
             />
 
             {/* Loading Overlay */}
@@ -942,6 +946,7 @@ const ResearchWorkspace = () => {
                         historyCount={annotationCount}
                         onToggleGuidelines={() => setShowGuidelines(!showGuidelines)}
                         contestantId={contestantId}
+                        onBack={onExit}
                         onSaveAndExit={handleSaveAndExit}
                         onEndSession={() => setShowSummary(true)}
                         isPaused={isPaused}

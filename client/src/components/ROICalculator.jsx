@@ -1,40 +1,34 @@
-// CITATION: useState - React hook for local state
-// SOURCE: React (n.d.). "useState"
-// URL: https://react.dev/reference/react/useState
-import React, { useState } from 'react';
-// lucide-react provides tree-shakable SVG icon components
-// CITATION: lucide-react - SVG icon library as React components
-// SOURCE: Lucide (n.d.). "lucide-react"
-// URL: https://lucide.dev/guide/packages/lucide-react
-import { DollarSign, Users, Building, Briefcase, TrendingDown, Clock } from 'lucide-react';
-// recharts renders data-driven charts as React components
-// CITATION: Recharts - composable charting library built on D3 and React
-// SOURCE: Recharts (n.d.). "Getting Started"
-// URL: https://recharts.org/en-US/guide
+import React, { useState, useEffect } from 'react';
+import { DollarSign, Users, Building, Briefcase, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 /**
  * ROICalculator Component
  * Translates the raw time savings of CAL-Log into projected financial savings for enterprise use cases.
+ * Adapts dynamically to light and dark themes for premium legibility.
  */
 const ROICalculator = () => {
     const [annotations, setAnnotations] = useState(10000);
     const [hourlyWage, setHourlyWage] = useState(20);
+    const [isLight, setIsLight] = useState(() => document.body.classList.contains('theme-light'));
+
+    // Dynamic theme detection
+    useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIsLight(document.body.classList.contains('theme-light'));
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
 
     // average processing times in seconds, taken from the empirical results of our study
     const avgTimeRandom = 3.75;
     const avgTimeCALLog = 2.47;
 
     const calculateROI = () => {
-        // convert total annotation time from seconds to hours, then multiply by hourly wage
-        // to calculate the absolute financial cost of the annotation campaign
         const randomCost = (annotations * avgTimeRandom / 3600) * hourlyWage;
         const calLogCost = (annotations * avgTimeCALLog / 3600) * hourlyWage;
         const savings = randomCost - calLogCost;
-        // toFixed(1) forces the percentage to display exactly one decimal place
-        // CITATION: Number.prototype.toFixed() - format number using fixed-point notation
-        // SOURCE: MDN Web Docs (n.d.). "Number.prototype.toFixed()"
-        // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed
         const savingsPercent = ((savings / randomCost) * 100).toFixed(1);
         const hoursSaved = (annotations * (avgTimeRandom - avgTimeCALLog) / 3600).toFixed(0);
 
@@ -43,10 +37,9 @@ const ROICalculator = () => {
 
     const roi = calculateROI();
 
-    // data array structured specifically for Recharts BarChart ingestion
     const chartData = [
-        { name: 'Random', cost: roi.randomCost, color: '#ef4444' }, 
-        { name: 'CAL-Log', cost: roi.calLogCost, color: '#3b82f6' }  
+        { name: 'Random', cost: roi.randomCost, color: isLight ? '#f43f5e' : '#ef4444' }, 
+        { name: 'CAL-Log', cost: roi.calLogCost, color: isLight ? '#4f46e5' : '#3b82f6' }  
     ];
 
     const presets = [
@@ -61,43 +54,39 @@ const ROICalculator = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
             {/* Left Column: Controls */}
             <div className="space-y-8">
                 {/* Presets */}
                 <div className="grid grid-cols-3 gap-3">
-                    {/* Array.map maps the preset configurations into intractable buttons */}
-                    {/* CITATION: Array.map() - transform array elements */}
-                    {/* SOURCE: MDN Web Docs (n.d.). "Array.prototype.map()" */}
-                    {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map */}
                     {presets.map((preset) => (
                         <button
                             key={preset.name}
                             onClick={() => applyPreset(preset)}
-                            className="bg-slate-800 hover:bg-slate-700 p-3 rounded-xl border border-slate-700 transition-all text-left group"
+                            className={`p-3.5 rounded-2xl border transition-all text-left group flex flex-col items-start ${
+                                isLight
+                                    ? 'bg-white hover:bg-slate-50 border-slate-200/80 shadow-sm'
+                                    : 'bg-slate-900/60 hover:bg-slate-800 border-slate-800'
+                            }`}
                         >
-                            <preset.icon className="text-slate-400 group-hover:text-blue-400 mb-2" size={20} />
-                            <h3 className="text-white font-semibold text-sm">{preset.name}</h3>
-                            <p className="text-[10px] text-slate-400">{preset.annotations.toLocaleString()} items</p>
+                            <preset.icon className={`mb-2.5 transition-colors ${isLight ? 'text-slate-400 group-hover:text-indigo-600' : 'text-slate-500 group-hover:text-blue-400'}`} size={20} />
+                            <h3 className={`font-bold text-sm ${isLight ? 'text-slate-800' : 'text-white'}`}>{preset.name}</h3>
+                            <p className="text-[10px] text-slate-400 mt-0.5">{preset.annotations.toLocaleString()} items</p>
                         </button>
                     ))}
                 </div>
 
                 {/* Sliders */}
-                <div className="space-y-6 bg-slate-900/50 p-6 rounded-xl border border-slate-800">
+                <div className={`space-y-6 p-6 rounded-2xl border transition-all ${
+                    isLight 
+                        ? 'bg-white border-slate-200/80 shadow-sm' 
+                        : 'bg-slate-900/50 border-slate-850'
+                }`}>
                     <div>
                         <div className="flex justify-between mb-2">
-                            <label className="text-sm text-slate-400">Annual Annotations</label>
-                            <span className="text-blue-400 font-mono font-bold">{annotations.toLocaleString()}</span>
+                            <label className={`text-sm font-semibold ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>Annual Annotations</label>
+                            <span className={`font-mono font-bold ${isLight ? 'text-indigo-600' : 'text-blue-400'}`}>{annotations.toLocaleString()}</span>
                         </div>
-                        {/* parseInt ensures the slider string value is cast safely to an integer */}
-                        {/* CITATION: parseInt() - convert string to integer */}
-                        {/* SOURCE: MDN Web Docs (n.d.). "parseInt()" */}
-                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/parseInt */}
-                        {/* accent-blue-500 is a Tailwind/CSS property that colors the native browser range slider thumb */}
-                        {/* CITATION: CSS accent-color - change the color of native form controls */}
-                        {/* SOURCE: MDN Web Docs (n.d.). "accent-color" */}
-                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/CSS/accent-color */}
                         <input
                             type="range"
                             min="1000"
@@ -105,15 +94,15 @@ const ROICalculator = () => {
                             step="1000"
                             value={annotations}
                             onChange={(e) => setAnnotations(parseInt(e.target.value))}
-                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                             aria-label="Annual Annotations"
                         />
                     </div>
 
                     <div>
                         <div className="flex justify-between mb-2">
-                            <label className="text-sm text-slate-400">Hourly Cost ($)</label>
-                            <span className="text-green-400 font-mono font-bold">${hourlyWage}/hr</span>
+                            <label className={`text-sm font-semibold ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>Hourly Cost ($)</label>
+                            <span className={`font-mono font-bold ${isLight ? 'text-emerald-600' : 'text-green-400'}`}>${hourlyWage}/hr</span>
                         </div>
                         <input
                             type="range"
@@ -122,72 +111,85 @@ const ROICalculator = () => {
                             step="1"
                             value={hourlyWage}
                             onChange={(e) => setHourlyWage(parseInt(e.target.value))}
-                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
                             aria-label="Hourly Cost"
                         />
                     </div>
                 </div>
 
-                <div className="text-xs text-slate-400 italic">
+                <div className="text-[11px] text-slate-400 italic">
                     * Based on average speeds: Random ({avgTimeRandom}s) vs CAL-Log ({avgTimeCALLog}s) per task.
                 </div>
             </div>
 
-            {/* visual dashboard mapping the inputs to financial outcomes */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-900/50 p-6 rounded-xl border border-slate-800 flex flex-col justify-between">
-
+            {/* Right Column: Outcomes Dashboard */}
+            <div className={`p-6 rounded-2xl border flex flex-col justify-between transition-all ${
+                isLight 
+                    ? 'bg-slate-100/70 border-slate-200' 
+                    : 'bg-gradient-to-br from-slate-900 to-slate-900/50 border-slate-800'
+            }`}>
                 {/* Hero Metrics */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-xl">
-                        <div className="flex items-center gap-2 mb-1 text-green-400">
-                            <DollarSign size={18} />
-                            <span className="text-sm font-semibold uppercase tracking-wider">Projected Savings</span>
+                    <div className={`p-4 rounded-xl border transition-all ${
+                        isLight
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                            : 'bg-green-900/20 border-green-500/30 text-green-400'
+                    }`}>
+                        <div className="flex items-center gap-2 mb-1.5 font-bold">
+                            <DollarSign size={16} />
+                            <span className="text-xs uppercase tracking-wider">Projected Savings</span>
                         </div>
-                        {/* toLocaleString formats the number with thousands separators for readability */}
-                        {/* CITATION: Number.prototype.toLocaleString() - language-sensitive number formatting */}
-                        {/* SOURCE: MDN Web Docs (n.d.). "Number.prototype.toLocaleString()" */}
-                        {/* URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString */}
-                        <p className="text-3xl font-bold text-white tracking-tight">
+                        <p className={`text-3xl font-black tracking-tight ${isLight ? 'text-emerald-900' : 'text-white'}`}>
                             ${roi.savings.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </p>
                     </div>
 
-                    <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-xl">
-                        <div className="flex items-center gap-2 mb-1 text-blue-400">
-                            <Clock size={18} />
-                            <span className="text-sm font-semibold uppercase tracking-wider">Time Saved</span>
+                    <div className={`p-4 rounded-xl border transition-all ${
+                        isLight
+                            ? 'bg-blue-50 border-blue-200 text-blue-800'
+                            : 'bg-blue-900/20 border-blue-500/30 text-blue-400'
+                    }`}>
+                        <div className="flex items-center gap-2 mb-1.5 font-bold">
+                            <Clock size={16} />
+                            <span className="text-xs uppercase tracking-wider">Time Saved</span>
                         </div>
-                        <p className="text-3xl font-bold text-white tracking-tight">
-                            {roi.hoursSaved} <span className="text-base font-normal text-slate-400">hours</span>
+                        <p className={`text-3xl font-black tracking-tight ${isLight ? 'text-blue-900' : 'text-white'}`}>
+                            {roi.hoursSaved} <span className={`text-sm font-normal ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>hours</span>
                         </p>
                     </div>
                 </div>
 
                 {/* Chart */}
-                <div className="flex-grow min-h-[200px]">
+                <div className="flex-grow min-h-[190px] mb-2">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                        <BarChart data={chartData} margin={{ top: 20, right: 20, left: -20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke={isLight ? '#cbd5e1' : '#334155'} vertical={false} />
                             <XAxis
                                 dataKey="name"
-                                stroke="#94a3b8"
+                                stroke={isLight ? '#475569' : '#94a3b8'}
                                 tickLine={false}
                                 axisLine={false}
+                                tick={{ fontSize: 11, fontWeight: 'bold' }}
                             />
                             <YAxis
-                                stroke="#94a3b8"
+                                stroke={isLight ? '#475569' : '#94a3b8'}
                                 tickFormatter={(value) => `$${value}`}
                                 tickLine={false}
                                 axisLine={false}
+                                tick={{ fontSize: 11, fontWeight: 'bold' }}
                             />
-                            {/* Recharts Tooltip formatter expects an array of [value, name] to customize the popup text */}
-                            {/* CITATION: Recharts Custom Tooltips Implementation */}
-                            {/* SOURCE: Medium (2023). "Implementing Custom tooltips and legends using Recharts" */}
-                            {/* URL: https://medium.com/@rutudhokchaule/implementing-custom-tooltips-and-legends-using-recharts-98b6e3c8b712 */}
                             <Tooltip
-                                cursor={{ fill: '#1e293b' }}
-                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f8fafc' }}
-                                itemStyle={{ color: '#f8fafc' }}
+                                cursor={{ fill: isLight ? '#f1f5f9' : '#1e293b' }}
+                                contentStyle={{ 
+                                    backgroundColor: isLight ? '#ffffff' : '#0f172a', 
+                                    borderColor: isLight ? '#cbd5e1' : '#334155', 
+                                    color: isLight ? '#0f172a' : '#f8fafc',
+                                    borderRadius: '12px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                                }}
+                                itemStyle={{ color: isLight ? '#0f172a' : '#f8fafc' }}
                                 formatter={(value) => [`$${value.toLocaleString()}`, 'Cost']}
                             />
                             <Bar dataKey="cost" radius={[4, 4, 0, 0]} isAnimationActive={false}>
@@ -200,11 +202,10 @@ const ROICalculator = () => {
                 </div>
 
                 <div className="mt-4 text-center">
-                    <p className="text-white">
-                        Projected cost reduction of <span className="text-green-400 font-bold text-xl">{roi.savingsPercent}%</span>
+                    <p className={`font-semibold ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                        Projected cost reduction of <span className={`${isLight ? 'text-indigo-600' : 'text-green-400'} font-bold text-xl`}>{roi.savingsPercent}%</span>
                     </p>
                 </div>
-
             </div>
         </div>
     );

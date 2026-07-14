@@ -10,6 +10,7 @@ import ManagerDashboardPage from "./pages/ManagerDashboardPage";
 import LoginPage from "./pages/LoginPage";
 import AnnotatorBoardPage from "./pages/AnnotatorBoardPage";
 import ProjectManagementPage from "./pages/ProjectManagementPage";
+import PitchDeckModal from "./components/PitchDeckModal";
 // lucide-react provides tree-shakable SVG icon components
 // CITATION: lucide-react - SVG icon library as React components
 // SOURCE: Lucide (n.d.). "lucide-react"
@@ -17,7 +18,7 @@ import ProjectManagementPage from "./pages/ProjectManagementPage";
 import { Terminal, TrendingUp, Edit3, ShieldAlert, BookOpen, LogIn, LogOut, User, Sun, Moon, Menu, X, Layers, FolderPlus } from "lucide-react";
 
 // controls navigation between the public impact dashboard and the private evaluator workspace
-const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
+const Navbar = ({ role, username, onSignOut, theme, onToggleTheme, onOpenPitchDeck }) => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -51,12 +52,6 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
               <Layers size={15} /> My Board
             </Link>
           )}
-          {/* Direct workspace access */}
-          {role && (
-            <Link to="/workspace" className={navLinkClass('/workspace')}>
-              <Edit3 size={15} /> Workspace
-            </Link>
-          )}
           {/* Manager-only links */}
           {role === 'manager' && (
             <Link to="/dashboard" className={navLinkClass('/dashboard')}>
@@ -76,6 +71,12 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
           >
             <BookOpen size={15} /> Docs
           </a>
+          <button
+            onClick={onOpenPitchDeck}
+            className="flex items-center gap-1.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 px-3 py-2 rounded-lg hover:bg-slate-800/50 transition border border-indigo-500/10 bg-indigo-500/5 font-bold"
+          >
+            <Sparkles size={15} className="animate-pulse" /> Pitch Deck
+          </button>
         </div>
 
         {/* Right controls */}
@@ -135,11 +136,6 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
               <Layers size={15} /> My Board
             </Link>
           )}
-          {role && (
-            <Link to="/workspace" onClick={() => setMobileOpen(false)} className={navLinkClass('/workspace')}>
-              <Edit3 size={15} /> Annotator Workspace
-            </Link>
-          )}
           {role === 'manager' && (
             <Link to="/dashboard" onClick={() => setMobileOpen(false)} className={navLinkClass('/dashboard')}>
               <ShieldAlert size={15} /> Manager Dashboard
@@ -159,6 +155,12 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme }) => {
           >
             <BookOpen size={15} /> Documentation
           </a>
+          <button
+            onClick={() => { setMobileOpen(false); onOpenPitchDeck(); }}
+            className="flex items-center gap-2 text-sm font-semibold text-indigo-400 px-3 py-2 rounded-lg hover:bg-slate-800/50 transition"
+          >
+            <Sparkles size={15} /> Pitch Slides
+          </button>
           <div className="border-t border-slate-800 pt-2 mt-1">
             {role ? (
               <>
@@ -197,6 +199,29 @@ function App() {
   const [role, setRole] = useState(() => sessionStorage.getItem("cal_log_role") || null);
   const [username, setUsername] = useState(() => sessionStorage.getItem("cal_log_username") || null);
   const [theme, setTheme] = useState(() => localStorage.getItem("cal_log_theme") || "dark");
+  const [showPitchDeck, setShowPitchDeck] = useState(false);
+
+  // Keyboard shortcut listener to toggle presentation mode instantly
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        setShowPitchDeck(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('theme-light', 'bg-slate-50', 'text-slate-800');
+      document.body.classList.remove('theme-dark', 'bg-slate-950', 'text-slate-200');
+    } else {
+      document.body.classList.add('theme-dark', 'bg-slate-950', 'text-slate-200');
+      document.body.classList.remove('theme-light', 'bg-slate-50', 'text-slate-800');
+    }
+  }, [theme]);
 
   const handleLogin = (selectedRole, selectedUser) => {
     setRole(selectedRole);
@@ -234,7 +259,7 @@ function App() {
           ? 'theme-light bg-slate-50 text-slate-800' 
           : 'theme-dark bg-slate-950 text-slate-200'
       }`}>
-        <Navbar role={role} username={username} onSignOut={handleSignOut} theme={theme} onToggleTheme={handleToggleTheme} />
+        <Navbar role={role} username={username} onSignOut={handleSignOut} theme={theme} onToggleTheme={handleToggleTheme} onOpenPitchDeck={() => setShowPitchDeck(true)} />
         <main className="flex-grow flex flex-col">
           <Routes>
             <Route path="/" element={<ImpactDashboard />} />
@@ -287,6 +312,7 @@ function App() {
             <Route path="*" element={<ImpactDashboard />} />
           </Routes>
         </main>
+        <PitchDeckModal isOpen={showPitchDeck} onClose={() => setShowPitchDeck(false)} />
       </div>
     </Router>
   );

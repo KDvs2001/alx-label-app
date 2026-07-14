@@ -40,14 +40,14 @@ const LoginPage = ({ onLogin }) => {
             
             // Call parent App.jsx login handler
             onLogin('annotator', username);
-            navigate('/');
+            navigate('/board');
         } catch (error) {
             console.error('Annotator login error:', error);
             setIsChecking(false);
             
             // Fallback: log in anyway
             onLogin('annotator', username);
-            navigate('/');
+            navigate('/board');
         }
     };
 
@@ -55,7 +55,7 @@ const LoginPage = ({ onLogin }) => {
         e.preventDefault();
         if (managerPasswordInput === 'admin') {
             onLogin('manager', 'admin');
-            navigate('/');
+            navigate('/dashboard');
         } else {
             setErrorMsg('Access denied: Invalid Project Manager credentials.');
         }
