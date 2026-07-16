@@ -745,7 +745,16 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 • Pro Team License: $49/mo (Up to 5 annotators).<br />
                                 • Enterprise Tier: $499/mo (SLA guarantees, custom integrations, active on-prem support).
                             </p>
-             return (
+                        </div>
+                    </div>
+                </div>
+            )
+        }
+    ];
+
+    const CurrentIcon = slides[currentSlide].icon;
+
+    return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-0 animate-fade-in">
             <div className={`w-full h-full relative flex flex-col justify-between overflow-hidden text-left transition-all ${
                 isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-white'
