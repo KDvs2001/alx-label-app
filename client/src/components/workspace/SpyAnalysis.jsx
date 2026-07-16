@@ -16,7 +16,7 @@ import {
  * ZERO hardcoding: every metric is computed from live backend data
  * and the annotator's own measured response times.
  */
-const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowMetrics, onShowAlphaBetaPanel, annotationCount }) => {
+const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowMetrics, onShowAlphaBetaPanel, annotationCount, speedStdDev = 0 }) => {
     const [devMode, setDevMode] = useState(false);
 
     // ─── Real Data Derivations ────────────────────────────────────────────────
@@ -422,13 +422,13 @@ const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowM
                     </div>
 
                     {/* Selection explainer */}
-                    <SelectionCard selectionLogic={selectionLogic} />
+                    <SelectionCard selectionLogic={selectionLogic} speedStdDev={speedStdDev} />
                 </div>
             ) : (
                 /* ── DEVELOPER MODE ──────────────────────────────────────── */
                 <div className="flex flex-col gap-6 animate-fadeIn">
                     <ComparisonTable shadowMetrics={shadowMetrics} />
-                    <SelectionCard selectionLogic={selectionLogic} />
+                    <SelectionCard selectionLogic={selectionLogic} speedStdDev={speedStdDev} />
                     <div className="relative text-left">
                         {onShowAlphaBetaPanel && (
                             <button
@@ -440,7 +440,7 @@ const SpyAnalysis = ({ selectionLogic, metrics, history, interactionLog, shadowM
                                 What are α & β?
                             </button>
                         )}
-                        <ParameterGraphs metrics={metrics} history={history} />
+                        <ParameterGraphs metrics={metrics} history={history} annotationCount={annotationCount} />
                     </div>
                     <CostMathDebug
                         selectionLogic={selectionLogic}

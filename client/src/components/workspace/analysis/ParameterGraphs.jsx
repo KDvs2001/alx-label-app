@@ -14,7 +14,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 // CITATION: destructuring assignment - extract props in the function parameter
 // SOURCE: MDN Web Docs (n.d.). "Destructuring assignment"
 // URL: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
-const ParameterGraphs = ({ metrics, history }) => {
+const ParameterGraphs = ({ metrics, history, annotationCount = 0 }) => {
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex-1 flex flex-col">
             <h3 className="text-green-400 font-bold mb-2">PARAMETER EVOLUTION</h3>
@@ -64,7 +64,14 @@ const ParameterGraphs = ({ metrics, history }) => {
             <div className="flex-1 w-full min-h-[150px] mt-4 border-t border-slate-800 pt-4">
                 <h4 className="text-xs text-slate-500 mb-1 flex justify-between">
                     <span>Cumulative Annotation Cost (per Strategy)</span>
-                    <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better</span>
+                    <div className="flex items-center gap-2">
+                        {annotationCount > 0 && (
+                            <span className="text-[10px] text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 rounded font-semibold">
+                                After {annotationCount} annotation{annotationCount !== 1 ? 's' : ''}
+                            </span>
+                        )}
+                        <span className="text-[10px] bg-slate-800 px-2 rounded">Lower is Better</span>
+                    </div>
                 </h4>
                 {/*
                  * Cumulative Cost Comparison:
@@ -81,9 +88,21 @@ const ParameterGraphs = ({ metrics, history }) => {
                     <ResponsiveContainer width="100%" height={150} minWidth={0} minHeight={0}>
                         <LineChart data={metrics.cumulative_costs.history}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="batch" stroke="#64748b" fontSize={10} label={{ value: 'Batch', position: 'insideBottom', offset: -2, fontSize: 10, fill: '#64748b' }} />
+                            <XAxis
+                                dataKey="batch"
+                                stroke="#64748b"
+                                fontSize={10}
+                                label={{ value: `Batch (${annotationCount} total labeled)`, position: 'insideBottom', offset: -2, fontSize: 9, fill: '#64748b' }}
+                            />
                             <YAxis stroke="#64748b" fontSize={10} label={{ value: 'Cost (s)', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#64748b' }} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}
+                                formatter={(value, name, props) => [
+                                    `${value.toFixed(1)}s`,
+                                    name
+                                ]}
+                                labelFormatter={(label) => `Batch ${label} · ~${label * 10} annotations`}
+                            />
                             <Line type="monotone" dataKey="cal_log" stroke="#3b82f6" strokeWidth={3} dot={true} name="CAL-Log (You)" />
                             {/* strokeDasharray makes the baseline lines dashed to visually separate them from CAL-Log */}
                             <Line type="monotone" dataKey="entropy" stroke="#facc15" strokeWidth={2} strokeDasharray="4 4" name="Entropy Only" />

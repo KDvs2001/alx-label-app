@@ -1,6 +1,15 @@
 """
 CAL-Log Ranker: Pure entropy-based task ranking logic.
 Implements the core CAL-Log formula: Score = Entropy / Cost
+
+Goodhart's Law mitigation: A minimum entropy floor (MIN_ENTROPY_FLOOR) prevents the
+ranker from exclusively selecting easy, low-cost samples. Without this, aggressively
+optimising for cost efficiency risks starving the model of rare or ambiguous samples
+that are disproportionately important for generalisation.
+
+CITATION: Goodhart's Law — "When a measure becomes a target, it ceases to be a good measure."
+SOURCE: Strathern, M. (1997). 'Improving ratings': audit in the British University system.
+URL: https://doi.org/10.1002/(SICI)1234-987X(199707)5:3<305::AID-EAP122>3.0.CO;2-4
 """
 import numpy as np
 # typing hints so function signatures are self-documenting
@@ -99,12 +108,23 @@ class CALLogRanker:
         )
         costs = cost_breakdown["costs"]
         
+        # Goodhart's Law mitigation: clamp entropy from below at MIN_ENTROPY_FLOOR.
+        # If we let the ranker pick tasks with near-zero entropy freely, it will eventually
+        # optimise toward easy, short, confident tasks only — ignoring rare or complex classes.
+        # The floor ensures every task contributes at least a minimum information signal,
+        # so rare/ambiguous items remain competitive even when they cost more time.
+        # CITATION: entropy clamping — minimum floor to prevent exploitation of the cost metric
+        # SOURCE: Settles, B. (2012). Active Learning. Morgan & Claypool. Section 2.3.
+        # URL: https://burrsettles.com/pub/settles.activelearning.pdf
+        MIN_ENTROPY_FLOOR = 0.3
+        effective_entropy = np.maximum(entropy, MIN_ENTROPY_FLOOR)
+
         # the CAL-Log formula: Score = Uncertainty / Expected Time.
         # If in pacing recovery mode, penalize cost quadratically to force short, simple texts.
         if pacing_mode:
-            scores = entropy / (costs ** 2)
+            scores = effective_entropy / (costs ** 2)
         else:
-            scores = entropy / costs
+            scores = effective_entropy / costs
         
         # Apply deduplication penalties if provided
         if penalties is not None:
@@ -152,6 +172,8 @@ class CALLogRanker:
                     },
                     "math_proof": {
                         "entropy": float(entropy[idx]),
+                        "effective_entropy": float(effective_entropy[idx]),
+                        "entropy_floored": bool(entropy[idx] < MIN_ENTROPY_FLOOR),
                         "redundancy_penalty": float(penalties[idx]),
                         "cal_log_score": float(scores[idx]),
                         "final_adjusted_score": float(final_scores[idx])

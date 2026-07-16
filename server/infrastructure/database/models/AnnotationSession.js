@@ -25,7 +25,17 @@ const AnnotationDetailSchema = new mongoose.Schema({
     alpha: Number,          // cost model alpha at time of annotation
     beta: Number,           // cost model beta at time of annotation
     timestamp: Date,
-    annotationIndex: Number // sequential counter within the session
+    annotationIndex: Number, // sequential counter within the session
+    // Self-reported perceived difficulty rating (1 = very easy, 5 = very hard).
+    // Collected via a brief star-rating prompt shown after each annotation.
+    // Evaluators suggested this allows the system to distinguish genuine cognitive load
+    // from length-based cost estimates, informing future alpha/beta calibration.
+    perceivedDifficulty: {
+        type: Number,
+        min: 1,
+        max: 5,
+        default: null
+    }
 }, { _id: false });
 
 // main session document. contestantId is unique so findOneAndUpdate with

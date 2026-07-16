@@ -10,7 +10,7 @@ import { Activity, ArrowRight, Gauge, Ruler } from 'lucide-react';
  * Primary UI feedback loop exposing exactly *why* the AL engine selected the current batch.
  * It translates background math (entropies, predicted costs) into human-readable visual indicators.
  */
-const SelectionCard = ({ selectionLogic }) => {
+const SelectionCard = ({ selectionLogic, speedStdDev = 0 }) => {
     // map each reading pattern to its display style using a switch statement
     // CITATION: switch statement - match a value against multiple cases
     // SOURCE: MDN Web Docs (n.d.). "switch"
@@ -134,7 +134,17 @@ const SelectionCard = ({ selectionLogic }) => {
                         </div>
                         <div>
                             <div className="text-xs text-slate-500">Predicted Cost</div>
-                            <div className="text-xl font-bold text-orange-400">{(selectionLogic.cost || 0).toFixed(1)}s</div>
+                            <div className="text-xl font-bold text-orange-400">
+                                {(selectionLogic.cost || 0).toFixed(1)}s
+                                {speedStdDev > 0 && (
+                                    <span className="text-sm font-normal text-slate-500 ml-1">
+                                        ±{(speedStdDev * Math.log1p((selectionLogic.task_stats?.length || 50))).toFixed(1)}s
+                                    </span>
+                                )}
+                            </div>
+                            {speedStdDev > 0 && (
+                                <div className="text-[10px] text-slate-600 mt-0.5">95% confidence band from rolling speed avg</div>
+                            )}
                         </div>
                     </div>
 

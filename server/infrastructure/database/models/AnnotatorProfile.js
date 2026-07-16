@@ -27,7 +27,20 @@ const AnnotatorProfileSchema = new mongoose.Schema({
         enum: ['Fast Skimmer', 'Moderate Reader', 'Careful Analyst']
     },
     baselineSpeed: {
-        type: Number // average time per word in seconds
+        type: Number // adaptive moving average of recent annotation session speeds (sec/word)
+    },
+    // Rolling window of last 10 session baseline speeds for adaptive recalibration.
+    // Using a moving average rather than a single OLS estimate means the profile
+    // updates continuously as the annotator's real-world reading speed evolves.
+    // CITATION: moving average — smoothed estimate of a time series by averaging recent values
+    // SOURCE: Box, G.E.P. (2015). Time Series Analysis: Forecasting and Control. Wiley.
+    recentSpeedReadings: {
+        type: [Number],
+        default: []
+    },
+    speedStdDev: {
+        type: Number, // standard deviation across the rolling window — used for cost confidence band
+        default: 0
     },
     pilotCompleted: {
         type: Boolean,

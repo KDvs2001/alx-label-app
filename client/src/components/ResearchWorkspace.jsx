@@ -87,6 +87,31 @@ const ResearchWorkspace = ({ onExit }) => {
     const [isPaused, setIsPaused] = useState(false);
     const pauseStartTimeRef = useRef(null);
     const totalPauseTimeRef = useRef(0);
+
+    // Idle Timeout: Track time the browser tab was hidden to exclude it from annotation timings.
+    // This addresses the evaluator concern that external distractions (phone calls, context switching)
+    // inflate the cognitive cost measurement and pollute alpha/beta calibration.
+    // CITATION: Page Visibility API — detect when a document is visible or hidden
+    // SOURCE: MDN Web Docs (n.d.). "Page Visibility API"
+    // URL: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+    const idleStartTimeRef = useRef(null);
+    const totalIdleTimeRef = useRef(0);
+
+    // Undo State — store the last annotated task for 8 seconds after each annotation.
+    // Nielsen Severity 2: Without undo, a misclick on the wrong label is permanent.
+    const [lastAction, setLastAction] = useState(null); // { taskId, label, taskObj }
+    const [showUndoToast, setShowUndoToast] = useState(false);
+    const undoTimerRef = useRef(null);
+
+    // Self-reported Difficulty — brief 1-5 star prompt shown after each annotation.
+    // Evaluators suggested capturing annotator-perceived difficulty to supplement the
+    // length-based cost proxy (which misses semantically ambiguous short texts).
+    const [showDifficultyPrompt, setShowDifficultyPrompt] = useState(false);
+    const [pendingDifficultyTaskId, setPendingDifficultyTaskId] = useState(null);
+    const difficultyTimerRef = useRef(null);
+
+    // Cost Std Deviation Band — populated from the annotator profile for the ± confidence display
+    const [speedStdDev, setSpeedStdDev] = useState(0);
     
     // Dataset Configuration State
     const [datasetConfig, setDatasetConfig] = useState(null);
@@ -174,6 +199,43 @@ const ResearchWorkspace = ({ onExit }) => {
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [contestantId, annotationCount]);
+
+    // Idle Timeout: Pause the annotation timer when the user switches tabs or minimises the window.
+    // When they return, we exclude the hidden time from timeSeconds so it doesn't inflate cognitive cost.
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                // Tab hidden — record when idle period started
+                idleStartTimeRef.current = Date.now();
+            } else {
+                // Tab visible again — accumulate the idle duration into totalPauseTimeRef
+                if (idleStartTimeRef.current) {
+                    totalIdleTimeRef.current += Date.now() - idleStartTimeRef.current;
+                    totalPauseTimeRef.current += Date.now() - idleStartTimeRef.current;
+                    idleStartTimeRef.current = null;
+                }
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, []);
+
+    // Fetch speedStdDev from the annotator profile on mount (for cost confidence band display)
+    useEffect(() => {
+        const cid = sessionStorage.getItem('contestantId') || contestantId;
+        if (!cid) return;
+        // Extract username from contestantId (format: username_projectId)
+        const username = cid.split('_')[0];
+        if (!username) return;
+        fetch(`${SERVER_URL}/api/session/profile/${username}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data?.exists && data.profile?.speedStdDev) {
+                    setSpeedStdDev(data.profile.speedStdDev);
+                }
+            })
+            .catch(() => {}); // non-critical
+    }, [contestantId]);
 
     // monitors time between annotations to detect if the user has left the keyboard or needs a break.
     // drops the top 20% longest times to prevent outliers (like getting a coffee) from skewing the average.
@@ -524,6 +586,26 @@ const ResearchWorkspace = ({ onExit }) => {
         };
         setFullAnnotations(prev => [...prev, fullAnnotation]);
 
+        // UNDO: Store the completed task for 8 seconds so annotator can reverse a misclick.
+        // Addresses Nielsen Severity 2 — no error recovery for an accidental wrong-label click.
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+        setLastAction({ taskId: currentTask.id, label, taskObj: currentTask, fullAnnotation });
+        setShowUndoToast(true);
+        undoTimerRef.current = setTimeout(() => {
+            setShowUndoToast(false);
+            setLastAction(null);
+        }, 8000);
+
+        // SELF-REPORTED DIFFICULTY: Show a 1-5 star prompt after each label.
+        // Auto-dismisses after 5 seconds if the annotator doesn't respond.
+        if (difficultyTimerRef.current) clearTimeout(difficultyTimerRef.current);
+        setPendingDifficultyTaskId(currentTask.id);
+        setShowDifficultyPrompt(true);
+        difficultyTimerRef.current = setTimeout(() => {
+            setShowDifficultyPrompt(false);
+            setPendingDifficultyTaskId(null);
+        }, 5000);
+
         // Re-enable button IMMEDIATELY after optimistic UI update
         setSubmitting(false);
 
@@ -557,6 +639,61 @@ const ResearchWorkspace = ({ onExit }) => {
         } catch (error) {
             console.error('Annotation error:', error);
         }
+    };
+
+    // UNDO handler: restore the last annotation within the 8-second window.
+    // Calls the new POST /undo backend route, which removes the last annotation document
+    // atomically from the session, then puts the task back at the top of the queue.
+    const handleUndo = async () => {
+        if (!lastAction || !contestantId) return;
+        // Cancel the undo window immediately
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+        setShowUndoToast(false);
+        // Hide the difficulty prompt too (it refers to the same task)
+        if (difficultyTimerRef.current) clearTimeout(difficultyTimerRef.current);
+        setShowDifficultyPrompt(false);
+
+        try {
+            const res = await fetch(`${SERVER_URL}/api/session/undo/${contestantId}`, { method: 'POST' });
+            if (!res.ok) throw new Error('Undo API failed');
+
+            // Restore the task at the front of the queue and roll back local counters
+            const restoredTask = lastAction.taskObj;
+            setTasks(prev => [restoredTask, ...prev]);
+            setCurrentTask(restoredTask);
+            const restoredIds = labeledIdsRef.current.filter(id => id !== lastAction.taskId);
+            labeledIdsRef.current = restoredIds;
+            setLabeledTaskIds(restoredIds);
+            setAnnotationCount(prev => Math.max(0, prev - 1));
+            setFullAnnotations(prev => prev.filter((_, i) => i !== prev.length - 1));
+            setLastAction(null);
+            setViewStartTime(Date.now()); // Restart timer for the restored task
+            setToast({ message: '↩ Annotation undone — task returned to queue.', type: 'info' });
+        } catch (err) {
+            console.error('Undo failed:', err);
+            setToast({ message: 'Undo failed — please try again.', type: 'error' });
+        }
+    };
+
+    // SELF-REPORTED DIFFICULTY handler: persist the 1-5 star rating to the session.
+    // Fires a lightweight patch to the session's last annotation entry.
+    const handleDifficultyRating = async (rating) => {
+        if (difficultyTimerRef.current) clearTimeout(difficultyTimerRef.current);
+        setShowDifficultyPrompt(false);
+        if (!contestantId || !pendingDifficultyTaskId) return;
+        // Fire-and-forget: save the perceived difficulty alongside the annotation
+        fetch(`${SERVER_URL}/api/session/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contestantId,
+                annotationCount,
+                labeledTaskIds: labeledIdsRef.current,
+                perceivedDifficulty: rating,
+                perceivedDifficultyTaskId: pendingDifficultyTaskId
+            })
+        }).catch(() => {}); // non-critical
+        setPendingDifficultyTaskId(null);
     };
 
     // Global keyboard event listener for rapid, mouse-free annotation labeling
@@ -862,8 +999,50 @@ const ResearchWorkspace = ({ onExit }) => {
 
             {/* Toast Notification */}
             {toast && (
-                <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-2 animate-bounce">
-                    <span></span> {toast.message}
+                <div className={`fixed top-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full shadow-2xl z-50 flex items-center gap-2 animate-bounce text-white font-semibold text-sm ${
+                    toast.type === 'error' ? 'bg-rose-500' : toast.type === 'warning' ? 'bg-amber-500' : toast.type === 'info' ? 'bg-blue-500' : 'bg-green-500'
+                }`}>
+                    {toast.message}
+                </div>
+            )}
+
+            {/* UNDO Toast — bottom-left, 8-second window after each annotation
+                Addresses Nielsen Severity 2: no error recovery for accidental wrong-label clicks. */}
+            {showUndoToast && lastAction && (
+                <div className="fixed bottom-6 left-6 z-50 flex items-center gap-3 bg-slate-900/95 border border-amber-500/40 text-white px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md animate-fade-in">
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Labeled as "{lastAction.label}"</span>
+                        <span className="text-[11px] text-slate-400">Misclick? You have 8 seconds to undo.</span>
+                    </div>
+                    <button
+                        id="undo-last-annotation-btn"
+                        onClick={handleUndo}
+                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/40 border border-amber-500/40 text-amber-300 transition-all duration-200 hover:scale-105 active:scale-95"
+                    >
+                        ↩ Undo
+                    </button>
+                </div>
+            )}
+
+            {/* Self-Reported Difficulty Prompt — bottom-right, auto-dismisses in 5s
+                Evaluators suggested capturing perceived difficulty to supplement the length-based cost proxy. */}
+            {showDifficultyPrompt && (
+                <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 bg-slate-900/95 border border-indigo-500/30 text-white px-4 py-3 rounded-2xl shadow-2xl backdrop-blur-md animate-fade-in min-w-[220px]">
+                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">How hard was that text?</span>
+                    <div className="flex gap-1 justify-center">
+                        {[1, 2, 3, 4, 5].map(star => (
+                            <button
+                                key={star}
+                                id={`difficulty-star-${star}`}
+                                onClick={() => handleDifficultyRating(star)}
+                                className="text-2xl hover:scale-125 transition-transform duration-150 active:scale-95"
+                                title={['Very Easy', 'Easy', 'Moderate', 'Hard', 'Very Hard'][star - 1]}
+                            >
+                                ⭐
+                            </button>
+                        ))}
+                    </div>
+                    <span className="text-[10px] text-slate-500 text-center">Auto-skips in 5s · Easy → Hard</span>
                 </div>
             )}
 
