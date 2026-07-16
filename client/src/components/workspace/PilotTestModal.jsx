@@ -82,10 +82,10 @@ const PilotTestModal = ({ username, onComplete }) => {
                         <div className="mx-auto w-16 h-16 bg-blue-500/10 rounded-2xl border border-blue-500/20 flex items-center justify-center mb-6">
                             <ShieldAlert size={32} className="text-blue-400" />
                         </div>
-                        <h2 className="text-2xl font-black text-white">Pilot Assessment Required</h2>
+                        <h2 className="text-2xl font-black text-white">Pilot Assessment Baseline</h2>
                         <p className="text-slate-400 text-sm leading-relaxed">
-                            Before accessing your project board, we need to calibrate your annotation profile. 
-                            This short pilot test measures your reading speed and cognitive pacing to automatically route the best projects to you.
+                            We calibrate your initial baseline speed using three sample texts. 
+                            Note: This serves as a relative bootstrap seed. Once you enter a specific project (e.g. medical, legal), our adaptive cost engine continuously recalibrates your speed parameters in real-time to match that target domain's semantic complexity.
                         </p>
                         <div className="pt-4">
                             <button

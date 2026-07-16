@@ -693,6 +693,17 @@ const ResearchWorkspace = ({ onExit }) => {
                 perceivedDifficultyTaskId: pendingDifficultyTaskId
             })
         }).catch(() => {}); // non-critical
+
+        // Also post to Python ML service for cost model deliberation-discounting
+        fetch(`${API_URL}/record-difficulty`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                taskId: pendingDifficultyTaskId,
+                difficulty: rating
+            })
+        }).catch(() => {});
+        
         setPendingDifficultyTaskId(null);
     };
 

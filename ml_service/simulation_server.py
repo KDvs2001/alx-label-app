@@ -111,6 +111,7 @@ class SimulationState:
         self.auto_label_threshold_mode = 'dynamic'
         self.cognitive_pacing_active = False
         self.baseline_beta = None
+        self.task_difficulty = {}
 
         # Initialize Files (Prevent 404s on Frontend)
         self._init_files()
@@ -948,12 +949,22 @@ def annotate():
     # We update the Cognitive Cost Model incrementally.
     # By logging the exact time it took them to read this specific text length,
     # our alpha/beta parameters dynamically shift to match their current physical fatigue level.
-    interaction = {'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
+    interaction = {'taskId': task_id, 'text': text, 'length': len(text.split()), 'time_seconds': time_taken}
     state.interaction_buffer.append(interaction)  # Keep rolling history
     record_annotation_observation(text=text, time_seconds=time_taken, label=label, task_id=task_id)
     
     if state.steps_since_update >= 5:
         recent_interactions = state.interaction_buffer[-5:]
+        # Decouple decision overhead (difficulty rating) from pure reading baseline
+        for inter in recent_interactions:
+            t_id = inter.get('taskId')
+            if t_id is not None:
+                try:
+                    t_id = int(t_id)
+                except (ValueError, TypeError):
+                    pass
+            inter['perceived_difficulty'] = state.task_difficulty.get(t_id, 1.0)
+            
         logger.info(f"Updating Cost Model with {len(recent_interactions)} recent interactions...")
         state.cost_model.update(recent_interactions)
         state.steps_since_update = 0
@@ -1038,6 +1049,21 @@ def annotate():
         "trained": triggered_training
     })
 
+@app.route('/record-difficulty', methods=['POST'])
+def record_difficulty():
+    data = request.json or {}
+    task_id = data.get('taskId')
+    difficulty = data.get('difficulty', 1.0)
+    
+    if task_id is not None:
+        try:
+            task_id = int(task_id)
+        except (ValueError, TypeError):
+            pass
+        state.task_difficulty[task_id] = float(difficulty)
+        logger.info(f"Recorded perceived difficulty {difficulty} for task {task_id}")
+    return jsonify({"status": "ok"})
+
 @app.route('/reset', methods=['POST'])
 def reset_session():
     """Reset ALL state for a new contestant, complete fresh start with optional dataset configurations."""
@@ -1053,6 +1079,7 @@ def reset_session():
         state.custom_labels = custom_labels
         state.labeled_ids = set() # Clear server-side labeled IDs
         state.last_bg_auto_labeled_count = 0
+        state.task_difficulty = {}
         state.round_size = int(payload.get("roundSize", 10))
         state.verification_queue = {}
         thresh_val = payload.get("autoLabelThreshold", "dynamic")
