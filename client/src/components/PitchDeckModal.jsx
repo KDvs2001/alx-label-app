@@ -348,22 +348,25 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             icon: ShieldCheck,
             iconColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="h-full flex flex-col justify-center gap-5 max-w-[1200px] mx-auto py-2 px-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                         
                         {/* Comparison Table */}
-                        <div className="lg:col-span-8 overflow-x-auto w-full">
+                        <div className="lg:col-span-5 overflow-x-auto w-full space-y-4">
+                            <h4 className={`text-base md:text-lg font-black tracking-tight ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                                Feature Matchup vs. Competitors
+                            </h4>
                             <table className="w-full text-left border-collapse text-xs md:text-sm">
                                 <thead>
                                     <tr className="border-b border-slate-800">
-                                        <th className="py-2.5 font-black text-slate-450">Features</th>
-                                        <th className="py-2.5 font-black text-rose-400 text-center">CAL-Log</th>
-                                        <th className="py-2.5 font-black text-slate-550 text-center">Prodigy</th>
-                                        <th className="py-2.5 font-black text-slate-550 text-center">Scale AI</th>
-                                        <th className="py-2.5 font-black text-slate-550 text-center">Snorkel</th>
+                                        <th className="py-3 font-black text-slate-400 text-sm">Features</th>
+                                        <th className="py-3 font-black text-rose-400 text-center text-sm">CAL-Log</th>
+                                        <th className="py-3 font-black text-slate-500 text-center text-sm">Prodigy</th>
+                                        <th className="py-3 font-black text-slate-500 text-center text-sm">Scale AI</th>
+                                        <th className="py-3 font-black text-slate-500 text-center text-sm">Snorkel</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-900/50">
+                                <tbody className="divide-y divide-slate-800/40">
                                     {[
                                         ["Active Learning Queue", true, true, true, false],
                                         ["Cost-Aware Selection", true, false, true, false],
@@ -374,36 +377,120 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                         ["Transparent Explanations", true, false, false, false]
                                     ].map((row, idx) => (
                                         <tr key={idx} className="hover:bg-slate-900/30">
-                                            <td className="py-2.5 font-semibold text-slate-350">{row[0]}</td>
-                                            <td className="py-2.5 text-center font-black text-rose-500">{row[1] ? "✓" : "—"}</td>
-                                            <td className="py-2.5 text-center text-slate-600">{row[2] ? "✓" : "—"}</td>
-                                            <td className="py-2.5 text-center text-slate-600">{row[3] ? "✓" : "—"}</td>
-                                            <td className="py-2.5 text-center text-slate-600">{row[4] ? "✓" : "—"}</td>
+                                            <td className="py-3 font-bold text-slate-300 text-sm">{row[0]}</td>
+                                            <td className="py-3 text-center font-black text-rose-500 text-base">{row[1] ? "✓" : "—"}</td>
+                                            <td className="py-3 text-center text-slate-500 text-base">{row[2] ? "✓" : "—"}</td>
+                                            <td className="py-3 text-center text-slate-500 text-base">{row[3] ? "✓" : "—"}</td>
+                                            <td className="py-3 text-center text-slate-500 text-base">{row[4] ? "✓" : "—"}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
 
-                        {/* Outcomes & Standards */}
-                        <div className="lg:col-span-4 space-y-5">
-                            <div className="bg-rose-500/10 border border-rose-500/20 p-5 rounded-2xl text-center">
-                                <span className="text-xs font-black text-rose-400 uppercase tracking-wider block mb-1">PROVEN RESULT</span>
-                                <h3 className="text-4xl font-black text-rose-500 leading-none">3.9x</h3>
-                                <p className="text-xs text-rose-300 font-bold uppercase tracking-wider mt-2">faster to target accuracy</p>
-                                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">38 min (CAL-Log) vs. 148 min (Entropy) averaged across 10 datasets.</p>
+                        {/* Cost Efficiency Horizontal Bar Chart (Custom Dynamic CSS Graph) */}
+                        <div className="lg:col-span-7 space-y-4">
+                            <div className="flex flex-col gap-1">
+                                <h4 className={`text-base md:text-lg font-black tracking-tight ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+                                    Cost Efficiency: Time to Reach F1 = 0.80
+                                </h4>
+                                <span className="text-xs text-slate-500 font-semibold">
+                                    Mean Annotation Time (minutes) averaged across 10 datasets (Lower = Better)
+                                </span>
                             </div>
 
-                            <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
-                                <span className="text-xs font-black text-slate-400 uppercase tracking-wider block mb-2">STANDARDS COMPLIANT</span>
-                                <div className="grid grid-cols-2 gap-2 text-xs text-slate-450 font-bold">
-                                    <span>✓ UK GDPR (Zero PII)</span>
-                                    <span>✓ BCS Conduct Code</span>
-                                    <span>✓ OWASP Security</span>
-                                    <span>✓ WCAG Accessible</span>
-                                    <span>✓ ISO/IEC 25010</span>
-                                    <span>✓ 99%+ Uptime</span>
+                            {/* Chart Container */}
+                            <div className={`p-5 rounded-2xl border space-y-4 ${
+                                isLight ? 'bg-white border-slate-200' : 'bg-slate-900/40 border-slate-850'
+                            }`}>
+                                {[
+                                    { name: "Entropy", time: 148.5, ciStart: 5, ciEnd: 303, color: "bg-green-500/80" },
+                                    { name: "CoreSet", time: 140.9, ciStart: 0, ciEnd: 286, color: "bg-cyan-500/80" },
+                                    { name: "BADGE", time: 126.5, ciStart: 21, ciEnd: 242, color: "bg-blue-500/80" },
+                                    { name: "Margin", time: 121.0, ciStart: 5, ciEnd: 238, color: "bg-amber-600/85" },
+                                    { name: "LeastConfidence", time: 105.9, ciStart: 32, ciEnd: 190, color: "bg-purple-500/80" },
+                                    { name: "Random", time: 93.7, ciStart: 38, ciEnd: 150, color: "bg-slate-500/80" },
+                                    { name: "CAL-Log (Ours)", time: 38.3, ciStart: 15, ciEnd: 62, color: "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)]", isHighlight: true }
+                                ].map((item, idx) => {
+                                    // Scale factor: max timeline is 310m
+                                    const maxVal = 310;
+                                    const barWidth = (item.time / maxVal) * 100;
+                                    const ciLeft = (item.ciStart / maxVal) * 100;
+                                    const ciWidth = ((item.ciEnd - item.ciStart) / maxVal) * 100;
+
+                                    return (
+                                        <div key={idx} className="grid grid-cols-12 gap-3 items-center">
+                                            {/* Label */}
+                                            <div className={`col-span-3 text-right text-xs md:text-sm font-bold truncate ${
+                                                item.isHighlight ? 'text-rose-400 font-extrabold' : 'text-slate-400'
+                                            }`}>
+                                                {item.name}
+                                            </div>
+
+                                            {/* Bar and Error Range */}
+                                            <div className="col-span-7 relative h-6 flex items-center bg-slate-950/40 rounded border border-slate-900/50 overflow-visible">
+                                                {/* Error Bar (CI) */}
+                                                <div 
+                                                    className="absolute h-0.5 bg-slate-650 flex items-center justify-between"
+                                                    style={{ left: `${ciLeft}%`, width: `${ciWidth}%` }}
+                                                >
+                                                    {/* CI Left Cap */}
+                                                    <div className="w-0.5 h-2 bg-slate-650 shrink-0" />
+                                                    {/* CI Right Cap */}
+                                                    <div className="w-0.5 h-2 bg-slate-650 shrink-0" />
+                                                </div>
+
+                                                {/* Value Bar */}
+                                                <div 
+                                                    className={`absolute h-4 rounded-sm transition-all duration-1000 ${item.color} ${
+                                                        item.isHighlight ? 'border-2 border-white' : ''
+                                                    }`}
+                                                    style={{ width: `${barWidth}%`, left: '0%' }}
+                                                />
+                                            </div>
+
+                                            {/* Value */}
+                                            <div className={`col-span-2 text-xs md:text-sm font-mono font-bold ${
+                                                item.isHighlight ? 'text-rose-400 font-extrabold' : 'text-slate-550'
+                                            }`}>
+                                                {item.time.toFixed(1)}m
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* X-Axis Scale */}
+                                <div className="grid grid-cols-12 gap-3 border-t border-slate-800/60 pt-2 text-[10px] font-mono text-slate-500">
+                                    <div className="col-span-3" />
+                                    <div className="col-span-7 flex justify-between px-1">
+                                        <span>0m</span>
+                                        <span>100m</span>
+                                        <span>200m</span>
+                                        <span>300m</span>
+                                    </div>
+                                    <div className="col-span-2 text-right">Time</div>
                                 </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* Bottom Banner for Standards & Proven Outcomes */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                        <div className="bg-rose-500/5 border border-rose-500/10 p-3 rounded-xl flex items-center justify-between px-6">
+                            <span className="text-xs font-black text-rose-400 uppercase tracking-widest">PROVEN RESULT</span>
+                            <div className="flex items-center gap-4">
+                                <span className="text-3xl font-black text-rose-500">3.9x Faster</span>
+                                <span className="text-xs text-slate-450 leading-tight">reach target accuracy vs. standard entropy models</span>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-900/40 border border-slate-850 p-3 rounded-xl flex items-center justify-between px-6">
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">COMPLIANCE STATS</span>
+                            <div className="flex gap-4 text-xs font-bold text-slate-400">
+                                <span>✓ UK GDPR (Zero PII)</span>
+                                <span>✓ OWASP Secure</span>
+                                <span>✓ 99.9% Net Uptime</span>
                             </div>
                         </div>
                     </div>
@@ -417,51 +504,107 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             icon: Cpu,
             iconColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center gap-8 max-w-5xl mx-auto py-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="h-full flex flex-col justify-center gap-8 max-w-[1200px] mx-auto py-4 px-4 text-slate-300">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         
-                        {/* Math */}
-                        <div className={`p-6 rounded-2xl border flex flex-col gap-3 ${
-                            isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-800'
+                        {/* Math Breakdown */}
+                        <div className={`p-8 rounded-3xl border flex flex-col justify-between min-h-[360px] ${
+                            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
                         }`}>
-                            <span className="text-xs font-black text-rose-500 uppercase tracking-widest">THE MATH</span>
-                            <h4 className={`font-black text-lg mt-1 ${isLight ? 'text-slate-850' : 'text-white'}`}>Simple Economics</h4>
-                            <div className="space-y-3 mt-2 text-sm text-slate-400 leading-relaxed">
-                                <div className="flex justify-between border-b border-slate-800/40 pb-2">
-                                    <span>Costs to run:</span>
-                                    <span className="font-mono text-white">$200 to $300 / mo</span>
+                            <div className="space-y-4">
+                                <span className="text-xs font-black text-rose-500 uppercase tracking-widest block">THE MATH</span>
+                                <h4 className={`font-black text-2xl ${isLight ? 'text-slate-850' : 'text-white'}`}>Operating Economics</h4>
+                                
+                                <div className="space-y-3.5 text-sm text-slate-400">
+                                    <div className="border-b border-slate-800/60 pb-2.5">
+                                        <div className="flex justify-between font-bold text-slate-200">
+                                            <span>Running Costs:</span>
+                                            <span className="font-mono text-white text-base">$250 / mo</span>
+                                        </div>
+                                        <div className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                                            MongoDB Atlas ($120) + AWS Node Host ($80) + Security & Logging ($50). Supports up to 50 active annotators.
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <div className="flex justify-between font-bold text-slate-250">
+                                            <span>Saves Per Project:</span>
+                                            <span className="font-mono text-emerald-400 text-base">+$1,530 saved</span>
+                                        </div>
+                                        <div className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                                            Based on 10,000 text records: Manual labor (140 hrs × $15 = $2,100) vs. CAL-Log (38 hrs × $15 = $570).
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between border-b border-slate-800/40 pb-2">
-                                    <span>Saves per project:</span>
-                                    <span className="font-mono text-emerald-400">$600 (Typical)</span>
-                                </div>
-                                <p className="text-xs text-slate-500 italic mt-3">Every project after the first is pure operating margin.</p>
                             </div>
+                            <p className="text-[11px] text-slate-500 italic border-t border-slate-800/40 pt-3">
+                                Every dataset labeled after the first project is pure operating margin.
+                            </p>
                         </div>
 
-                        {/* Revenue */}
-                        <div className={`p-6 rounded-2xl border flex flex-col gap-3 ${
-                            isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-800'
+                        {/* Revenue Model & SLAs */}
+                        <div className={`p-8 rounded-3xl border flex flex-col justify-between min-h-[360px] ${
+                            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
                         }`}>
-                            <span className="text-xs font-black text-indigo-400 uppercase tracking-widest">REVENUE MODEL</span>
-                            <h4 className={`font-black text-lg mt-1 ${isLight ? 'text-slate-850' : 'text-white'}`}>Tiers & Licensing</h4>
-                            <div className="space-y-3 mt-2 text-xs md:text-sm text-slate-400">
-                                <div><b className="text-slate-200">Free</b>: Solo researchers, small pilot runs</div>
-                                <div><b className="text-indigo-400">$49/mo</b>: Small teams up to 5 annotators</div>
-                                <div><b className="text-rose-500">$499/mo</b>: Enterprise: On-prem, SLAs, API integrations</div>
+                            <div className="space-y-4">
+                                <span className="text-xs font-black text-indigo-400 uppercase tracking-widest block">REVENUE MODEL</span>
+                                <h4 className={`font-black text-2xl ${isLight ? 'text-slate-850' : 'text-white'}`}>Tiers & Licensing</h4>
+                                
+                                <div className="space-y-4 text-sm text-slate-400">
+                                    <div className="border-b border-slate-800/40 pb-2">
+                                        <span className="font-black text-slate-200 block text-base">Free Tier</span>
+                                        <span className="text-xs">Solo researchers, local projects, and small pilot runs.</span>
+                                    </div>
+                                    <div className="border-b border-slate-800/40 pb-2">
+                                        <span className="font-black text-indigo-400 block text-base">$49 / mo (Teams)</span>
+                                        <span className="text-xs">Small teams up to 5 concurrent annotators, shared MongoDB.</span>
+                                    </div>
+                                    <div>
+                                        <span className="font-black text-rose-500 block text-base">$499 / mo (Enterprise)</span>
+                                        <div className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                                            On-premise deployment, custom API integrations, and premium <b>Service Level Agreements (SLAs)</b>:
+                                            <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-450">
+                                                <li>99.9% Net Platform Uptime Guarantee</li>
+                                                <li>&lt;4-Hour Support Response Window</li>
+                                                <li>Dedicated Kubernetes isolation node</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Target Segment */}
-                        <div className={`p-6 rounded-2xl border flex flex-col gap-3 ${
-                            isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-800'
+                        <div className={`p-8 rounded-3xl border flex flex-col justify-between min-h-[360px] ${
+                            isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
                         }`}>
-                            <span className="text-xs font-black text-emerald-400 uppercase tracking-widest">WHO IT'S FOR</span>
-                            <h4 className={`font-black text-lg mt-1 ${isLight ? 'text-slate-850' : 'text-white'}`}>Immediate Users</h4>
-                            <div className="space-y-3 mt-2 text-xs md:text-sm text-slate-400">
-                                <div>➔ <b className="text-slate-200">ML Text Teams</b> (Fintech, Legaltech)</div>
-                                <div>➔ <b className="text-slate-200">University Labs</b> (Strict research budgets)</div>
-                                <div>➔ <b className="text-slate-200">Label Agencies</b> (Firms billing hourly)</div>
+                            <div className="space-y-4">
+                                <span className="text-xs font-black text-emerald-400 uppercase tracking-widest block">WHO IT'S FOR</span>
+                                <h4 className={`font-black text-2xl ${isLight ? 'text-slate-850' : 'text-white'}`}>Immediate Users</h4>
+                                
+                                <div className="space-y-5 text-sm text-slate-400 mt-2">
+                                    <div className="flex gap-3">
+                                        <span className="text-emerald-400 font-extrabold text-base">➔</span>
+                                        <div>
+                                            <b className="text-slate-200 block text-base">ML Text Teams</b>
+                                            <span className="text-xs leading-relaxed block text-slate-450 mt-0.5">Fintech, legaltech, and clinical text developers with high privacy restrictions.</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <span className="text-emerald-400 font-extrabold text-base">➔</span>
+                                        <div>
+                                            <b className="text-slate-200 block text-base">University Labs</b>
+                                            <span className="text-xs leading-relaxed block text-slate-450 mt-0.5">Strict academic research budgets seeking maximum accuracy per grant dollar.</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <span className="text-emerald-400 font-extrabold text-base">➔</span>
+                                        <div>
+                                            <b className="text-slate-200 block text-base">Labeling Agencies</b>
+                                            <span className="text-xs leading-relaxed block text-slate-450 mt-0.5">Firms billing clients hourly using active learning to expand their margins.</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

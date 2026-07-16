@@ -25,6 +25,46 @@ const connectDB = async () => {
     // cap how long queued operations wait before timing out
     mongoose.set('bufferTimeoutMS', 30000);
     console.log("MongoDB Connected Successfully");
+
+    // Automatically seed default IMDb project if database is empty
+    try {
+      const Project = require("../infrastructure/database/models/Project");
+      const fs = require("fs");
+      const path = require("path");
+
+      const count = await Project.countDocuments();
+      if (count === 0) {
+        console.log("No projects found in DB. Seeding default IMDb project...");
+        const datasetPath = path.join(__dirname, "../../ml_service/dataset.json");
+        if (fs.existsSync(datasetPath)) {
+          const raw = JSON.parse(fs.readFileSync(datasetPath, "utf-8"));
+          const textDocs = raw.map((r, i) => {
+            const text = r.data?.text || r.text || "";
+            return {
+              id: `text_seed_${i}`,
+              text
+            };
+          }).filter(d => d.text.trim().length > 0);
+
+          const defaultProject = new Project({
+            name: "IMDb Movie Reviews (Binary Sentiment)",
+            description: "Standard IMDb dataset for active learning sentiment validation.",
+            labelTypes: ["Negative", "Positive"],
+            texts: textDocs,
+            complexityScore: 0.5,
+            targetProfile: "All",
+            createdBy: "System",
+            status: "active"
+          });
+          await defaultProject.save();
+          console.log("Successfully seeded default IMDb Movie Reviews project with " + textDocs.length + " texts!");
+        } else {
+          console.warn("Could not find dataset.json at path: " + datasetPath);
+        }
+      }
+    } catch (seedErr) {
+      console.error("Failed to seed default IMDb project:", seedErr);
+    }
   } catch (err) {
     console.error("MongoDB Connection Error:", err.message);
     // simple retry-once with a 3s delay.

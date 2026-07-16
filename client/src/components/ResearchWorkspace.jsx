@@ -738,12 +738,13 @@ const ResearchWorkspace = ({ onExit }) => {
     }, [currentTask, submitting, showRoundTransition, datasetConfig]);
 
     // Session Management Functions
-    const saveSession = async (count = annotationCount, ids = labeledTaskIds, newAnnotation = null) => {
-        if (!contestantId) return;
+    const saveSession = async (count = annotationCount, ids = labeledTaskIds, newAnnotation = null, overrideConfig = null, customId = null) => {
+        const activeId = customId || contestantId;
+        if (!activeId) return;
         try {
             // Use functional getters to avoid stale closure
             const payload = {
-                contestantId,
+                contestantId: activeId,
                 annotationCount: count,
                 labeledTaskIds: ids,
                 cumulativeTimeSaved,
@@ -752,10 +753,11 @@ const ResearchWorkspace = ({ onExit }) => {
                 cumulativeCalLogCost
             };
             // Include dataset config if available
-            if (datasetConfig) {
-                payload.datasetName = datasetConfig.datasetName;
-                payload.labels = datasetConfig.labels;
-                payload.uploadedTexts = datasetConfig.uploadedTexts;
+            const currentConfig = overrideConfig || datasetConfig;
+            if (currentConfig) {
+                payload.datasetName = currentConfig.datasetName;
+                payload.labels = currentConfig.labels;
+                payload.uploadedTexts = currentConfig.uploadedTexts;
                 payload.roundSize = roundSize;
                 payload.autoLabelThreshold = autoLabelThreshold;
             }
@@ -917,6 +919,20 @@ const ResearchWorkspace = ({ onExit }) => {
             } catch (error) {
                 console.error('Failed to reset ML service:', error);
             }
+        }
+        
+        // Save the new configuration immediately to MongoDB to ensure it is persisted and synced
+        if (action !== 'resume') {
+            const currentConfig = config || {
+                datasetName: 'imdb',
+                labels: ['Negative', 'Positive'],
+                seedType: 'unlabeled',
+                seedCount: 0,
+                uploadedTexts: null,
+                roundSize: 10,
+                autoLabelThreshold: 'dynamic'
+            };
+            await saveSession(0, [], null, currentConfig, id);
         }
 
         setLoading(true);

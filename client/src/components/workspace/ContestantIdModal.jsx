@@ -109,11 +109,81 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
                         ? data.map(item => item.text || item.content || item.data?.text || String(item))
                         : [];
                 } else if (file.name.endsWith('.csv')) {
-                    // Quick-and-dirty CSV parser
-                    const lines = content.split('\n');
-                    parsedTexts = lines
-                        .map(line => line.trim().replace(/^"|"$/g, ''))
-                        .filter(line => line.length > 5);
+                    // Smart CSV Parser with automatic text-column detection
+                    const rows = content.split(/\r?\n/).map(row => row.trim()).filter(Boolean);
+                    if (rows.length === 0) throw new Error('CSV file is empty.');
+
+                    // 1. Detect delimiter (, or ; or \t)
+                    const header = rows[0];
+                    const commas = (header.match(/,/g) || []).length;
+                    const semicolons = (header.match(/;/g) || []).length;
+                    const tabs = (header.match(/\t/g) || []).length;
+                    let delimiter = ',';
+                    if (semicolons > commas && semicolons > tabs) delimiter = ';';
+                    if (tabs > commas && tabs > semicolons) delimiter = '\t';
+
+                    // Helper to split CSV row respecting double quotes
+                    const splitRow = (rowText) => {
+                        const result = [];
+                        let insideQuote = false;
+                        let entry = '';
+                        for (let i = 0; i < rowText.length; i++) {
+                            const char = rowText[i];
+                            if (char === '"') {
+                                insideQuote = !insideQuote;
+                            } else if (char === delimiter && !insideQuote) {
+                                result.push(entry.trim());
+                                entry = '';
+                            } else {
+                                entry += char;
+                            }
+                        }
+                        result.push(entry.trim());
+                        return result;
+                    };
+
+                    const headerColumns = splitRow(header).map(col => col.toLowerCase().replace(/^"|"$/g, ''));
+                    let textColIndex = -1;
+
+                    // 2. Look for common text column names
+                    const targetHeaders = ['text', 'content', 'body', 'review', 'message', 'data', 'description', 'comment', 'input', 'utterance'];
+                    for (const target of targetHeaders) {
+                        textColIndex = headerColumns.indexOf(target);
+                        if (textColIndex !== -1) break;
+                    }
+
+                    // 3. Fallback: Heuristical check for the longest-average-text column in first 5 rows
+                    if (textColIndex === -1 && rows.length > 1) {
+                        const sampleRows = rows.slice(1, Math.min(6, rows.length)).map(splitRow);
+                        const numCols = sampleRows[0]?.length || 0;
+                        if (numCols > 0) {
+                            let maxAvgLength = -1;
+                            let bestIndex = 0;
+                            for (let colIdx = 0; colIdx < numCols; colIdx++) {
+                                let totalLen = 0;
+                                sampleRows.forEach(r => {
+                                    if (r[colIdx]) totalLen += r[colIdx].replace(/^"|"$/g, '').length;
+                                });
+                                const avgLen = totalLen / sampleRows.length;
+                                if (avgLen > maxAvgLength) {
+                                    maxAvgLength = avgLen;
+                                    bestIndex = colIdx;
+                                }
+                            }
+                            textColIndex = bestIndex;
+                        }
+                    }
+
+                    if (textColIndex === -1) textColIndex = 0; // ultimate fallback
+
+                    // 4. Extract text rows
+                    parsedTexts = rows.slice(1) // skip header
+                        .map(row => {
+                            const cols = splitRow(row);
+                            const val = cols[textColIndex] || '';
+                            return val.replace(/^"|"$/g, '').trim(); // strip outer quotes
+                        })
+                        .filter(txt => txt.length > 5);
                 } else {
                     throw new Error('Unsupported format. Please upload .json or .csv');
                 }
@@ -254,7 +324,13 @@ const ContestantIdModal = ({ isOpen, onSubmit, onClose }) => {
                             </label>
                             <select
                                 value={datasetSource}
-                                onChange={(e) => setDatasetSource(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setDatasetSource(val);
+                                    if (val === 'imdb') setClassLabels('Negative, Positive');
+                                    else if (val === 'rotten_tomatoes') setClassLabels('Fresh, Rotten');
+                                    else if (val === 'ag_news') setClassLabels('World, Sports, Business, Sci/Tech');
+                                }}
                                 className="w-full px-4 py-3 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-blue-500 transition"
                             >
                                 <option value="imdb">IMDB Movie Reviews (Sentiment Analysis)</option>
