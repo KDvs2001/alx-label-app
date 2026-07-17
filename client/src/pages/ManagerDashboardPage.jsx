@@ -705,31 +705,73 @@ const ManagerDashboardPage = () => {
                                 }[p.status] || 'text-slate-400 bg-slate-700 border-slate-600';
 
                                 return (
-                                    <div key={p.projectId} className="flex items-center gap-4 p-3 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-700 transition">
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span className="font-bold text-white text-sm">{p.name}</span>
-                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor}`}>{p.status}</span>
-                                                <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                    <Users size={11} /> {p.annotatorCount}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                    <div
-                                                        className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
-                                                        style={{ width: `${pct}%` }}
-                                                    />
+                                    <div key={p.projectId} className="flex flex-col gap-3 p-4 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-700 transition">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                    <span className="font-bold text-white text-sm">{p.name}</span>
+                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor}`}>{p.status}</span>
+                                                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                        <Users size={11} /> {p.annotatorCount} Annotator{p.annotatorCount !== 1 && 's'}
+                                                    </span>
                                                 </div>
-                                                <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{p.labeled}/{p.total} ({pct}%)</span>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                                        <div
+                                                            className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
+                                                            style={{ width: `${pct}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{p.labeled}/{p.total} ({pct}%)</span>
+                                                </div>
+                                                <div className="flex gap-1.5 mt-2 flex-wrap">
+                                                    {(p.labelTypes || []).map(l => (
+                                                        <span key={l} className="text-xs bg-slate-800 border border-slate-700 text-slate-400 px-1.5 py-0.5 rounded-full">{l}</span>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className="flex gap-1.5 mt-1.5 flex-wrap">
-                                                {(p.labelTypes || []).map(l => (
-                                                    <span key={l} className="text-xs bg-slate-800 border border-slate-700 text-slate-400 px-1.5 py-0.5 rounded-full">{l}</span>
-                                                ))}
-                                            </div>
+                                            {pct === 100 && <CheckCircle2 size={24} className="text-emerald-400 shrink-0" />}
                                         </div>
-                                        {pct === 100 && <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />}
+
+                                        {p.annotators && p.annotators.length > 0 && (
+                                            <div className="mt-2 pt-3 border-t border-slate-800/60">
+                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Engaged Annotators & Performance</span>
+                                                <div className="grid grid-cols-1 gap-2">
+                                                    {p.annotators.map(annotator => (
+                                                        <div key={annotator.username} className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-black uppercase">
+                                                                    {annotator.username.charAt(0)}
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-sm font-bold text-slate-300 capitalize flex items-center gap-2">
+                                                                        {annotator.username}
+                                                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">{annotator.readingStyle}</span>
+                                                                    </span>
+                                                                    <span className="text-[10px] text-slate-500 font-mono">
+                                                                        Base Speed: {annotator.baselineSpeed > 0 ? annotator.baselineSpeed.toFixed(2) : '--'}s/word
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-6">
+                                                                <div className="text-right flex flex-col items-end">
+                                                                    <span className="text-[10px] uppercase font-bold text-slate-500">Labels</span>
+                                                                    <span className="text-sm font-black text-blue-400">{annotator.labeled}</span>
+                                                                </div>
+                                                                <div className="text-right flex flex-col items-end">
+                                                                    <span className="text-[10px] uppercase font-bold text-slate-500">Accuracy</span>
+                                                                    <span className="text-sm font-black text-emerald-400">{annotator.accuracy}%</span>
+                                                                </div>
+                                                                <div className="text-right flex flex-col items-end">
+                                                                    <span className="text-[10px] uppercase font-bold text-slate-500">Saved Time</span>
+                                                                    <span className="text-sm font-black text-purple-400">~{Math.round(annotator.timeSaved)}s</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}

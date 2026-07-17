@@ -24,7 +24,7 @@ const PilotTestModal = ({ username, onComplete }) => {
     const [totalTime, setTotalTime] = useState(0);
     const [saving, setSaving] = useState(false);
     const [result, setResult] = useState(null);
-    const [pilotSize, setPilotSize] = useState(3);
+    const [pilotSize, setPilotSize] = useState(5);
 
     const pilotTexts = FULL_PILOT_TEXTS.slice(0, pilotSize);
 
