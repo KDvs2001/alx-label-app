@@ -37,8 +37,8 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
     };
 
     const nextSlide = () => {
-        if (currentSlide === 12) {
-            onClose(); // Slide 13 is end of flow -> close and start demo
+        if (currentSlide === slides.length - 1) {
+            onClose(); // End of flow -> close and start demo
         } else {
             setCurrentSlide(prev => prev + 1);
         }
@@ -66,13 +66,13 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             title: "AI doesn't run out of data. It runs out of time.",
             subtitle: "A smarter way to label data for AI. Built for the enterprise.",
             icon: Sparkles,
-            iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+            iconColor: "text-amber-450 bg-amber-500/10 border-amber-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center items-center text-center gap-4 max-w-4xl mx-auto py-2">
-                    <img src="/logo.jpg" alt="CAL-Log Logo" className="h-16 md:h-20 object-contain bg-white p-1 rounded-xl border-2 border-slate-900 shadow-sm" />
+                <div className="h-full flex flex-col justify-center items-center text-center gap-6 max-w-4xl mx-auto py-2">
+                    <img src="/logo.jpg" alt="CAL-Log Logo" className="h-20 md:h-24 object-contain bg-white p-1.5 rounded-xl border-2 border-slate-900 shadow-sm animate-pulse" />
                     <div className="space-y-4">
-                        <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border-2 border-emerald-600 bg-emerald-500/10 text-emerald-700 text-sm font-black uppercase tracking-widest">
-                            <ShieldCheck size={16} /> Enterprise-Grade Data Labeling
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border-2 border-emerald-600 bg-emerald-500/10 text-emerald-700 text-base font-black uppercase tracking-widest">
+                            <ShieldCheck size={18} /> Enterprise-Grade Data Labeling
                         </div>
                         <h1 className={`text-4xl md:text-6xl font-black tracking-tight leading-none uppercase ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
                             AI doesn't run out of data.<br />
@@ -80,234 +80,83 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 It runs out of time.
                             </span>
                         </h1>
-                        <p className={`text-lg md:text-xl font-bold max-w-3xl mx-auto leading-relaxed ${contrastLight ? 'text-slate-900' : 'text-slate-300'}`}>
+                        <p className={`text-lg md:text-2xl font-bold max-w-3xl mx-auto leading-relaxed ${contrastLight ? 'text-slate-900 font-extrabold' : 'text-slate-300'}`}>
                             CAL-Log is a cost-aware active learning system that adapts to human speed limits in real-time, accelerating your data pipelines.
                         </p>
                     </div>
 
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent my-2" />
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-3xl">
-                        <div className={`p-4 rounded-xl border-2 flex flex-col gap-1 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-rose-500">65%</span>
-                            <span className={`text-xs uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>Avg Time Saved</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
+                        <div className={`p-5 rounded-2xl border-2 flex flex-col gap-2 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-4xl font-black text-rose-500">65%</span>
+                            <span className={`text-sm uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-400'}`}>Avg Time Saved</span>
                         </div>
-                        <div className={`p-4 rounded-xl border-2 flex flex-col gap-1 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-indigo-500">Local</span>
-                            <span className={`text-xs uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>100% Data Privacy</span>
+                        <div className={`p-5 rounded-2xl border-2 flex flex-col gap-2 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-4xl font-black text-indigo-500">Local</span>
+                            <span className={`text-sm uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-400'}`}>100% Data Privacy</span>
                         </div>
-                        <div className={`p-4 rounded-xl border-2 flex flex-col gap-1 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-emerald-500">Adaptive</span>
-                            <span className={`text-xs uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>To Annotator Speed</span>
+                        <div className={`p-5 rounded-2xl border-2 flex flex-col gap-2 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-4xl font-black text-emerald-500">Adaptive</span>
+                            <span className={`text-sm uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-400'}`}>To Annotator Speed</span>
                         </div>
                     </div>
                 </div>
             )
         },
-        // SLIDE 2 — THE QUESTION (RESTORED)
+        // SLIDE 2 — THE LABELING BOTTLENECK (QUESTION + STATS RESTORED & COMBINED)
         {
-            title: "How much of your AI project is spent labeling data by hand?",
-            subtitle: "The unseen bottleneck holding back generative intelligence.",
+            title: "The 80% Data Labeling Bottleneck",
+            subtitle: "Uncovering the massive unseen cost of generative intelligence.",
             icon: HelpCircle,
             iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center items-center text-center gap-6 max-w-4xl mx-auto py-2">
-                    <div className="space-y-4">
-                        <h2 className={`text-4xl md:text-5xl font-black tracking-tight leading-snug ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
-                            How much of your AI project is spent labeling data by hand?
+                <div className="h-full flex flex-col justify-center items-center gap-6 max-w-5xl mx-auto py-2">
+                    <div className="space-y-3 text-center">
+                        <h2 className={`text-3xl md:text-5xl font-black tracking-tight leading-snug uppercase ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
+                            Why is AI scaling so expensive?<br />
+                            <span className="text-rose-500 font-black">Human Labeling Takes 80%+ of Project Budgets</span>
                         </h2>
-                        <p className="text-lg font-extrabold tracking-widest uppercase text-rose-500 animate-pulse">
-                            Take a guess.
+                        <p className={`text-base md:text-xl font-bold max-w-3xl mx-auto leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-350'}`}>
+                            Traditional active learning tools select samples blindly, forcing highly-paid human annotators to waste hours reading redundant, low-value documents.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-2">
-                        {[
-                            { name: "Requirements", pct: "5%", color: contrastLight ? "border-slate-900 text-slate-700 bg-white" : "border-slate-800 bg-slate-900/40 text-slate-500" },
-                            { name: "Model Tuning", pct: "10%", color: contrastLight ? "border-slate-900 text-slate-700 bg-white" : "border-slate-800 bg-slate-900/40 text-slate-500" },
-                            { name: "Deployment", pct: "5%", color: contrastLight ? "border-slate-900 text-slate-700 bg-white" : "border-slate-800 bg-slate-900/40 text-slate-500" },
-                            { name: "Human Labeling", pct: "80%+", color: "border-rose-550 bg-rose-500/10 text-rose-600 font-black animate-pulse" }
-                        ].map((stage, idx) => (
-                            <div key={idx} className={`p-5 rounded-xl border-2 text-center flex flex-col gap-2 ${stage.color} shadow-sm`}>
-                                <span className="text-xs uppercase font-bold tracking-wider">{stage.name}</span>
-                                <span className="text-3xl font-black">{stage.pct}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 3 — THE ANSWER/STATS (RESTORED)
-        {
-            title: "Eighty Percent.",
-            subtitle: "Of every AI project. Humans. One sample at a time.",
-            icon: AlertTriangle,
-            iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="text-center space-y-2">
-                        <h2 className="text-5xl md:text-7xl font-black text-rose-500 tracking-tight uppercase">80%</h2>
-                        <p className={`text-xl md:text-2xl font-black ${contrastLight ? 'text-slate-950' : 'text-slate-300'}`}>
-                            Of every AI project. Humans, one sample at a time.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mt-2 text-left">
                         {[
                             {
-                                label: "SCALE",
-                                value: "$20 Billion",
+                                label: "THE BUDGET DRAIN",
+                                value: "$20B by 2030",
                                 source: "Grand View Research",
-                                desc: "Projected global data labeling market size by 2030, growing 5x from 2024 values."
+                                desc: "The global data labeling market size is expanding 5x to support LLM instruction tuning and RLHF."
                             },
                             {
-                                label: "IMPACT",
+                                label: "THE ABANDONMENT RATE",
                                 value: "60% Abandoned",
                                 source: "Gartner Group",
-                                desc: "Of AI projects will be completely abandoned by 2026 due to poor training data quality."
+                                desc: "Of AI projects will fail or be abandoned by 2026 due to unmanageable manual annotation costs."
                             },
                             {
-                                label: "URGENCY",
-                                value: "$14.3 Billion",
-                                source: "Market Transaction",
-                                desc: "Meta acquired 49% of Scale AI for $14.3B in June 2025. The enterprise market has spoken."
+                                label: "THE INDUSTRY SHIFT",
+                                value: "Meta & Scale AI",
+                                source: "Market Deal (June 2025)",
+                                desc: "Meta acquired a 49% stake in Scale AI for $14.3B. The enterprise value is concentrated in data workflows."
                             }
                         ].map((stat, idx) => (
-                            <div key={idx} className={`p-5 rounded-xl border-2 flex flex-col gap-2 ${
-                                contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md animate-none' : 'bg-slate-900/60 border-slate-800 text-slate-200'
+                            <div key={idx} className={`p-6 rounded-2xl border-2 flex flex-col gap-2 ${
+                                contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-200'
                             }`}>
                                 <span className="text-xs font-black text-rose-550 uppercase tracking-widest">{stat.label}</span>
                                 <h3 className="text-2xl font-black">{stat.value}</h3>
-                                <p className={`text-xs leading-relaxed mt-1 flex-1 ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>{stat.desc}</p>
-                                <span className="text-[9px] text-slate-500 font-mono text-right mt-1">Source: {stat.source}</span>
+                                <p className={`text-sm leading-relaxed mt-1 flex-1 ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>{stat.desc}</p>
+                                <span className="text-[10px] text-slate-500 font-mono text-right mt-1">Source: {stat.source}</span>
                             </div>
                         ))}
                     </div>
                 </div>
             )
         },
-        // SLIDE 4 — BUSINESS + TECHNOLOGY CHALLENGE
-        {
-            title: "The Double Bottleneck: Business Cost & Tech Latency",
-            subtitle: "Human annotation budgets drain capital, while static models waste compute and annotator time.",
-            icon: HelpCircle,
-            iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center items-center text-center gap-6 max-w-4xl mx-auto py-2">
-                    <div className="space-y-4">
-                        <h2 className={`text-4xl md:text-5xl font-black tracking-tight leading-snug ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
-                            The Dual Challenge of AI Projects
-                        </h2>
-                        <p className={`text-lg md:text-xl font-bold ${contrastLight ? 'text-slate-900 font-extrabold' : 'text-slate-350'}`}>
-                            Traditional active learning only looks at model uncertainty, ignoring human labor costs and mental fatigue.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-2">
-                        <div className={`p-6 rounded-2xl border-2 text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <span className="text-xs font-black text-rose-550 uppercase tracking-widest block mb-2">1. The Business Drain</span>
-                            <h3 className="text-2xl font-black mb-2">Annotation Labor Costs</h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>
-                                Data labeling takes up **80% of AI project budgets**. Paying experts to read long, redundant texts costs thousands of dollars in wasted hourly wages.
-                             </p>
-                        </div>
-                        <div className={`p-6 rounded-2xl border-2 text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <span className="text-xs font-black text-indigo-500 uppercase tracking-widest block mb-2">2. The Technology Fail</span>
-                            <h3 className="text-2xl font-black mb-2">Cognitive Fatigue & Noise</h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-855 font-bold' : 'text-slate-400'}`}>
-                                Annotators read at different speeds and suffer from fatigue. Blind algorithms route complex files when users are tired, leading to lazy errors that corrupt the dataset.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 5 — THE CONVERGENCE
-        {
-            title: "CAL-Log: Merging Business ROI with Adaptive Tech",
-            subtitle: "A machine learning pipeline built to optimize both accuracy and cash flow.",
-            icon: AlertTriangle,
-            iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="text-center space-y-2">
-                        <h2 className="text-4xl md:text-5xl font-black text-rose-500 tracking-tight uppercase">THE CONVERGENCE</h2>
-                        <p className={`text-lg md:text-xl font-black ${contrastLight ? 'text-slate-955' : 'text-slate-350'}`}>
-                            Optimizing the two critical variables: Model Performance & Annotator Pacing.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className={`p-6 rounded-2xl border-2 ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <span className="text-xs font-black text-rose-500 uppercase tracking-widest block mb-1">BUSINESS OUTCOME</span>
-                            <h3 className="text-2xl font-black mb-2">65% Financial ROI</h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>
-                                By estimating text complexity *before* assigning it, the system filters out trivial files and auto-labels them. This saves up to **a third of total human labor hours**.
-                            </p>
-                        </div>
-
-                        <div className={`p-6 rounded-2xl border-2 ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <span className="text-xs font-black text-indigo-500 uppercase tracking-widest block mb-1">TECHNOLOGY ENABLER</span>
-                            <h3 className="text-2xl font-black mb-2">Online OLS Timing & QBC</h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>
-                                Standard deviation residuals from Ordinary Least Squares timer models detect fatigue. The system switches to simple tasks automatically, keeping data error-free.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className={`p-4 rounded-xl border-2 text-center font-bold text-sm ${
-                        contrastLight ? 'bg-slate-100 border-slate-900 text-slate-900' : 'bg-indigo-950/20 border-indigo-500/20 text-indigo-300'
-                    }`}>
-                        "A technology stack designed to save engineering hours and corporate budgets."
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 6 — EXISTING SOLUTIONS
-        {
-            title: "A crowded market. Nobody solves the real problem.",
-            subtitle: "Everyone competes on features. CAL-Log competes on time.",
-            icon: BarChart2,
-            iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                        {/* 2x2 Matrix Coordinates Infographic */}
-                        <div className="lg:col-span-7 flex justify-center">
-                            <div className={`relative w-full max-w-[450px] rounded-2xl p-1 overflow-hidden shadow-2xl border-2 hover:scale-102 transition-all duration-350 ${
-                                contrastLight ? 'bg-white border-slate-900 shadow-sm' : 'bg-slate-900/60 border-slate-850'
-                            }`}>
-                                <img 
-                                    src="/market_gap_diagram.png" 
-                                    alt="Market Gap Infographic Matrix" 
-                                    className="w-full h-auto rounded-xl object-cover"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Content Right side */}
-                        <div className="lg:col-span-5 space-y-4 text-left">
-                            <h3 className={`text-3xl font-black tracking-tight leading-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
-                                A Crowded Market.<br />
-                                <span className="bg-gradient-to-r from-rose-500 to-indigo-500 bg-clip-text text-transparent">
-                                    Nobody Solves the Real Problem.
-                                </span>
-                            </h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>
-                                Traditional annotation suites (Prodigy, Label Studio, Doccano) operate blindly with respect to time and cost. Scale AI addresses cost but uses rigid, static task allocation.
-                            </p>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>
-                                CAL-Log alone maps to the top-right quadrant, delivering **adaptive active learning** that calculates real cognitive time profiles to optimize budget.
-                            </p>
-                            <div className="text-sm font-black text-rose-500 uppercase tracking-widest flex items-center gap-2 animate-pulse">
-                                <Zap size={16} /> Everyone competes on features. CAL-Log competes on time.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 7 — THE GAPS
+        // SLIDE 3 — THE GAPS
         {
             title: "Three Gaps.",
             subtitle: "Ranked by what actually costs business organizations money.",
@@ -319,42 +168,42 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                         {
                             num: "1",
                             type: "PRIORITY 1 · BUSINESS",
-                            title: "Nobody prices per sample",
-                            desc: "Every tool assumes a tweet and a 500-word document cost the same. Result: teams pay for hours of trivial labels.",
-                            badge: "Confirmed by 19 of 31 domain experts we surveyed",
-                            badgeColor: contrastLight ? "bg-rose-100 text-rose-900 border-rose-550 border-2 font-bold" : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                            title: "Nobody prices per sample complexity",
+                            desc: "Existing tools route a single sentence and a dense 1,000-word contract as if they cost the same time. Result: teams overpay for trivial labels.",
+                            badge: "Confirmed by 19 of 31 surveyed NLP domain leads",
+                            badgeColor: contrastLight ? "bg-rose-100 text-rose-900 border-rose-550 border-2 font-black text-xs" : "bg-rose-500/10 text-rose-450 border-rose-500/20"
                         },
                         {
                             num: "2",
                             type: "PRIORITY 2 · BUSINESS",
-                            title: "Nobody adapts to the annotator",
-                            desc: "One-size-fits-all queues ignore that annotators have different speeds and get tired. Result: burnout and quality drops.",
-                            badge: "Flagged in interviews & academic literature (Mortagua, 2025)",
-                            badgeColor: contrastLight ? "bg-amber-100 text-amber-905 border-amber-600 border-2 font-bold" : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                            title: "Nobody adapts to annotator speed and fatigue",
+                            desc: "Static lists ignore that users slow down, lose concentration, and make mistakes when tired. Result: lazy errors corrupt the datasets.",
+                            badge: "Flagged in cognitive science speed studies",
+                            badgeColor: contrastLight ? "bg-amber-100 text-amber-905 border-amber-600 border-2 font-black text-xs" : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                         },
                         {
                             num: "3",
                             type: "PRIORITY 3 · TECHNICAL",
-                            title: "Nobody trusts the model early",
-                            desc: "Active learning tools use uncalibrated confidence from round one. Result: the model picks bad samples and the loop degrades.",
-                            badge: "Documented failure mode in 52% of active learning benchmarks",
-                            badgeColor: contrastLight ? "bg-purple-100 text-purple-900 border-purple-650 border-2 font-bold" : "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                            title: "Nobody calibrates model confidence early",
+                            desc: "Traditional active learning uses uncalibrated early-round probabilities. Result: model picks poor samples, degrading accuracy.",
+                            badge: "52% failure rate in standard entropy baselines",
+                            badgeColor: contrastLight ? "bg-purple-100 text-purple-900 border-purple-650 border-2 font-black text-xs" : "bg-purple-500/10 text-purple-400 border-purple-500/20"
                         }
                     ].map((gap) => (
-                        <div key={gap.num} className={`p-4 rounded-xl border-2 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'
+                        <div key={gap.num} className={`p-5 rounded-xl border-2 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center ${
+                            contrastLight ? 'bg-white border-slate-900 text-slate-955 shadow-md font-bold' : 'bg-slate-900/60 border-slate-850'
                         }`}>
                             <div className="flex gap-4 items-start text-left">
-                                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center font-black text-base shrink-0 border-2 border-rose-550/20">
+                                <div className="w-12 h-12 rounded-xl bg-rose-500/10 text-rose-550 flex items-center justify-center font-black text-lg shrink-0 border-2 border-rose-550/20">
                                     {gap.num}
                                 </div>
                                 <div className="space-y-1">
-                                    <div className={`text-[10px] font-black uppercase tracking-widest ${contrastLight ? 'text-slate-800' : 'text-slate-500'}`}>{gap.type}</div>
-                                    <h4 className={`font-black text-base md:text-lg ${contrastLight ? 'text-slate-955' : 'text-white'}`}>{gap.title}</h4>
-                                    <p className={`text-xs md:text-sm leading-relaxed ${contrastLight ? 'text-slate-850 font-bold' : 'text-slate-400'}`}>{gap.desc}</p>
+                                    <div className={`text-xs font-black uppercase tracking-widest ${contrastLight ? 'text-slate-800' : 'text-slate-500'}`}>{gap.type}</div>
+                                    <h4 className={`font-black text-lg md:text-xl ${contrastLight ? 'text-slate-955' : 'text-white'}`}>{gap.title}</h4>
+                                    <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>{gap.desc}</p>
                                 </div>
                             </div>
-                            <span className={`text-[10px] md:text-xs font-bold px-3 py-1 rounded-full border shrink-0 ${gap.badgeColor}`}>
+                            <span className={`text-xs font-bold px-3 py-1.5 rounded-full border shrink-0 ${gap.badgeColor}`}>
                                 {gap.badge}
                             </span>
                         </div>
@@ -362,124 +211,82 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                 </div>
             )
         },
-        // SLIDE 8 — OUR SOLUTION & ARCHITECTURE
+        // SLIDE 4 — SYSTEM ARCHITECTURE & CORE MATHEMATICAL ENGINE
         {
-            title: "Our Solution: Live Microservice Architecture",
-            subtitle: "100% accurate view of our deployed Node.js & Python backend pipeline.",
+            title: "Microservice Architecture & Core Selection Engine",
+            subtitle: "Combining our deployed multi-tier loop with our cost-aware selection formula.",
             icon: Brain,
-            iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+            iconColor: "text-indigo-405 bg-indigo-500/10 border-indigo-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="h-full flex flex-col justify-center gap-4 max-w-[1250px] mx-auto py-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                         
-                        {/* 100% Accurate Architecture Diagram */}
                         <div className="lg:col-span-7 flex justify-center">
-                            <div className={`relative w-full max-w-[450px] rounded-2xl p-1 overflow-hidden shadow-2xl border-2 hover:scale-102 transition-all duration-300 ${
+                            <div className={`relative w-full max-w-[580px] rounded-2xl p-1.5 overflow-hidden shadow-2xl border-2 hover:scale-102 transition-all duration-300 ${
                                 contrastLight ? 'bg-white border-slate-900 shadow-md' : 'bg-slate-900/60 border-slate-850'
                             }`}>
                                 <img 
                                     src="/system_architecture.png" 
                                     alt="Live Microservices System Architecture Diagram" 
-                                    className="w-full h-auto rounded-xl object-cover"
+                                    className="w-full h-auto rounded-xl object-contain"
                                 />
                             </div>
                         </div>
 
-                        {/* Content Right side */}
                         <div className="lg:col-span-5 space-y-4 text-left">
-                            <h3 className={`text-2xl md:text-3xl font-black tracking-tight leading-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
-                                Production-Grade<br />
-                                <span className="bg-gradient-to-r from-emerald-400 to-indigo-500 bg-clip-text text-transparent">
-                                    Microservice Loop
-                                </span>
-                            </h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-400'}`}>
-                                Not a simple prototype script. CAL-Log runs a distributed Node.js server gateway integrated with an active Python Flask simulation server.
-                            </p>
-                            
-                            <div className="space-y-2.5 text-xs md:text-sm text-slate-450 leading-relaxed">
-                                <div className="flex gap-2">
-                                    <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={12} /></div>
-                                    <span className={`${contrastLight ? 'text-slate-900 font-bold' : ''}`}><b>Client Tier:</b> Workspace UI, Fatigue Tracking, and live ROI calculators in React.</span>
-                                </div>
-                                <div className="flex gap-2">
-                                    <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={12} /></div>
-                                    <span className={`${contrastLight ? 'text-slate-900 font-bold' : ''}`}><b>Server Tier:</b> REST API gateway, Mongoose session controllers, and MongoDB storage.</span>
-                                </div>
-                                <div className="flex gap-2">
-                                    <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={12} /></div>
-                                    <span className={`${contrastLight ? 'text-slate-900 font-bold' : ''}`}><b>Logic Tier:</b> Python adaptive regression engines. Recalibrates Alpha and Beta parameters every round.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 9 — THE CORE MATHEMATICAL ENGINE
-        {
-            title: "Under The Hood: Core Algorithmic Selection",
-            subtitle: "Cost-Aware Active Learning selection balanced against online timing timing models.",
-            icon: Cpu,
-            iconColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                        {/* Left Side: Code Block */}
-                        <div className="lg:col-span-7 w-full">
+                            <span className="text-xs font-black text-indigo-505 uppercase tracking-widest block">PYTHON ML ENGINE</span>
                             <div className={`p-4 rounded-xl border-2 font-mono text-xs md:text-sm leading-relaxed overflow-x-auto text-left shadow-lg ${
-                                contrastLight ? 'bg-slate-900 border-slate-950 text-emerald-450 font-bold' : 'bg-slate-950 border-slate-800 text-emerald-400'
+                                contrastLight ? 'bg-slate-900 border-slate-950 text-emerald-455 font-black' : 'bg-slate-955 border-slate-800 text-emerald-400'
                             }`}>
-                                <div className="text-slate-500 mb-1">// Dynamic Selection Utility balancing info vs. human latency</div>
-                                <span className="text-purple-400">def</span> <span className="text-blue-400">calculate_selection_utility</span>(uncertainty, reading_speed_residual):<br />
-                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># 1. Fatigue check using OLS residual timing signals</span><br />
-                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">if</span> reading_speed_residual &gt;= <span className="text-amber-450 font-black">1.5</span> * baseline_speed:<br />
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># User is fatigued: route simple calibration texts</span><br />
+                                <div className="text-slate-500 mb-1">// Utility = Information Density / Expected Time Cost</div>
+                                <span className="text-purple-400">def</span> <span className="text-blue-400">calculate_selection_utility</span>(uncertainty, speed_residual):<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># OLS residual flags cognitive fatigue</span><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">if</span> speed_residual &gt;= <span className="text-amber-450 font-black">1.5</span> * baseline_speed:<br />
                                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> route_low_complexity_samples()<br />
                                 <br />
-                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># 2. Information density divided by expected cost (in seconds)</span><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># Expected cost: alpha + beta * log(length)</span><br />
                                 &nbsp;&nbsp;&nbsp;&nbsp;expected_seconds = alpha + beta * log(text_length)<br />
-                                &nbsp;&nbsp;&nbsp;&nbsp;utility = uncertainty / expected_seconds<br />
-                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> argmax(utility)<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> argmax(uncertainty / expected_seconds)<br />
                             </div>
-                        </div>
 
-                        {/* Right Side: Math Explanation */}
-                        <div className="lg:col-span-5 space-y-4 text-left">
-                            <h3 className={`text-2xl md:text-3xl font-black tracking-tight leading-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
-                                How the Algorithm Thinks
-                            </h3>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-400'}`}>
-                                Instead of just selecting the most uncertain text, CAL-Log selection is **divided by the predicted human time cost** ($\alpha + \beta \log(L)$).
-                            </p>
-                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-400'}`}>
-                                By tracking the standard deviation of annotator reading speed, we monitor cognitive friction. If a user slows down (fatigue), the system pivots to easy recovery texts to prevent dataset label collapse.
-                            </p>
+                            <div className="space-y-2 text-xs md:text-sm text-slate-450 leading-relaxed font-bold">
+                                <div className="flex gap-2">
+                                    <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={12} /></div>
+                                    <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : ''}`}><b>Client UI Tier:</b> fatigue timing metrics in React.</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={12} /></div>
+                                    <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : ''}`}><b>Server Tier:</b> REST API gateway & MongoDB storage.</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={12} /></div>
+                                    <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : ''}`}><b>Flask Logic Tier:</b> Python adaptive regression engines.</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             )
         },
-        // SLIDE 10 — FEATURE MATCHUP & PERFORMANCE
+        // SLIDE 5 — PERFORMANCE
         {
-            title: "Does it actually work? Six of six ticks.",
-            subtitle: "3.9x faster than the next best tool to reach target accuracy.",
+            title: "Validated Performance: Six of Six Ticks",
+            subtitle: "CAL-Log reaches target accuracy 3.9x faster than standard active learning tools.",
             icon: ShieldCheck,
             iconColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
             content: (
                 <div className="h-full flex flex-col justify-center gap-4 max-w-[1200px] mx-auto py-2 px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                         
-                        {/* Comparison Table */}
                         <div className="lg:col-span-5 overflow-x-auto w-full space-y-3 text-left">
-                            <h4 className={`text-base font-black tracking-tight ${contrastLight ? 'text-slate-955' : 'text-slate-200'}`}>
+                            <h4 className={`text-lg font-black tracking-tight ${contrastLight ? 'text-slate-950' : 'text-slate-200'}`}>
                                 Feature Matchup vs. Competitors
                             </h4>
                             <table className="w-full text-left border-collapse text-xs md:text-sm">
                                 <thead>
                                     <tr className={`border-b ${contrastLight ? 'border-slate-900' : 'border-slate-800'}`}>
-                                        <th className={`py-2 font-black text-sm ${contrastLight ? 'text-slate-950' : 'text-slate-400'}`}>Features</th>
-                                        <th className="py-2 font-black text-rose-500 text-center text-sm">CAL-Log</th>
+                                        <th className={`py-2 font-black text-sm ${contrastLight ? 'text-slate-950' : 'text-slate-450'}`}>Features</th>
+                                        <th className="py-2 font-black text-rose-600 text-center text-sm">CAL-Log</th>
                                         <th className={`py-2 font-black text-center text-sm ${contrastLight ? 'text-slate-700' : 'text-slate-500'}`}>Prodigy</th>
                                         <th className={`py-2 font-black text-center text-sm ${contrastLight ? 'text-slate-700' : 'text-slate-500'}`}>Scale AI</th>
                                         <th className={`py-2 font-black text-center text-sm ${contrastLight ? 'text-slate-700' : 'text-slate-500'}`}>Snorkel</th>
@@ -492,8 +299,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                         ["Adaptive to Annotator Speed", true, false, false, false],
                                         ["Real-Time Fatigue Detection", true, false, false, false],
                                         ["Semantic Deduplication", true, false, false, true],
-                                        ["Calibrated Confidence", true, false, false, false],
-                                        ["Transparent Explanations", true, false, false, false]
+                                        ["Calibrated Confidence", true, false, false, false]
                                     ].map((row, idx) => (
                                         <tr key={idx} className="hover:bg-slate-900/30">
                                             <td className={`py-2 font-bold text-sm ${contrastLight ? 'text-slate-950 font-black' : 'text-slate-300'}`}>{row[0]}</td>
@@ -507,27 +313,23 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             </table>
                         </div>
  
-                        {/* Cost Efficiency Horizontal Bar Chart (Custom Dynamic CSS Graph) */}
                         <div className="lg:col-span-7 space-y-3">
                             <div className="flex flex-col gap-1 text-left">
-                                <h4 className={`text-base font-black tracking-tight ${contrastLight ? 'text-slate-950' : 'text-slate-200'}`}>
+                                <h4 className={`text-lg font-black tracking-tight ${contrastLight ? 'text-slate-955' : 'text-slate-200'}`}>
                                     Cost Efficiency: Time to Reach F1 = 0.80
                                 </h4>
-                                <span className={`text-xs font-bold ${contrastLight ? 'text-slate-800 font-black' : 'text-slate-500'}`}>
+                                <span className={`text-xs font-bold ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-500'}`}>
                                     Mean Annotation Time (minutes) across 10 datasets (Lower = Better)
                                 </span>
                             </div>
  
-                            {/* Chart Container */}
-                            <div className={`p-4 rounded-xl border-2 space-y-3 ${
-                                contrastLight ? 'bg-white border-slate-900 text-slate-950' : 'bg-slate-900/40 border-slate-850'
+                            <div className={`p-4 rounded-xl border-2 space-y-2.5 ${
+                                contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/40 border-slate-850'
                             }`}>
                                 {[
                                     { name: "Entropy", time: 148.5, ciStart: 5, ciEnd: 303, color: "bg-green-500/80" },
-                                    { name: "CoreSet", time: 140.9, ciStart: 0, ciEnd: 286, color: "bg-cyan-500/80" },
                                     { name: "BADGE", time: 126.5, ciStart: 21, ciEnd: 242, color: "bg-blue-500/80" },
                                     { name: "Margin", time: 121.0, ciStart: 5, ciEnd: 238, color: "bg-amber-600/85" },
-                                    { name: "LeastConfidence", time: 105.9, ciStart: 32, ciEnd: 190, color: "bg-purple-500/80" },
                                     { name: "Random", time: 93.7, ciStart: 38, ciEnd: 150, color: "bg-slate-550/80" },
                                     { name: "CAL-Log (Ours)", time: 38.3, ciStart: 15, ciEnd: 62, color: "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)]", isHighlight: true }
                                 ].map((item, idx) => {
@@ -538,25 +340,21 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
  
                                     return (
                                         <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                                            {/* Label */}
                                             <div className={`col-span-3 text-right text-xs font-bold truncate ${
                                                 item.isHighlight ? 'text-rose-500 font-black' : contrastLight ? 'text-slate-950 font-black' : 'text-slate-400'
                                             }`}>
                                                 {item.name}
                                             </div>
  
-                                            {/* Bar and Error Range */}
-                                            <div className={`col-span-7 relative h-5 flex items-center rounded border overflow-visible ${contrastLight ? 'bg-slate-100 border-slate-900 border-2' : 'bg-slate-950/40 border-slate-900/50'}`}>
-                                                {/* Error Bar (CI) */}
+                                            <div className={`col-span-7 relative h-5 flex items-center rounded border overflow-visible ${contrastLight ? 'bg-slate-100 border-slate-900 border-2' : 'bg-slate-955/40 border-slate-900/50'}`}>
                                                 <div 
-                                                    className={`absolute h-0.5 flex items-center justify-between ${contrastLight ? 'bg-slate-950' : 'bg-slate-650'}`}
+                                                    className={`absolute h-0.5 flex items-center justify-between ${contrastLight ? 'bg-slate-950 font-bold' : 'bg-slate-650'}`}
                                                     style={{ left: `${ciLeft}%`, width: `${ciWidth}%` }}
                                                 >
                                                     <div className={`w-0.5 h-2 shrink-0 ${contrastLight ? 'bg-slate-955' : 'bg-slate-650'}`} />
                                                     <div className={`w-0.5 h-2 shrink-0 ${contrastLight ? 'bg-slate-955' : 'bg-slate-650'}`} />
                                                 </div>
  
-                                                {/* Value Bar */}
                                                 <div 
                                                     className={`absolute h-3.5 rounded-sm transition-all duration-1000 ${item.color} ${
                                                         item.isHighlight ? 'border-2 border-white' : ''
@@ -565,324 +363,170 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                                 />
                                             </div>
  
-                                            {/* Value */}
                                             <div className={`col-span-2 text-xs font-mono font-bold ${
-                                                item.isHighlight ? 'text-rose-600 font-extrabold' : contrastLight ? 'text-slate-955 font-black' : 'text-slate-400'
+                                                item.isHighlight ? 'text-rose-650 font-extrabold' : contrastLight ? 'text-slate-955 font-black' : 'text-slate-400'
                                             }`}>
                                                 {item.time.toFixed(1)}m
                                             </div>
                                         </div>
                                     );
                                 })}
- 
-                                {/* X-Axis Scale */}
-                                <div className="grid grid-cols-12 gap-2 border-t border-slate-800/60 pt-2 text-[10px] font-mono text-slate-500">
-                                    <div className="col-span-3" />
-                                    <div className="col-span-7 flex justify-between px-1">
-                                        <span>0m</span>
-                                        <span>100m</span>
-                                        <span>200m</span>
-                                        <span>300m</span>
-                                    </div>
-                                    <div className="col-span-2 text-right">Time</div>
-                                </div>
                             </div>
                         </div>
- 
                     </div>
                 </div>
             )
         },
-        // SLIDE 11 — BUSINESS ECONOMICS
+        // SLIDE 6 — STRATEGY & ECONOMICS
         {
-            title: "Business Economics & Pricing Tiers",
-            subtitle: "One project's savings covers a month of running the tool.",
+            title: "Business Strategy & Operating Economics",
+            subtitle: "One dashboard project's savings covers a month of running the tool.",
             icon: Cpu,
-            iconColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+            iconColor: "text-purple-404 bg-purple-500/10 border-purple-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-[1200px] mx-auto py-2 px-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="h-full flex flex-col justify-center gap-4 max-w-[1250px] mx-auto py-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                         
-                        {/* Math Breakdown */}
-                        <div className={`p-6 rounded-2xl border-2 flex flex-col justify-between min-h-[300px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
-                        }`}>
-                            <div className="space-y-3 text-left">
-                                <span className="text-xs font-black text-rose-500 uppercase tracking-widest block">THE MATH</span>
-                                <h4 className="font-black text-xl">Operating Economics</h4>
-                                
-                                <div className="space-y-3 text-xs md:text-sm text-slate-400">
-                                    <div className={`border-b pb-2 ${contrastLight ? 'border-slate-300' : 'border-slate-800/60'}`}>
-                                        <div className="flex justify-between font-bold text-slate-200">
-                                            <span className={`${contrastLight ? 'text-slate-900 font-bold' : ''}`}>Running Costs:</span>
-                                            <span className={`font-mono text-base ${contrastLight ? 'text-slate-950 font-black' : 'text-white'}`}>$250 / mo</span>
-                                        </div>
-                                        <div className={`text-[10px] leading-relaxed mt-1 ${contrastLight ? 'text-slate-800' : 'text-slate-500'}`}>
-                                            MongoDB Atlas ($120) + AWS Node Host ($80) + Security & Logging ($50). Supports up to 50 active annotators.
-                                        </div>
+                        <div className="lg:col-span-5 flex flex-col gap-4 text-left">
+                            <div className={`p-5 rounded-xl border-2 flex flex-col justify-between flex-1 ${
+                                contrastLight ? 'bg-white border-slate-900 text-slate-955 shadow-md font-bold' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
+                            }`}>
+                                <div className="space-y-2">
+                                    <span className="text-xs font-black text-rose-500 uppercase tracking-widest block">OPERATING COSTS</span>
+                                    <div className="flex justify-between border-b pb-2 font-bold text-slate-205">
+                                        <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : ''}`}>Running Costs:</span>
+                                        <span className={`font-mono text-base ${contrastLight ? 'text-slate-955 font-black' : 'text-white'}`}>$250 / mo</span>
                                     </div>
-                                    
-                                    <div>
-                                        <div className="flex justify-between font-bold text-slate-250">
-                                            <span className={`${contrastLight ? 'text-slate-900 font-bold' : ''}`}>Saves Per Project:</span>
-                                            <span className="font-mono text-emerald-600 text-base font-black">+$1,530 saved</span>
-                                        </div>
-                                        <div className={`text-[10px] leading-relaxed mt-1 ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-500'}`}>
-                                            Based on 10,000 records: Manual labor (140 hrs × $15) vs. CAL-Log (38 hrs × $15).
-                                        </div>
-                                    </div>
+                                    <p className={`text-xs mt-1 ${contrastLight ? 'text-slate-800' : 'text-slate-500'}`}>
+                                        MongoDB ($120) + AWS Gateway ($80) + Log Security ($50). Handles 50 annotators.
+                                    </p>
                                 </div>
-                            </div>
-                            <p className={`text-[10px] italic border-t pt-2 text-left ${contrastLight ? 'border-slate-300 text-slate-800 font-black' : 'border-slate-800/40 text-slate-500'}`}>
-                                Every dataset labeled after the first project is pure operating margin.
-                            </p>
-                        </div>
 
-                        {/* Revenue Model & SLAs */}
-                        <div className={`p-6 rounded-2xl border-2 flex flex-col justify-between min-h-[300px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
-                        }`}>
-                            <div className="space-y-3 text-left">
-                                <span className="text-xs font-black text-indigo-400 uppercase tracking-widest block">REVENUE MODEL</span>
-                                <h4 className="font-black text-xl">Tiers & Licensing</h4>
-                                
-                                <div className="space-y-3 text-xs md:text-sm text-slate-400">
-                                    <div className={`border-b pb-2 ${contrastLight ? 'border-slate-300' : 'border-slate-800/40'}`}>
-                                        <span className={`font-black block text-base ${contrastLight ? 'text-slate-950' : 'text-slate-200'}`}>Free Tier</span>
-                                        <span className={`text-[10px] ${contrastLight ? 'text-slate-800 font-bold' : ''}`}>Solo researchers, local projects, and small pilot runs.</span>
+                                <div className="space-y-2 mt-2">
+                                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest block">ROI MATH</span>
+                                    <div className="flex justify-between border-b pb-2 font-bold text-slate-205">
+                                        <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : ''}`}>Savings / Project:</span>
+                                        <span className="text-emerald-600 font-black">+$1,530 saved</span>
                                     </div>
-                                    <div className={`border-b pb-2 ${contrastLight ? 'border-slate-300' : 'border-slate-800/40'}`}>
-                                        <span className="font-black text-indigo-500 block text-base">$49 / mo (Teams)</span>
-                                        <span className={`text-[10px] ${contrastLight ? 'text-slate-800 font-bold' : ''}`}>Small teams up to 5 concurrent annotators, shared MongoDB.</span>
-                                    </div>
-                                    <div>
-                                        <span className="font-black text-rose-500 block text-base">$499 / mo (Enterprise)</span>
-                                        <div className={`text-[10px] leading-relaxed mt-1 ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-550'}`}>
-                                            On-premise deployment, custom API integrations, and premium <b>Service Level Agreements (SLAs)</b>:
-                                            <ul className="list-disc pl-4 mt-0.5 space-y-0.5">
-                                                <li>99.9% Net Platform Uptime Guarantee</li>
-                                                <li>&lt;4-Hour Support Response Window</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <p className={`text-xs mt-1 ${contrastLight ? 'text-slate-800' : 'text-slate-500'}`}>
+                                        Based on 10,000 records: Manual (140 hrs @ $15) vs. CAL-Log (38 hrs @ $15).
+                                    </p>
+                                </div>
+
+                                <div className="space-y-1 mt-2">
+                                    <span className="text-xs font-black text-indigo-505 uppercase tracking-widest block">TIERS & SLAS</span>
+                                    <p className={`text-xs font-bold ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>
+                                        • <b>Free:</b> Academics & small teams.<br />
+                                        • <b>$49/mo (Teams):</b> Shared database support.<br />
+                                        • <b>$499/mo (Enterprise):</b> 99.9% Platform Uptime SLA & &lt;4h response window.
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Target Segment */}
-                        <div className={`p-6 rounded-2xl border-2 flex flex-col justify-between min-h-[300px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/50 border-slate-850 shadow-2xl'
-                        }`}>
-                            <div className="space-y-3 text-left">
-                                <span className="text-xs font-black text-emerald-400 uppercase tracking-widest block">WHO IT'S FOR</span>
-                                <h4 className="font-black text-xl">Immediate Users</h4>
-                                
-                                <div className="space-y-4 text-xs md:text-sm text-slate-400 mt-1">
-                                    <div className="flex gap-2">
-                                        <span className="text-emerald-500 font-extrabold text-sm">➔</span>
-                                        <div>
-                                            <b className={`block text-base ${contrastLight ? 'text-slate-950' : 'text-slate-200'}`}>ML Text Teams</b>
-                                            <span className={`text-[10px] leading-tight block mt-0.5 ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-450'}`}>Fintech, legaltech, and clinical developers with privacy restrictions.</span>
-                                        </div>
+                        <div className="lg:col-span-7 flex flex-col gap-4 text-left">
+                            <div className={`p-5 rounded-xl border-2 flex-1 ${
+                                contrastLight ? 'bg-white border-slate-900 text-slate-955 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'
+                            }`}>
+                                <span className="text-xs font-black text-indigo-550 uppercase tracking-widest block mb-3">LEAN CANVAS STRATEGY MAP</span>
+                                <div className="grid grid-cols-2 gap-4 text-xs md:text-sm">
+                                    <div className="space-y-1">
+                                        <b className="text-rose-500 block text-xs tracking-wider uppercase">1. Problem</b>
+                                        <p className={`text-[11px] leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-450'}`}>High annotation spend (80% budget) & cognitive fatigue.</p>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <span className="text-emerald-500 font-extrabold text-sm">➔</span>
-                                        <div>
-                                            <b className={`block text-base ${contrastLight ? 'text-slate-955' : 'text-slate-200'}`}>University Labs</b>
-                                            <span className={`text-[10px] leading-tight block mt-0.5 ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-450'}`}>NLP labs seeking maximum accuracy per grant dollar.</span>
-                                        </div>
+                                    <div className="space-y-1">
+                                        <b className="text-rose-500 block text-xs tracking-wider uppercase">2. Solution</b>
+                                        <p className={`text-[11px] leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-450'}`}>Cost-aware selection, timing feedback loop (OLS).</p>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <span className="text-emerald-500 font-extrabold text-sm">➔</span>
-                                        <div>
-                                            <b className={`block text-base ${contrastLight ? 'text-slate-955' : 'text-slate-200'}`}>Labeling Agencies</b>
-                                            <span className={`text-[10px] leading-tight block mt-0.5 ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-450'}`}>Firms billing clients hourly using active learning to expand margins.</span>
-                                        </div>
+                                    <div className="space-y-1">
+                                        <b className="text-rose-500 block text-xs tracking-wider uppercase">3. Unique Value</b>
+                                        <p className={`text-[11px] leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-450'}`}>3.9x speedup to target F1, transparent explanations.</p>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <b className="text-indigo-505 block text-xs tracking-wider uppercase">4. Advantage</b>
+                                        <p className={`text-[11px] leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-450'}`}>Combined fatigue clamping & peer-reviewed at ACL 2026.</p>
+                                    </div>
+                                    <div className="space-y-1 col-span-2">
+                                        <b className="text-indigo-505 block text-xs tracking-wider uppercase">5. Customer Segments & Channels</b>
+                                        <p className={`text-[11px] leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-450'}`}>ML text developers, university NLP labs, and hourly labeling agencies via open-source model plugins.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             )
         },
-        // SLIDE 12 — LEAN CANVAS STRATEGY - PART 1
-        {
-            title: "Lean Canvas Business Strategy (Part 1)",
-            subtitle: "First three columns of the strategic business roadmap.",
-            icon: Database,
-            iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                        
-                        {/* Box 1 */}
-                        <div className={`p-6 rounded-2xl border-2 space-y-3 min-h-[320px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                        }`}>
-                            <span className="font-black text-rose-500 uppercase tracking-wider block text-sm">1. PROBLEM</span>
-                            <div className="h-px bg-rose-500/30 my-2" />
-                            <ul className={`space-y-2 text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : ''}`}>
-                                <li>• High human annotation costs (80% of project spend)</li>
-                                <li>• Annotator cognitive fatigue goes unmonitored</li>
-                                <li>• Redundant text selection wastes expert time</li>
-                            </ul>
-                        </div>
- 
-                        {/* Box 2 */}
-                        <div className={`p-6 rounded-2xl border-2 space-y-3 min-h-[320px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                        }`}>
-                            <span className="font-black text-rose-500 uppercase tracking-wider block text-sm">2. SOLUTION</span>
-                            <div className="h-px bg-rose-500/30 my-2" />
-                            <ul className={`space-y-2 text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : ''}`}>
-                                <li>• Cost-aware active learning selection</li>
-                                <li>• Adaptive annotator speed timing loops (OLS)</li>
-                                <li>• Semantic text deduplication on client upload</li>
-                            </ul>
-                        </div>
- 
-                        {/* Box 3 */}
-                        <div className={`p-6 rounded-2xl border-2 space-y-3 min-h-[320px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                        }`}>
-                            <span className="font-black text-rose-500 uppercase tracking-wider block text-sm">3. UNIQUE VALUE PROP</span>
-                            <div className="h-px bg-rose-500/30 my-2" />
-                            <ul className={`space-y-2 text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : ''}`}>
-                                <li>• 3.9x speedup over standard baseline queues</li>
-                                <li>• Plugs directly into standard pipelines (REST API)</li>
-                                <li>• Full transparency showing *why* samples were selected</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 13 — LEAN CANVAS STRATEGY - PART 2
-        {
-            title: "Lean Canvas Business Strategy (Part 2)",
-            subtitle: "Remaining three columns of the strategic business roadmap.",
-            icon: Database,
-            iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-            content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                        
-                        {/* Box 4 */}
-                        <div className={`p-6 rounded-2xl border-2 space-y-3 min-h-[320px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                        }`}>
-                            <span className="font-black text-indigo-505 uppercase tracking-wider block text-sm">4. UNFAIR ADVANTAGE</span>
-                            <div className="h-px bg-indigo-505/30 my-2" />
-                            <ul className={`space-y-2 text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : ''}`}>
-                                <li>• First framework combining cost-awareness, speed adaptation, and confidence calibration</li>
-                                <li>• Peer-reviewed status at ACL 2026</li>
-                            </ul>
-                        </div>
- 
-                        {/* Box 5 */}
-                        <div className={`p-6 rounded-2xl border-2 space-y-3 min-h-[320px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                        }`}>
-                            <span className="font-black text-indigo-505 uppercase tracking-wider block text-sm">5. CUSTOMER SEGMENTS</span>
-                            <div className="h-px bg-indigo-505/30 my-2" />
-                            <ul className={`space-y-2 text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : ''}`}>
-                                <li>• ML research teams building language AI tools</li>
-                                <li>• University NLP labs with tight grant budgets</li>
-                                <li>• Data annotation agencies billing hourly</li>
-                            </ul>
-                        </div>
- 
-                        {/* Box 6 */}
-                        <div className={`p-6 rounded-2xl border-2 space-y-3 min-h-[320px] ${
-                            contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800 text-slate-400'
-                        }`}>
-                            <span className="font-black text-indigo-505 uppercase tracking-wider block text-sm">6. CHANNELS</span>
-                            <div className="h-px bg-indigo-505/30 my-2" />
-                            <ul className={`space-y-2 text-sm leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : ''}`}>
-                                <li>• Open-source model plugins (Label Studio integrations)</li>
-                                <li>• Research papers & ML presentations (ACL)</li>
-                                <li>• Direct developer word-of-mouth outreach</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            )
-        },
-        // SLIDE 14 — VALIDATED BY EXPERTS (quotes from user feedback)
+        // SLIDE 7 — VALIDATED
         {
             title: "Validated by the ML & Cognitive Science Community",
             subtitle: "Peer feedback and evaluations from PhD candidates, researchers, and engineers.",
             icon: Users,
             iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-6xl mx-auto py-2">
+                <div className="h-full flex flex-col justify-center gap-4 max-w-6xl mx-auto py-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         
-                        {/* Quote 1: METU PhD Cognitive Science */}
-                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-xs md:text-sm italic leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-205'}`}>
                                 "Personalizing the annotation process is great. Using reading time and overhead patterns as a proxy for cognitive load is highly valid... Differentiating underlying causes of reading speed variations is crucial for real-world application."
                             </p>
                             <div className="mt-3 border-t border-slate-850 pt-2 text-right">
-                                <span className="font-black text-xs block">Ibrahim Ethem Deveci</span>
-                                <span className="text-[10px] text-indigo-400 font-extrabold">PhD Student, METU Cognitive Science</span>
+                                <span className={`font-black text-sm block ${contrastLight ? 'text-slate-955' : ''}`}>Ibrahim Ethem Deveci</span>
+                                <span className="text-[10px] text-indigo-500 font-extrabold">PhD Student, METU Cognitive Science</span>
                             </div>
                         </div>
 
-                        {/* Quote 2: UF NLP Candidate */}
-                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-xs md:text-sm italic leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-205'}`}>
                                 "Dynamic cost calculation is a huge step up from pure entropy sampling which often just feeds annotators garbage data. Clamping the parameters makes a lot of sense for outlier filtering."
                             </p>
                             <div className="mt-3 border-t border-slate-850 pt-2 text-right">
-                                <span className="font-black text-xs block">Shlok Gilda</span>
-                                <span className="text-[10px] text-indigo-455 font-extrabold">PhD Candidate @ UF | NLP & Cybersecurity</span>
+                                <span className={`font-black text-sm block ${contrastLight ? 'text-slate-955' : ''}`}>Shlok Gilda</span>
+                                <span className="text-[10px] text-indigo-500 font-extrabold">PhD Candidate @ UF | NLP & Cybersecurity</span>
                             </div>
                         </div>
 
-                        {/* Quote 3: Cognitive Science Researcher */}
-                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-xs md:text-sm italic leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-205'}`}>
                                 "Using reading speed together with interaction time is a meaningful way to analyze cognitive load... these signals can be robust to individual baseline differences."
                             </p>
                             <div className="mt-3 border-t border-slate-850 pt-2 text-right">
-                                <span className="font-black text-xs block">Hinduja Balasubramaniyam</span>
-                                <span className="text-[10px] text-indigo-400 font-extrabold">Cognitive Science & NLP Researcher</span>
+                                <span className={`font-black text-sm block ${contrastLight ? 'text-slate-955' : ''}`}>Hinduja Balasubramaniyam</span>
+                                <span className="text-[10px] text-indigo-500 font-extrabold">Cognitive Science & NLP Researcher</span>
                             </div>
                         </div>
 
-                        {/* Quote 4: Data Analyst */}
-                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
-                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-xs md:text-sm italic leading-relaxed ${contrastLight ? 'text-slate-900 font-black' : 'text-slate-205'}`}>
                                 "Real-world annotation fatigue isn't just about reading time. It is influenced by context switching, complexity, and micro-interactions. Real-time client-side timing is a solid, practical approach."
                             </p>
                             <div className="mt-3 border-t border-slate-850 pt-2 text-right">
-                                <span className="font-black text-xs block">Seif Feroz</span>
-                                <span className="text-[10px] text-indigo-400 font-extrabold">Data Analyst & Operations Lead</span>
+                                <span className={`font-black text-sm block ${contrastLight ? 'text-slate-955' : ''}`}>Seif Feroz</span>
+                                <span className="text-[10px] text-indigo-500 font-extrabold">Data Analyst & Operations Lead</span>
                             </div>
                         </div>
                     </div>
                 </div>
             )
         },
-        // SLIDE 15 — WHERE WE ARE (WITH IEEE/ACL LOGOS)
+        // SLIDE 8 — PEER REVIEW & TIMELINE
         {
             title: "Peer-reviewed. Deployed. Growing.",
             subtitle: "From academic acceptance to active production pilots.",
             icon: ShieldCheck,
-            iconColor: "text-emerald-450 bg-emerald-500/10 border-emerald-550/20",
+            iconColor: "text-emerald-450 bg-emerald-500/10 border-emerald-555/20",
             content: (
                 <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
-                        {/* Publications with logos */}
                         <div className={`p-6 rounded-2xl border-2 text-left flex flex-col justify-between ${
                             contrastLight ? 'bg-white border-slate-900 text-slate-955 shadow-md font-bold' : 'bg-slate-900/60 border-slate-800'
                         }`}>
                             <div>
                                 <span className="text-xs font-black text-rose-505 uppercase tracking-widest block mb-4">ACCEPTED & PUBLISHED</span>
-                                <div className="space-y-4 text-sm font-bold">
+                                <div className="space-y-4 text-sm md:text-base font-bold font-extrabold">
                                     <div className="flex items-center gap-3">
                                         <img src="https://aclanthology.org/images/acl-logo-square.svg" alt="ACL Logo" className="h-8 w-8 object-contain bg-white p-0.5 rounded border border-slate-300 shrink-0" />
                                         <span><b>ACL 2026</b> (Accepted and presented - A* NLP conference)</span>
@@ -891,25 +535,16 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                         <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/IEEE_logo.svg" alt="IEEE Logo" className="h-8 w-8 object-contain bg-white p-0.5 rounded border border-slate-300 shrink-0" />
                                         <span><b>IEEE CSNT 2026</b> (Accepted, in press)</span>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/IEEE_logo.svg" alt="IEEE Logo" className="h-8 w-8 object-contain bg-white p-0.5 rounded border border-slate-300 shrink-0" />
-                                        <span><b>ICAIIC 2026</b> (Published in IEEE Xplore)</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/IEEE_logo.svg" alt="IEEE Logo" className="h-8 w-8 object-contain bg-white p-0.5 rounded border border-slate-300 shrink-0" />
-                                        <span><b>IEEE SCSE 2026</b> (Published, indexing in progress)</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Roadmap */}
                         <div className={`p-6 rounded-2xl border-2 text-left flex flex-col justify-between ${
                             contrastLight ? 'bg-white border-slate-900 text-slate-955 shadow-md' : 'bg-slate-900/60 border-slate-800'
                         }`}>
                             <div>
                                 <span className="text-xs font-black text-indigo-505 uppercase tracking-widest block mb-4">ROADMAP</span>
-                                <div className="space-y-4 text-xs md:text-sm font-bold">
+                                <div className="space-y-4 text-sm md:text-base font-bold font-extrabold">
                                     <div className="flex gap-3">
                                         <span className={`font-black ${contrastLight ? 'text-slate-955' : 'text-slate-300'}`}>NOW:</span>
                                         <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : 'text-slate-450'}`}>Live deployment, 4 papers, 10-dataset benchmark</span>
@@ -923,7 +558,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                         <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : 'text-slate-450'}`}>Image and audio cost baselines, multi-modal expansion</span>
                                     </div>
                                     <div className="flex gap-3">
-                                        <span className="font-black text-emerald-505">Q3:</span>
+                                        <span className="font-black text-emerald-550">Q3:</span>
                                         <span className={`${contrastLight ? 'text-slate-900 font-extrabold' : 'text-slate-450'}`}>Enterprise on-prem license release with SLAs</span>
                                     </div>
                                 </div>
@@ -933,7 +568,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                 </div>
             )
         },
-        // SLIDE 16 — CLOSE
+        // SLIDE 9 — CLOSE
         {
             title: "This isn't a research idea. It's a tool, ready today.",
             subtitle: "Same accuracy, a third of the time, at a fraction of the cost.",
@@ -941,7 +576,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
             content: (
                 <div className="h-full flex flex-col justify-center items-center text-center gap-6 max-w-4xl mx-auto py-2">
-                    <img src="/logo.jpg" alt="CAL-Log Logo" className="h-16 md:h-20 object-contain bg-white p-1 rounded-xl border-2 border-slate-350 shadow-md animate-bounce" />
+                    <img src="/logo.jpg" alt="CAL-Log Logo" className="h-20 md:h-24 object-contain bg-white p-1 rounded-xl border-2 border-slate-350 shadow-md animate-bounce" />
                     <div className="space-y-4">
                         <h2 className={`text-4xl md:text-6xl font-black uppercase tracking-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
                             This isn't a research idea.<br />
@@ -964,10 +599,6 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             <Play size={18} className="fill-white" /> Start Live Annotation Demo
                         </button>
                     </div>
-
-                    <div className={`text-xs md:text-sm mt-1 font-black tracking-widest uppercase animate-pulse ${contrastLight ? 'text-slate-955' : 'text-slate-400'}`}>
-                        Thank you. Happy to take your questions.
-                    </div>
                 </div>
             )
         }
@@ -980,10 +611,8 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             <div className={`w-full h-full relative flex flex-col justify-between overflow-hidden text-left transition-all ${
                 contrastLight ? 'bg-white text-slate-955' : 'bg-slate-955 text-white'
             }`}>
-                {/* Visual Top Glow */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-500 z-20" />
                 
-                {/* Close Button */}
                 <button 
                     onClick={onClose}
                     className={`absolute top-4 right-4 p-2.5 rounded-xl transition z-30 border ${
@@ -997,7 +626,6 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                 </button>
 
                 {!isAuthenticated ? (
-                    /* Lock Screen */
                     <div className="flex-grow flex flex-col items-center justify-center py-10 space-y-6 text-center">
                         <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                             <Lock size={30} className="animate-pulse" />
@@ -1029,9 +657,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                         </form>
                     </div>
                 ) : (
-                    /* Sliding Carousel Viewport */
                     <>
-                        {/* Slide Header */}
                         <div className={`p-6 md:p-8 pb-4 border-b flex justify-between items-center ${
                             contrastLight ? 'border-slate-350 bg-white border-b-2' : 'border-slate-900 bg-slate-950'
                         }`}>
@@ -1041,14 +667,13 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-505 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
-                                        Slide {currentSlide + 1} of 16
+                                        Slide {currentSlide + 1} of {slides.length}
                                     </span>
                                     <h2 className={`text-2xl md:text-3xl font-black mt-1 tracking-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>{slides[currentSlide].title}</h2>
                                     <p className={`text-sm font-semibold mt-0.5 ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>{slides[currentSlide].subtitle}</p>
                                 </div>
                             </div>
                             
-                            {/* Projector Optimization Mode Toggle */}
                             <button
                                 onClick={() => setIsProjectorMode(!isProjectorMode)}
                                 className={`mr-14 px-4 py-2 text-xs font-black rounded-lg transition border-2 ${
@@ -1064,7 +689,6 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        {/* Slide Body (Carousels) */}
                         <div className="flex-grow overflow-hidden relative">
                             <div 
                                 className="flex h-full transition-transform duration-500 ease-out"
@@ -1078,7 +702,6 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             </div>
                         </div>
 
-                        {/* Slide Footer Navigation */}
                         <div className={`p-6 md:p-8 pt-4 border-t flex items-center justify-between ${
                             contrastLight ? 'border-slate-350 bg-white border-t-2' : 'border-slate-900 bg-slate-950'
                         }`}>
@@ -1112,7 +735,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                     onClick={nextSlide}
                                     className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-sm font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10 border-2 border-indigo-700 font-extrabold"
                                 >
-                                    {currentSlide === 15 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={16} />
+                                    {currentSlide === slides.length - 1 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={16} />
                                 </button>
                             </div>
                         </div>
