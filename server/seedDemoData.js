@@ -19,9 +19,8 @@ async function seed() {
         const existingProfiles = await AnnotatorProfile.find();
         console.log('Currently in DB Profiles:', existingProfiles.length, existingProfiles.map(p => ({ username: p.username, pilotCompleted: p.pilotCompleted })));
 
-        // Clear existing demo projects/sessions
-        await Project.deleteMany({});
-        await AnnotationSession.deleteMany({});
+        // Removed destructive database drops (Project.deleteMany / AnnotationSession.deleteMany)
+        // to preserve the manual annotations and testing progress made by users across all profiles.
         
         // Ensure "vihanga" profile has pilotCompleted = true to fix their issue
         await AnnotatorProfile.findOneAndUpdate(
