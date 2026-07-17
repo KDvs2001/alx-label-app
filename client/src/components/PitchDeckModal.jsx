@@ -58,17 +58,16 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     const slides = [
-        // SLIDE 1 — TITLE / HOOK
         {
             title: "AI doesn't run out of data. It runs out of time.",
-            subtitle: "A smarter way to label data for AI. Built, tested, and published.",
+            subtitle: "A smarter way to label data for AI. Built for the enterprise.",
             icon: Sparkles,
             iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
             content: (
                 <div className="h-full flex flex-col justify-center items-center text-center gap-8 max-w-4xl mx-auto py-6">
                     <div className="space-y-6">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-black uppercase tracking-widest animate-pulse">
-                            <Award size={16} /> Peer-Reviewed at ACL 2026
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm font-black uppercase tracking-widest animate-pulse">
+                            <ShieldCheck size={16} /> Enterprise-Grade Data Labeling
                         </div>
                         <h1 className={`text-5xl md:text-7xl font-black tracking-tight leading-tight uppercase ${isLight ? 'text-slate-905' : 'text-white'}`}>
                             AI doesn't run out of data.<br />
@@ -77,7 +76,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             </span>
                         </h1>
                         <p className={`text-xl md:text-2xl font-bold max-w-3xl mx-auto leading-relaxed ${isLight ? 'text-slate-655' : 'text-slate-350'}`}>
-                            CAL-Log is a cost-aware active learning system that adapts to human speed limits in real-time.
+                            CAL-Log is a cost-aware active learning system that adapts to human speed limits in real-time, accelerating your data pipelines.
                         </p>
                     </div>
 
@@ -85,16 +84,16 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
                         <div className={`p-6 rounded-2xl border flex flex-col gap-2 items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-rose-500">4</span>
-                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">Published Papers</span>
+                            <span className="text-3xl font-black text-rose-500">65%</span>
+                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">Avg Time Saved</span>
                         </div>
                         <div className={`p-6 rounded-2xl border flex flex-col gap-2 items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-indigo-450">ACL 2026</span>
-                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">A* Conference</span>
+                            <span className="text-3xl font-black text-indigo-450">Local</span>
+                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">100% Data Privacy</span>
                         </div>
                         <div className={`p-6 rounded-2xl border flex flex-col gap-2 items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-emerald-450">Vihanga Supasan</span>
-                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">Lead Researcher</span>
+                            <span className="text-3xl font-black text-emerald-450">Adaptive</span>
+                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">To Annotator Speed</span>
                         </div>
                     </div>
                 </div>

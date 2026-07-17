@@ -21,7 +21,7 @@ const LoginPage = ({ onLogin }) => {
 
     const handleAnnotatorLogin = async (e) => {
         e.preventDefault();
-        const username = annotatorIdInput.trim();
+        const username = annotatorIdInput.trim().toLowerCase();
         if (!username) {
             setErrorMsg('Please enter a username or Contestant ID.');
             return;

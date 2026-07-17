@@ -201,10 +201,18 @@ const ROICalculator = () => {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="mt-4 text-center">
-                    <p className={`font-semibold ${isLight ? 'text-slate-800' : 'text-white'}`}>
-                        Projected cost reduction of <span className={`${isLight ? 'text-indigo-600' : 'text-green-400'} font-bold text-xl`}>{roi.savingsPercent}%</span>
+                <div className="mt-4 text-center space-y-3">
+                    <p className={`font-semibold text-lg md:text-xl ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                        Projected cost reduction of <span className={`${isLight ? 'text-indigo-600' : 'text-green-400'} font-black text-2xl md:text-3xl`}>{roi.savingsPercent}%</span>
                     </p>
+                    <div className={`p-4 rounded-xl border text-xs md:text-sm text-left leading-relaxed ${isLight ? 'bg-slate-50 border-slate-200 text-slate-600' : 'bg-slate-900/50 border-slate-800 text-slate-400'}`}>
+                        <div className="font-bold mb-2 uppercase tracking-wider text-[10px] md:text-xs text-slate-500">Service Level Agreement (SLA) & Cost Math</div>
+                        <ul className="space-y-1.5 list-disc list-inside">
+                            <li><strong>Traditional Approach:</strong> {annotations.toLocaleString()} tasks × {avgTimeRandom}s/task = {(annotations * avgTimeRandom / 3600).toFixed(1)} hrs × ${hourlyWage}/hr = <span className="font-mono text-rose-400 font-bold">${roi.randomCost.toFixed(0)}</span></li>
+                            <li><strong>CAL-Log SLA:</strong> {annotations.toLocaleString()} tasks × {avgTimeCALLog}s/task = {(annotations * avgTimeCALLog / 3600).toFixed(1)} hrs × ${hourlyWage}/hr = <span className="font-mono text-emerald-400 font-bold">${roi.calLogCost.toFixed(0)}</span></li>
+                            <li><strong>System Infrastructure Costs:</strong> Lightweight local linear models mean computing costs are ~$0. Savings are pure labor ROI.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
