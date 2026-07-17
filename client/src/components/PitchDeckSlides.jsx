@@ -246,49 +246,49 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
         )
     },
-    // SLIDE 8 — TECHNOLOGICAL INNOVATION (DATA DRIVEN)
+    // SLIDE 8 — TECHNOLOGICAL INNOVATION (DATA DRIVEN FOR NBQSA GOLD)
     {
         title: "Technological Innovation",
-        subtitle: "Breaking the boundaries of modern Active Learning",
+        subtitle: "Engineering built for the NBQSA Gold Standard",
         icon: Cpu,
         iconColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
         content: (
             <div className="h-full w-full flex flex-col justify-center items-center gap-6 px-4 py-2 max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
                     <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-24 h-24 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
-                            <Layers size={48} />
-                        </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Infinite Scalability</h3>
-                        <p className={`text-lg font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            Stateless queue architecture handles <span className="text-blue-500 font-black">10,000+ concurrent annotators</span> with zero latency degradation. Benchmarked via K6 load testing.
-                        </p>
-                    </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-24 h-24 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
-                            <Globe size={48} />
-                        </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Seamless Interoperability</h3>
-                        <p className={`text-lg font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            API-first integrations. Deploys natively across <span className="text-emerald-500 font-black">AWS, Databricks, PyTorch, and HuggingFace</span> environments. Containerized via Docker.
-                        </p>
-                    </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-24 h-24 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-500">
-                            <Brain size={48} />
+                        <div className="w-20 h-20 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-500">
+                            <Brain size={40} />
                         </div>
                         <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Cognitive Novelty</h3>
-                        <p className={`text-lg font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            The FIRST mathematical fusion of <span className="text-purple-500 font-black">cognitive OLS fatigue tracking</span> and Active Learning heuristics. Adjusts UI layout dynamically.
+                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            The FIRST mathematical fusion of <span className="text-purple-500 font-black">HCI telemetry and ML</span>. Tracks real-time OLS residuals to detect fatigue, while a <span className="text-purple-500 font-black">3-Model SLM Consensus</span> automatically intercepts the loop if models disagree.
                         </p>
                     </div>
                     <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-24 h-24 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-500">
-                            <ShieldCheck size={48} />
+                        <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
+                            <Layers size={40} />
                         </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Air-Gapped Privacy</h3>
-                        <p className={`text-lg font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            VPC-deployable edge execution ensures absolute <span className="text-rose-500 font-black">zero-PII compliance</span> for FinTech and Healthcare mission-critical data.
+                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Infinite Scalability</h3>
+                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            Uses <span className="text-blue-500 font-black">SBERT embeddings for Semantic Deduplication</span> in real-time. The stateless React/Node/Flask architecture dynamically handles 10,000+ concurrent annotators with zero latency degradation.
+                        </p>
+                    </div>
+                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
+                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                            <Globe size={40} />
+                        </div>
+                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Transparent UX</h3>
+                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            Replaces the AL "black box" with <span className="text-emerald-500 font-black">Dynamic Parameter Explainer Modals</span>. Fully lazy-loaded UI ensures sub-second rendering, backed by strict WCAG/ARIA accessibility standards.
+                        </p>
+                    </div>
+                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
+                        <div className="w-20 h-20 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-500">
+                            <ShieldCheck size={40} />
+                        </div>
+                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Air-Gapped Precision</h3>
+                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            VPC-deployable edge execution for <span className="text-rose-500 font-black">zero-PII compliance</span>. Engine leverages <span className="text-rose-500 font-black">Calibrated Confidence Scores</span> to guarantee stability from round one of the Active Learning loop.
                         </p>
                     </div>
                 </div>
