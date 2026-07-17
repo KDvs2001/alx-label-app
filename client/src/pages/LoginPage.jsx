@@ -67,9 +67,7 @@ const LoginPage = ({ onLogin }) => {
                 
                 {/* Logo Section */}
                 <div className="flex items-center gap-3 border-b border-slate-800 pb-5 mb-8">
-                    <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white text-sm font-black">
-                        CAL
-                    </div>
+                    <img src="/logo.jpg" alt="CAL-Log Logo" className="w-10 h-10 rounded-xl object-contain bg-white border border-slate-700 p-0.5" />
                     <div>
                         <h2 className="text-2xl font-black text-white">CAL-Log Gateway</h2>
                         <p className="text-xs text-slate-500">Access your role-based labeling interface</p>

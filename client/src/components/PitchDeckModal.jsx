@@ -11,6 +11,9 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('pitch_deck_auth') === 'true');
     const [errorMsg, setErrorMsg] = useState('');
     const [isLight, setIsLight] = useState(() => document.body.classList.contains('theme-light'));
+    const [isProjectorMode, setIsProjectorMode] = useState(false);
+
+    const contrastLight = isLight || isProjectorMode;
 
     // Dynamic theme detection
     useEffect(() => {
@@ -34,8 +37,8 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
     };
 
     const nextSlide = () => {
-        if (currentSlide === 11) {
-            onClose(); // Slide 12 is end of flow -> close and start demo
+        if (currentSlide === 12) {
+            onClose(); // Slide 13 is end of flow -> close and start demo
         } else {
             setCurrentSlide(prev => prev + 1);
         }
@@ -65,17 +68,18 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
             iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
             content: (
                 <div className="h-full flex flex-col justify-center items-center text-center gap-8 max-w-4xl mx-auto py-6">
+                    <img src="/logo.jpg" alt="CAL-Log Logo" className="h-24 md:h-28 object-contain bg-white p-2 rounded-2xl border-2 border-slate-700 shadow-md" />
                     <div className="space-y-6">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm font-black uppercase tracking-widest animate-pulse">
                             <ShieldCheck size={16} /> Enterprise-Grade Data Labeling
                         </div>
-                        <h1 className={`text-5xl md:text-7xl font-black tracking-tight leading-tight uppercase ${isLight ? 'text-slate-905' : 'text-white'}`}>
+                        <h1 className={`text-5xl md:text-7xl font-black tracking-tight leading-tight uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>
                             AI doesn't run out of data.<br />
                             <span className="bg-gradient-to-r from-rose-500 via-red-500 to-indigo-550 bg-clip-text text-transparent">
                                 It runs out of time.
                             </span>
                         </h1>
-                        <p className={`text-xl md:text-2xl font-bold max-w-3xl mx-auto leading-relaxed ${isLight ? 'text-slate-655' : 'text-slate-350'}`}>
+                        <p className={`text-xl md:text-3xl font-bold max-w-3xl mx-auto leading-relaxed ${contrastLight ? 'text-slate-900' : 'text-slate-200'}`}>
                             CAL-Log is a cost-aware active learning system that adapts to human speed limits in real-time, accelerating your data pipelines.
                         </p>
                     </div>
@@ -83,106 +87,95 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent my-4" />
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
-                        <div className={`p-6 rounded-2xl border flex flex-col gap-2 items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-rose-500">65%</span>
-                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">Avg Time Saved</span>
+                        <div className={`p-6 rounded-2xl border-2 flex flex-col gap-2 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'}`}>
+                            <span className="text-4xl md:text-5xl font-black text-rose-500">65%</span>
+                            <span className={`text-xs uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>Avg Time Saved</span>
                         </div>
-                        <div className={`p-6 rounded-2xl border flex flex-col gap-2 items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-indigo-450">Local</span>
-                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">100% Data Privacy</span>
+                        <div className={`p-6 rounded-2xl border-2 flex flex-col gap-2 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'}`}>
+                            <span className="text-4xl md:text-5xl font-black text-indigo-500">Local</span>
+                            <span className={`text-xs uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>100% Data Privacy</span>
                         </div>
-                        <div className={`p-6 rounded-2xl border flex flex-col gap-2 items-center justify-center ${isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <span className="text-3xl font-black text-emerald-450">Adaptive</span>
-                            <span className="text-xs text-slate-400 uppercase font-black tracking-wider">To Annotator Speed</span>
+                        <div className={`p-6 rounded-2xl border-2 flex flex-col gap-2 items-center justify-center ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-850'}`}>
+                            <span className="text-4xl md:text-5xl font-black text-emerald-500">Adaptive</span>
+                            <span className={`text-xs uppercase font-black tracking-wider ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>To Annotator Speed</span>
                         </div>
                     </div>
                 </div>
             )
         },
-        // SLIDE 2 — THE QUESTION
+        // SLIDE 2 — BUSINESS + TECHNOLOGY CHALLENGE
         {
-            title: "How much of your AI project is spent labeling data by hand?",
-            subtitle: "The unseen bottleneck holding back generative intelligence.",
+            title: "The Double Bottleneck: Business Cost & Tech Latency",
+            subtitle: "Human annotation budgets drain capital, while static models waste compute and annotator time.",
             icon: HelpCircle,
             iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center items-center text-center gap-10 max-w-4xl mx-auto py-6">
-                    <div className="space-y-6">
-                        <h2 className={`text-4xl md:text-6xl font-black tracking-tight leading-snug ${isLight ? 'text-slate-850' : 'text-white'}`}>
-                            How much of your AI project is spent labeling data by hand?
+                <div className="h-full flex flex-col justify-center items-center text-center gap-8 max-w-4xl mx-auto py-6">
+                    <div className="space-y-4">
+                        <h2 className={`text-4xl md:text-5xl font-black tracking-tight leading-snug ${contrastLight ? 'text-slate-950' : 'text-white'}`}>
+                            The Dual Challenge of AI Projects
                         </h2>
-                        <p className="text-xl font-extrabold tracking-widest uppercase text-rose-500 animate-pulse">
-                            Take a guess.
+                        <p className={`text-lg md:text-xl font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-350'}`}>
+                            Traditional active learning only looks at model uncertainty, ignoring human labor costs and mental fatigue.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full">
-                        {[
-                            { name: "Requirements", pct: "5%", color: "border-slate-800 bg-slate-900/40 text-slate-500" },
-                            { name: "Model Tuning", pct: "10%", color: "border-slate-800 bg-slate-900/40 text-slate-500" },
-                            { name: "Deployment", pct: "5%", color: "border-slate-800 bg-slate-900/40 text-slate-500" },
-                            { name: "Human Labeling", pct: "?", color: "border-rose-500 bg-rose-950/20 text-rose-455 font-black animate-pulse" }
-                        ].map((stage, idx) => (
-                            <div key={idx} className={`p-6 rounded-2xl border text-center flex flex-col gap-3 ${stage.color}`}>
-                                <span className="text-sm uppercase font-bold tracking-wider">{stage.name}</span>
-                                <span className="text-4xl font-black">{stage.pct}</span>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-4">
+                        <div className={`p-6 rounded-2xl border-2 text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-xs font-black text-rose-500 uppercase tracking-widest block mb-2">1. The Business Drain</span>
+                            <h3 className="text-xl font-black mb-2">Annotation Labor Costs</h3>
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-400'}`}>
+                                Data labeling takes up **80% of AI project budgets**. Paying experts to read long, redundant texts costs thousands of dollars in wasted hourly wages.
+                             </p>
+                        </div>
+                        <div className={`p-6 rounded-2xl border-2 text-left ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-xs font-black text-indigo-400 uppercase tracking-widest block mb-2">2. The Technology Fail</span>
+                            <h3 className="text-xl font-black mb-2">Cognitive Fatigue & Noise</h3>
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-400'}`}>
+                                Annotators read at different speeds and suffer from fatigue. Blind algorithms route complex files when users are tired, leading to lazy errors that corrupt the dataset.
+                            </p>
+                        </div>
                     </div>
                 </div>
             )
         },
         // SLIDE 3 — THE ANSWER
         {
-            title: "Eighty Percent.",
-            subtitle: "Of every AI project. Humans. One sample at a time.",
+            title: "CAL-Log: Merging Business ROI with Adaptive Tech",
+            subtitle: "A machine learning pipeline built to optimize both accuracy and cash flow.",
             icon: AlertTriangle,
             iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
             content: (
                 <div className="h-full flex flex-col justify-center gap-8 max-w-5xl mx-auto py-4">
                     <div className="text-center space-y-3">
-                        <h2 className="text-6xl md:text-8xl font-black text-rose-500 tracking-tight uppercase animate-pulse">80%</h2>
-                        <p className={`text-2xl font-black ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            Of every AI project. Humans, one sample at a time.
+                        <h2 className="text-4xl md:text-6xl font-black text-rose-500 tracking-tight uppercase">THE CONVERGENCE</h2>
+                        <p className={`text-xl md:text-2xl font-black ${contrastLight ? 'text-slate-900' : 'text-slate-350'}`}>
+                            Optimizing the two critical variables: Model Performance & Annotator Pacing.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {[
-                            {
-                                label: "SCALE",
-                                value: "$20 Billion",
-                                source: "Grand View Research",
-                                desc: "Projected global data labeling market size by 2030, growing 5x from 2024 values."
-                            },
-                            {
-                                label: "IMPACT",
-                                value: "60% Abandoned",
-                                source: "Gartner Group",
-                                desc: "Of AI projects will be completely abandoned by 2026 due to poor training data quality."
-                            },
-                            {
-                                label: "URGENCY",
-                                value: "$14.3 Billion",
-                                source: "Market Transaction",
-                                desc: "Meta acquired 49% of Scale AI for $14.3B in June 2025. The enterprise market has spoken."
-                            }
-                        ].map((stat, idx) => (
-                            <div key={idx} className={`p-6 rounded-2xl border flex flex-col gap-3 ${
-                                isLight ? 'bg-white border-slate-200' : 'bg-slate-900/60 border-slate-800'
-                            }`}>
-                                <span className="text-xs font-black text-rose-500 uppercase tracking-widest">{stat.label}</span>
-                                <h3 className={`text-3xl font-black ${isLight ? 'text-slate-850' : 'text-white'}`}>{stat.value}</h3>
-                                <p className="text-sm text-slate-400 leading-relaxed mt-1 flex-1">{stat.desc}</p>
-                                <span className="text-[10px] text-slate-500 font-mono text-right mt-2">Source: {stat.source}</span>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className={`p-6 rounded-2xl border-2 ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-xs font-black text-rose-500 uppercase tracking-widest block mb-1">BUSINESS OUTCOME</span>
+                            <h3 className="text-2xl font-black mb-2">65% Financial ROI</h3>
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-400'}`}>
+                                By estimating text complexity *before* assigning it, the system filters out trivial files and auto-labels them. This saves up to **a third of total human labor hours**.
+                            </p>
+                        </div>
+
+                        <div className={`p-6 rounded-2xl border-2 ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <span className="text-xs font-black text-indigo-400 uppercase tracking-widest block mb-1">TECHNOLOGY ENABLER</span>
+                            <h3 className="text-2xl font-black mb-2">Online OLS Timing & QBC</h3>
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-400'}`}>
+                                Standard deviation residuals from Ordinary Least Squares timer models detect fatigue. The system switches to simple tasks automatically, keeping data error-free.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className={`p-5 rounded-2xl border text-center font-bold text-sm italic ${
-                        isLight ? 'bg-indigo-50 border-indigo-200 text-indigo-850' : 'bg-indigo-950/20 border-indigo-500/20 text-indigo-300'
+                    <div className={`p-4 rounded-xl border-2 text-center font-bold text-sm ${
+                        contrastLight ? 'bg-slate-100 border-slate-900 text-slate-900' : 'bg-indigo-950/20 border-indigo-500/20 text-indigo-300'
                     }`}>
-                        "If Meta thinks labeling is worth $14 billion, so should every AI team."
+                        "A technology stack designed to save engineering hours and corporate budgets."
                     </div>
                 </div>
             )
@@ -298,8 +291,8 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                         
                         {/* 100% Accurate Architecture Diagram */}
                         <div className="lg:col-span-7 flex justify-center">
-                            <div className={`relative w-full max-w-[500px] rounded-2xl p-1.5 overflow-hidden shadow-2xl border hover:scale-102 transition-all duration-300 ${
-                                isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-850'
+                            <div className={`relative w-full max-w-[500px] rounded-2xl p-1.5 overflow-hidden shadow-2xl border-2 hover:scale-102 transition-all duration-300 ${
+                                contrastLight ? 'bg-white border-slate-900 shadow-md' : 'bg-slate-900/60 border-slate-850'
                             }`}>
                                 <img 
                                     src="/system_architecture.png" 
@@ -311,30 +304,74 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
 
                         {/* Content Right side */}
                         <div className="lg:col-span-5 space-y-5">
-                            <h3 className={`text-3xl font-black tracking-tight leading-tight ${isLight ? 'text-slate-805' : 'text-white'}`}>
+                            <h3 className={`text-3xl font-black tracking-tight leading-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>
                                 Production-Grade<br />
                                 <span className="bg-gradient-to-r from-emerald-400 to-indigo-500 bg-clip-text text-transparent">
                                     Microservice Loop
                                 </span>
                             </h3>
-                            <p className="text-sm text-slate-400 leading-relaxed font-semibold">
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-400'}`}>
                                 Not a simple prototype script. CAL-Log runs a distributed Node.js server gateway integrated with an active Python Flask simulation server.
                             </p>
                             
                             <div className="space-y-3 text-xs md:text-sm text-slate-450 leading-relaxed">
                                 <div className="flex gap-2.5">
                                     <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={14} /></div>
-                                    <span><b>Client Tier:</b> Workspace UI, Fatigue Tracking, and live ROI calculators in React.</span>
+                                    <span className={`${contrastLight ? 'text-slate-900' : ''}`}><b>Client Tier:</b> Workspace UI, Fatigue Tracking, and live ROI calculators in React.</span>
                                 </div>
                                 <div className="flex gap-2.5">
                                     <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={14} /></div>
-                                    <span><b>Server Tier:</b> REST API gateway, Mongoose session controllers, and MongoDB storage.</span>
+                                    <span className={`${contrastLight ? 'text-slate-900' : ''}`}><b>Server Tier:</b> REST API gateway, Mongoose session controllers, and MongoDB storage.</span>
                                 </div>
                                 <div className="flex gap-2.5">
                                     <div className="p-1 rounded bg-indigo-500/10 text-indigo-400 shrink-0"><Check size={14} /></div>
-                                    <span><b>Logic Tier:</b> Python adaptive regression engines. Recalibrates Alpha and Beta parameters every round to match target domain complexity, adjusting automatically from simple reviews to complex legal or medical documents.</span>
+                                    <span className={`${contrastLight ? 'text-slate-900' : ''}`}><b>Logic Tier:</b> Python adaptive regression engines. Recalibrates Alpha and Beta parameters every round to match target domain complexity, adjusting automatically from simple reviews to complex legal or medical documents.</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        },
+        // SLIDE 7 — THE CORE MATHEMATICAL ENGINE
+        {
+            title: "Under The Hood: Core Algorithmic Selection",
+            subtitle: "Cost-Aware Active Learning selection balanced against online timing timing models.",
+            icon: Cpu,
+            iconColor: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+            content: (
+                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        {/* Left Side: Code Block */}
+                        <div className="lg:col-span-7 w-full">
+                            <div className={`p-5 rounded-2xl border-2 font-mono text-xs md:text-sm leading-relaxed overflow-x-auto text-left shadow-lg ${
+                                contrastLight ? 'bg-slate-900 border-slate-950 text-emerald-450' : 'bg-slate-950 border-slate-800 text-emerald-400'
+                            }`}>
+                                <div className="text-slate-500 mb-2">// Dynamic Selection Utility balancing info vs. human latency</div>
+                                <span className="text-purple-400">def</span> <span className="text-blue-400">calculate_selection_utility</span>(uncertainty, reading_speed_residual):<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># 1. Fatigue check using OLS residual timing signals</span><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">if</span> reading_speed_residual &gt;= <span className="text-amber-450">1.5</span> * baseline_speed:<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># User is fatigued: route simple calibration texts</span><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> route_low_complexity_samples()<br />
+                                <br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-slate-500"># 2. Information density divided by expected cost (in seconds)</span><br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;expected_seconds = alpha + beta * log(text_length)<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;utility = uncertainty / expected_seconds<br />
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> argmax(utility)<br />
+                            </div>
+                        </div>
+
+                        {/* Right Side: Math Explanation */}
+                        <div className="lg:col-span-5 space-y-4">
+                            <h3 className={`text-2xl md:text-3xl font-black tracking-tight leading-tight ${contrastLight ? 'text-slate-950' : 'text-white'}`}>
+                                How the Algorithm Thinks
+                            </h3>
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-400'}`}>
+                                Instead of just selecting the most uncertain text, CAL-Log selection is **divided by the predicted human time cost** ($\alpha + \beta \log(L)$).
+                            </p>
+                            <p className={`text-sm leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-400'}`}>
+                                By tracking the standard deviation of annotator reading speed, we monitor cognitive friction. If a user slows down (fatigue), the system pivots to easy recovery texts to prevent dataset label collapse.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -682,58 +719,57 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                 </div>
             )
         },
-        // SLIDE 10 — VALIDATED BY EXPERTS
+        // SLIDE 11 — VALIDATED BY EXPERTS (quotes from user feedback)
         {
-            title: "31 experts reviewed it. Their feedback shaped what shipped.",
-            subtitle: "42 contacted, 31 responses, 19 researchers, 12 ML engineers",
+            title: "Validated by the ML & Cognitive Science Community",
+            subtitle: "Peer feedback and evaluations from PhD candidates, researchers, and engineers.",
             icon: Users,
             iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center gap-6 max-w-5xl mx-auto py-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="h-full flex flex-col justify-center gap-6 max-w-6xl mx-auto py-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         
-                        {/* Quotes Left */}
-                        <div className="lg:col-span-5 space-y-4">
-                            <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-2xl">
-                                <p className="text-sm md:text-base text-slate-300 italic leading-relaxed">
-                                    "Strong practical and commercial value. The balance between utility and annotation time is effective."
-                                </p>
-                                <span className="text-xs text-indigo-400 font-extrabold block mt-2.5 text-right">
-                                    ML Engineer at Meta
-                                </span>
-                            </div>
-                            <div className="p-5 bg-slate-900/60 border border-slate-800 rounded-2xl">
-                                <p className="text-sm md:text-base text-slate-300 italic leading-relaxed">
-                                    "75.6% improvement over baselines, with a clear peak at 60 minutes of annotation."
-                                </p>
-                                <span className="text-xs text-indigo-400 font-extrabold block mt-2.5 text-right">
-                                    Active Learning Researcher at Scale AI
-                                </span>
+                        {/* Quote 1: METU PhD Cognitive Science */}
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                                "Personalizing the annotation process is great. Using reading time and overhead patterns as a proxy for cognitive load is highly valid... Differentiating underlying causes of reading speed variations is crucial for real-world application."
+                            </p>
+                            <div className="mt-3 border-t border-slate-850 pt-2 text-right">
+                                <span className="font-black text-xs block">Ibrahim Ethem Deveci</span>
+                                <span className="text-[10px] text-indigo-400 font-extrabold">PhD Student, METU Cognitive Science</span>
                             </div>
                         </div>
 
-                        {/* What Changed Right */}
-                        <div className="lg:col-span-7 overflow-hidden w-full flex flex-col justify-center">
-                            <div className={`p-6 rounded-2xl border ${isLight ? 'bg-white border-slate-200' : 'bg-slate-950/60 border-slate-900'}`}>
-                                <span className="text-xs font-black text-indigo-455 uppercase tracking-wider block mb-3">FEEDBACK ➔ SHIPPED CHANGES</span>
-                                <div className="space-y-3 text-xs md:text-sm">
-                                    <div className="flex justify-between border-b border-slate-900/50 pb-2">
-                                        <span className="text-rose-400 font-bold font-mono">"Spy Window" term unclear</span>
-                                        <span className="text-emerald-400 font-bold font-mono">Added parameter explainer modal</span>
-                                    </div>
-                                    <div className="flex justify-between border-b border-slate-900/50 pb-2">
-                                        <span className="text-rose-400 font-bold font-mono">Alpha / Beta hidden</span>
-                                        <span className="text-emerald-400 font-bold font-mono">Info icon + inline explanations</span>
-                                    </div>
-                                    <div className="flex justify-between border-b border-slate-900/50 pb-2">
-                                        <span className="text-rose-400 font-bold font-mono">Slow initial loading</span>
-                                        <span className="text-emerald-400 font-bold font-mono">React lazy-loading + code splitting</span>
-                                    </div>
-                                    <div className="flex justify-between border-b border-slate-900/50 pb-2">
-                                        <span className="text-rose-400 font-bold font-mono">Accessibility gaps</span>
-                                        <span className="text-emerald-400 font-bold font-mono">WCAG headers + ARIA structure</span>
-                                    </div>
-                                </div>
+                        {/* Quote 2: UF NLP Candidate */}
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                                "Dynamic cost calculation is a huge step up from pure entropy sampling which often just feeds annotators garbage data. Clamping the parameters makes a lot of sense for outlier filtering."
+                            </p>
+                            <div className="mt-3 border-t border-slate-850 pt-2 text-right">
+                                <span className="font-black text-xs block">Shlok Gilda</span>
+                                <span className="text-[10px] text-indigo-455 font-extrabold">PhD Candidate @ UF | NLP & Cybersecurity</span>
+                            </div>
+                        </div>
+
+                        {/* Quote 3: Cognitive Science Researcher */}
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                                "Using reading speed together with interaction time is a meaningful way to analyze cognitive load... these signals can be robust to individual baseline differences."
+                            </p>
+                            <div className="mt-3 border-t border-slate-850 pt-2 text-right">
+                                <span className="font-black text-xs block">Hinduja Balasubramaniyam</span>
+                                <span className="text-[10px] text-indigo-400 font-extrabold">Cognitive Science & NLP Researcher</span>
+                            </div>
+                        </div>
+
+                        {/* Quote 4: Data Analyst */}
+                        <div className={`p-5 rounded-xl border-2 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 text-slate-950 shadow-md' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <p className={`text-[13px] italic leading-relaxed ${contrastLight ? 'text-slate-900 font-bold' : 'text-slate-200'}`}>
+                                "Real-world annotation fatigue isn't just about reading time. It is influenced by context switching, complexity, and micro-interactions. Real-time client-side timing is a solid, practical approach."
+                            </p>
+                            <div className="mt-3 border-t border-slate-850 pt-2 text-right">
+                                <span className="font-black text-xs block">Seif Feroz</span>
+                                <span className="text-[10px] text-indigo-400 font-extrabold">Data Analyst & Operations Lead</span>
                             </div>
                         </div>
                     </div>
@@ -791,22 +827,23 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                 </div>
             )
         },
-        // SLIDE 12 — CLOSE
+        // SLIDE 13 — CLOSE
         {
             title: "This isn't a research idea. It's a tool, ready today.",
             subtitle: "Same accuracy, a third of the time, at a fraction of the cost.",
             icon: Award,
             iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
             content: (
-                <div className="h-full flex flex-col justify-center items-center text-center gap-10 max-w-4xl mx-auto py-6">
+                <div className="h-full flex flex-col justify-center items-center text-center gap-8 max-w-4xl mx-auto py-6">
+                    <img src="/logo.jpg" alt="CAL-Log Logo" className="h-20 object-contain bg-white p-1.5 rounded-xl border border-slate-350 shadow-md" />
                     <div className="space-y-6">
-                        <h2 className={`text-5xl md:text-7xl font-black uppercase tracking-tight ${isLight ? 'text-slate-905' : 'text-white'}`}>
+                        <h2 className={`text-5xl md:text-7xl font-black uppercase tracking-tight ${contrastLight ? 'text-slate-950' : 'text-white'}`}>
                             This isn't a research idea.<br />
-                            <span className="bg-gradient-to-r from-rose-500 to-indigo-500 bg-clip-text text-transparent">
+                            <span className="bg-gradient-to-r from-rose-500 to-indigo-550 bg-clip-text text-transparent">
                                 It's a tool, ready today.
                             </span>
                         </h2>
-                        <p className={`text-xl md:text-2xl font-bold max-w-2xl mx-auto leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-350'}`}>
+                        <p className={`text-xl md:text-2xl font-bold max-w-2xl mx-auto leading-relaxed ${contrastLight ? 'text-slate-800 font-bold' : 'text-slate-300'}`}>
                             Same accuracy. A third of the human time. At a fraction of the budget.
                         </p>
                     </div>
@@ -816,13 +853,13 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <button
                             onClick={onClose}
-                            className="px-10 py-5 bg-gradient-to-r from-rose-600 to-red-505 hover:from-rose-500 hover:to-red-400 text-white font-extrabold text-base rounded-2xl shadow-2xl shadow-rose-500/20 transform hover:scale-105 active:scale-95 transition flex items-center gap-3"
+                            className="px-10 py-5 bg-gradient-to-r from-rose-600 to-red-505 hover:from-rose-500 hover:to-red-400 text-white font-extrabold text-base rounded-2xl shadow-2xl shadow-rose-500/20 transform hover:scale-105 active:scale-95 transition flex items-center gap-3 animate-bounce"
                         >
                             <Play size={18} className="fill-white" /> Start Live Annotation Demo
                         </button>
                     </div>
 
-                    <div className="text-xs md:text-sm text-slate-500 mt-2 font-black tracking-widest uppercase animate-pulse">
+                    <div className={`text-xs md:text-sm mt-2 font-black tracking-widest uppercase animate-pulse ${contrastLight ? 'text-slate-950' : 'text-slate-400'}`}>
                         Thank you. Happy to take your questions.
                     </div>
                 </div>
@@ -833,9 +870,9 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
     const CurrentIcon = slides[currentSlide].icon;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-0 animate-fade-in">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 animate-fade-in ${contrastLight ? 'bg-white' : 'bg-slate-950'}`}>
             <div className={`w-full h-full relative flex flex-col justify-between overflow-hidden text-left transition-all ${
-                isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-white'
+                contrastLight ? 'bg-white text-slate-950' : 'bg-slate-950 text-white'
             }`}>
                 {/* Visual Top Glow */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-500 z-20" />
@@ -844,8 +881,8 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                 <button 
                     onClick={onClose}
                     className={`absolute top-4 right-4 p-2.5 rounded-xl transition z-30 border ${
-                        isLight 
-                            ? 'bg-slate-100 border-slate-200 text-slate-650 hover:bg-slate-200' 
+                        contrastLight 
+                            ? 'bg-slate-100 border-slate-350 text-slate-950 hover:bg-slate-200 border-2' 
                             : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
                     }`}
                     title="Exit Presentation"
@@ -860,7 +897,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             <Lock size={30} className="animate-pulse" />
                         </div>
                         <div>
-                            <h3 className={`text-xl font-black ${isLight ? 'text-slate-855' : 'text-white'}`}>CAL-Log Presentation</h3>
+                            <h3 className={`text-xl font-black ${contrastLight ? 'text-slate-950' : 'text-white'}`}>CAL-Log Presentation</h3>
                             <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Please enter the pitch presentation passkey to unlock the slides.</p>
                         </div>
                         <form onSubmit={handlePasswordSubmit} className="w-full max-w-xs space-y-3">
@@ -871,7 +908,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 onChange={(e) => setPasswordInput(e.target.value)}
                                 placeholder="Enter presentation passkey..."
                                 className={`w-full px-4 py-3.5 rounded-xl text-sm focus:outline-none focus:border-indigo-500 transition font-mono ${
-                                    isLight ? 'bg-white border border-slate-200 text-slate-850 shadow-inner' : 'bg-slate-900 border border-slate-800 text-white'
+                                    contrastLight ? 'bg-white border-2 border-slate-900 text-slate-950 shadow-inner font-bold' : 'bg-slate-900 border border-slate-800 text-white'
                                 }`}
                             />
                             {errorMsg && (
@@ -890,7 +927,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                     <>
                         {/* Slide Header */}
                         <div className={`p-6 md:p-8 pb-4 border-b flex justify-between items-center ${
-                            isLight ? 'border-slate-200/80 bg-white' : 'border-slate-900 bg-slate-950'
+                            contrastLight ? 'border-slate-350 bg-white border-b-2' : 'border-slate-900 bg-slate-950'
                         }`}>
                             <div className="flex items-center gap-4">
                                 <div className={`p-3 rounded-xl border ${slides[currentSlide].iconColor}`}>
@@ -898,12 +935,27 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 </div>
                                 <div>
                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-505 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
-                                        Slide {currentSlide + 1} of 12
+                                        Slide {currentSlide + 1} of 13
                                     </span>
-                                    <h2 className={`text-2xl md:text-3xl font-black mt-1 tracking-tight ${isLight ? 'text-slate-805' : 'text-white'}`}>{slides[currentSlide].title}</h2>
-                                    <p className="text-sm font-semibold text-slate-400 mt-0.5">{slides[currentSlide].subtitle}</p>
+                                    <h2 className={`text-2xl md:text-3xl font-black mt-1 tracking-tight ${contrastLight ? 'text-slate-950' : 'text-white'}`}>{slides[currentSlide].title}</h2>
+                                    <p className={`text-sm font-semibold mt-0.5 ${contrastLight ? 'text-slate-800' : 'text-slate-400'}`}>{slides[currentSlide].subtitle}</p>
                                 </div>
                             </div>
+                            
+                            {/* Projector Optimization Mode Toggle */}
+                            <button
+                                onClick={() => setIsProjectorMode(!isProjectorMode)}
+                                className={`mr-14 px-4 py-2 text-xs font-black rounded-lg transition border-2 ${
+                                    isProjectorMode 
+                                        ? 'bg-amber-500 border-amber-600 text-black shadow-md' 
+                                        : contrastLight
+                                            ? 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-slate-200'
+                                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                                }`}
+                                title="Optimize colors for low-contrast projection on white walls"
+                            >
+                                {isProjectorMode ? '☀ Projector Mode On' : '☼ Optimize for Projector (White Wall)'}
+                            </button>
                         </div>
 
                         {/* Slide Body (Carousels) */}
@@ -922,14 +974,16 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
 
                         {/* Slide Footer Navigation */}
                         <div className={`p-6 md:p-8 pt-4 border-t flex items-center justify-between ${
-                            isLight ? 'border-slate-200/80 bg-white' : 'border-slate-900 bg-slate-950'
+                            contrastLight ? 'border-slate-350 bg-white border-t-2' : 'border-slate-900 bg-slate-950'
                         }`}>
                             <div className="flex gap-3">
                                 {slides.map((_, i) => (
                                     <span 
                                         key={i} 
                                         className={`w-3 h-3 rounded-full transition-all duration-350 cursor-pointer ${
-                                            i === currentSlide ? 'bg-indigo-500 w-8' : 'bg-slate-850'
+                                            i === currentSlide 
+                                                ? 'bg-indigo-500 w-8' 
+                                                : contrastLight ? 'bg-slate-300' : 'bg-slate-850'
                                         }`} 
                                         onClick={() => setCurrentSlide(i)}
                                     />
@@ -940,8 +994,8 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                     onClick={prevSlide}
                                     disabled={currentSlide === 0}
                                     className={`p-3 rounded-xl border transition disabled:opacity-30 ${
-                                        isLight 
-                                            ? 'bg-slate-100 border-slate-200 text-slate-650 hover:bg-slate-200' 
+                                        contrastLight 
+                                            ? 'bg-slate-100 border-slate-300 text-slate-950 hover:bg-slate-200 border-2 font-bold' 
                                             : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
                                     }`}
                                     title="Previous Slide"
@@ -950,9 +1004,9 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 </button>
                                 <button
                                     onClick={nextSlide}
-                                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-sm font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10"
+                                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-sm font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10 border-2 border-indigo-700"
                                 >
-                                    {currentSlide === 11 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={16} />
+                                    {currentSlide === 12 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={16} />
                                 </button>
                             </div>
                         </div>
