@@ -44,8 +44,8 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme, onOpenPitchDe
           <Link to="/" className={navLinkClass('/')}>  
             <TrendingUp size={15} /> Impact
           </Link>
-          {/* Annotator Board — visible to all logged-in users */}
-          {role && (
+          {/* Annotator Board — visible to annotators only */}
+          {role === 'annotator' && (
             <Link to="/board" className={navLinkClass('/board')}>
               <Layers size={15} /> My Board
             </Link>
@@ -129,7 +129,7 @@ const Navbar = ({ role, username, onSignOut, theme, onToggleTheme, onOpenPitchDe
           <Link to="/" onClick={() => setMobileOpen(false)} className={navLinkClass('/')}>
             <TrendingUp size={15} /> Impact Calculator
           </Link>
-          {role && (
+          {role === 'annotator' && (
             <Link to="/board" onClick={() => setMobileOpen(false)} className={navLinkClass('/board')}>
               <Layers size={15} /> My Board
             </Link>

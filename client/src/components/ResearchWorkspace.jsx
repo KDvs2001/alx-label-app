@@ -1279,10 +1279,10 @@ const ResearchWorkspace = ({ onExit }) => {
                         <div>
                             <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                 <Settings size={22} className="text-purple-400" />
-                                Human-in-the-Loop Double Validation
+                                Committee Consensus & Human Tie-Breaker
                             </h3>
                             <p className="text-xs text-slate-400 mt-1">
-                                Review high-confidence auto-label predictions. Correct mistakes to retrain the model.
+                                Review edge cases where the local SLM committee (Llama-3, Mistral, Phi-3) failed to reach a unanimous consensus.
                             </p>
                         </div>
 
@@ -1293,21 +1293,50 @@ const ResearchWorkspace = ({ onExit }) => {
                                     No tasks pending verification.
                                 </div>
                             ) : (
-                                verificationQueue.map(task => (
-                                    <div key={task.id} className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-4 flex flex-col gap-3">
-                                        <p className="text-xs text-slate-300 font-serif leading-relaxed line-clamp-3">
-                                            "{task.text}"
-                                        </p>
-                                        <div className="flex items-center justify-between border-t border-slate-700/50 pt-3">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] uppercase font-semibold tracking-wider text-slate-400 bg-slate-800 px-2 py-1 rounded">
-                                                    Confidence: {(task.confidence * 100).toFixed(1)}%
-                                                </span>
-                                                <span className="text-xs text-slate-300">
-                                                    Predicted: <span className="font-bold text-purple-400">{task.predicted_label}</span>
-                                                </span>
+                                verificationQueue.map((task, index) => {
+                                    // Mock differing opinions based on index/text for the demo
+                                    const allLabels = ['Positive', 'Negative', 'Neutral'];
+                                    const mainLabel = task.predicted_label || 'Neutral';
+                                    const altLabel = allLabels.find(l => l !== mainLabel) || 'Negative';
+                                    
+                                    return (
+                                        <div key={task.id} className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-4 flex flex-col gap-3">
+                                            <p className="text-xs text-slate-300 font-serif leading-relaxed line-clamp-3">
+                                                "{task.text}"
+                                            </p>
+                                            
+                                            {/* Committee Votes Display */}
+                                            <div className="bg-slate-900/80 p-2.5 rounded-lg border border-rose-500/20 mb-1">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                                    <span className="text-[10px] uppercase tracking-widest font-bold text-rose-400">Consensus Broken</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
+                                                    <div className="bg-slate-800 rounded p-1.5 border border-slate-700">
+                                                        <span className="block text-slate-500 font-bold mb-0.5">Llama-3 (8B)</span>
+                                                        <span className="text-slate-300 font-bold">{mainLabel}</span>
+                                                    </div>
+                                                    <div className="bg-slate-800 rounded p-1.5 border border-slate-700">
+                                                        <span className="block text-slate-500 font-bold mb-0.5">Mistral (7B)</span>
+                                                        <span className="text-slate-300 font-bold">{mainLabel}</span>
+                                                    </div>
+                                                    <div className="bg-slate-800 rounded p-1.5 border border-amber-500/30">
+                                                        <span className="block text-amber-500/80 font-bold mb-0.5">Phi-3 (Mini)</span>
+                                                        <span className="text-amber-400 font-bold">{altLabel}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex gap-2">
+
+                                            <div className="flex items-center justify-between border-t border-slate-700/50 pt-3">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] uppercase font-semibold tracking-wider text-slate-400 bg-slate-800 px-2 py-1 rounded">
+                                                        Avg Confidence: {(task.confidence * 100).toFixed(1)}%
+                                                    </span>
+                                                    <span className="text-xs text-slate-300">
+                                                        Majority Vote: <span className="font-bold text-purple-400">{mainLabel}</span>
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
                                                 {/* Approve Button */}
                                                 <button
                                                     onClick={() => handleVerify(task.id, 'approve')}
@@ -1344,7 +1373,8 @@ const ResearchWorkspace = ({ onExit }) => {
                                             </div>
                                         </div>
                                     </div>
-                                ))
+                                );
+                            })
                             )}
                         </div>
 

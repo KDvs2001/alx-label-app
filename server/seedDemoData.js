@@ -38,13 +38,14 @@ async function seed() {
 
         // 1. Pending IMDB project for all annotators
         const imdbProjectId = randomUUID();
-        const imdbTexts = [
-            { id: `text_${Date.now()}_0`, text: "This movie was fantastic, I really enjoyed the cinematography and the brilliant acting." },
-            { id: `text_${Date.now()}_1`, text: "Terrible plot. The story was very wooden and unbelievable from start to finish." },
-            { id: `text_${Date.now()}_2`, text: "It's an okay watch if you have nothing better to do on a lazy Sunday afternoon." },
-            { id: `text_${Date.now()}_3`, text: "One of the best sci-fi films of the decade! Highly recommend it to everyone." },
-            { id: `text_${Date.now()}_4`, text: "Boring and too long. I fell asleep halfway through the second act." }
-        ];
+        
+        // Generate 900 mock IMDB reviews to match the ML service dataset size
+        const imdbTexts = Array.from({ length: 900 }).map((_, i) => ({
+            id: `text_${Date.now()}_${i}`,
+            text: i % 2 === 0 
+                ? `Movie review sample ${i}: This was an absolutely fantastic cinematic experience.` 
+                : `Movie review sample ${i}: Terrible plot, completely wooden acting and boring pacing.`
+        }));
 
         const imdbProject = new Project({
             projectId: imdbProjectId,
