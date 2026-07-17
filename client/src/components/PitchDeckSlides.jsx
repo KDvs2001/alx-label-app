@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
     Sparkles, ShieldCheck, HelpCircle, Layers, Brain, Cpu, Users, Award, 
-    Check, Play, ArrowRight, Settings, Server, Database, Globe
+    Check, Play, ArrowRight, Settings, Server, Database, Globe, BookOpen, FileText, Layout
 } from 'lucide-react';
 
 export const getSlides = (contrastLight, onClose) => [
@@ -110,45 +110,43 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
         )
     },
-    // SLIDE 4 — SYSTEM ARCHITECTURE & CORE MATHEMATICAL ENGINE (BIGGER)
+    // SLIDE 4 — SYSTEM ARCHITECTURE & CORE MATHEMATICAL ENGINE
     {
         title: "Microservice Architecture",
         subtitle: "A massive multi-tier engine working in real-time.",
         icon: Brain,
         iconColor: "text-indigo-405 bg-indigo-500/10 border-indigo-500/20",
         content: (
-            <div className="h-full flex flex-col justify-center gap-6 w-full px-6 py-4">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center h-full">
-                    <div className="lg:col-span-7 flex justify-center w-full h-full">
-                        <div className={`relative w-full h-full rounded-2xl p-2 overflow-hidden shadow-2xl border-4 ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-850'}`}>
-                            <img src="/system_architecture.png" alt="Live Microservices System Architecture Diagram" className="w-full h-full object-cover rounded-xl" style={{ minHeight: '500px' }} />
+            <div className="h-full flex flex-col justify-center gap-4 w-full px-6 py-2">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center h-full">
+                    <div className="lg:col-span-7 flex justify-center w-full">
+                        <div className={`relative w-full rounded-2xl p-2 overflow-hidden shadow-2xl border-4 ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-850'}`}>
+                            <img src="/system_architecture.png" alt="Live Microservices System Architecture Diagram" className="w-full h-auto object-contain rounded-xl max-h-[380px]" />
                         </div>
                     </div>
-                    <div className="lg:col-span-5 space-y-6 text-left flex flex-col justify-center">
-                        <h2 className={`text-3xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Real-Time Cost-Aware Selection Engine</h2>
-                        <div className={`p-6 rounded-xl border-4 font-mono text-lg leading-relaxed shadow-xl ${contrastLight ? 'bg-slate-900 border-slate-950 text-emerald-455 font-black' : 'bg-slate-955 border-slate-800 text-emerald-400'}`}>
-                            <div className="text-slate-500 mb-2">// Utility = Information Density / Expected Time Cost</div>
-                            <span className="text-purple-400">def</span> <span className="text-blue-400">calculate_selection_utility</span>(uncertainty, speed_residual):<br />
+                    <div className="lg:col-span-5 space-y-4 text-left flex flex-col justify-center">
+                        <h2 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Real-Time Cost-Aware Selection Engine</h2>
+                        <div className={`p-4 rounded-xl border-4 font-mono text-base leading-relaxed shadow-xl ${contrastLight ? 'bg-slate-900 border-slate-950 text-emerald-455 font-black' : 'bg-slate-955 border-slate-800 text-emerald-400'}`}>
+                            <div className="text-slate-500 mb-1">// Utility = Information Density / Expected Time Cost</div>
+                            <span className="text-purple-400">def</span> <span className="text-blue-400">calc_utility</span>(uncertainty, speed_residual):<br />
                             <br />
                             &nbsp;&nbsp;<span className="text-slate-500"># OLS residual flags cognitive fatigue</span><br />
                             &nbsp;&nbsp;<span className="text-purple-400">if</span> speed_residual &gt;= <span className="text-amber-450 font-black">1.5</span> * baseline:<br />
-                            &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> route_low_complexity_samples()<br />
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> route_low_complexity()<br />
                             <br />
-                            &nbsp;&nbsp;<span className="text-slate-500"># Cost: alpha + beta * log(length)</span><br />
-                            &nbsp;&nbsp;expected_seconds = alpha + beta * log(length)<br />
                             &nbsp;&nbsp;<span className="text-purple-400">return</span> argmax(uncertainty / expected_seconds)<br />
                         </div>
-                        <div className="space-y-4 text-lg md:text-xl text-slate-450 leading-relaxed font-bold">
+                        <div className="space-y-3 text-base md:text-lg text-slate-450 leading-relaxed font-bold">
                             <div className="flex gap-4 items-center">
-                                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400 shrink-0"><Server size={24} /></div>
+                                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400 shrink-0"><Server size={20} /></div>
                                 <span className={`${contrastLight ? 'text-slate-900 font-black' : 'text-slate-200'}`}>React UI collects keystroke & scroll dynamics.</span>
                             </div>
                             <div className="flex gap-4 items-center">
-                                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0"><Database size={24} /></div>
+                                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0"><Database size={20} /></div>
                                 <span className={`${contrastLight ? 'text-slate-900 font-black' : 'text-slate-200'}`}>MongoDB handles distributed asynchronous queues.</span>
                             </div>
                             <div className="flex gap-4 items-center">
-                                <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400 shrink-0"><Settings size={24} /></div>
+                                <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400 shrink-0"><Settings size={20} /></div>
                                 <span className={`${contrastLight ? 'text-slate-900 font-black' : 'text-slate-200'}`}>Python Flask calculates multi-model consensus.</span>
                             </div>
                         </div>
@@ -157,74 +155,74 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
         )
     },
-    // SLIDE 5 — TECHNOLOGICAL INNOVATION (NEW)
+    // SLIDE 5 — TECHNOLOGICAL INNOVATION (NEW, VISUAL)
     {
         title: "Technological Innovation",
         subtitle: "Breaking the boundaries of modern Active Learning",
         icon: Cpu,
         iconColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
         content: (
-            <div className="h-full w-full flex flex-col justify-center items-center gap-8 px-8 py-6 max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full text-left">
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? 'bg-white border-slate-900 shadow-2xl' : 'bg-slate-900/60 border-slate-800'}`}>
-                        <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center text-blue-500 mb-2">
-                            <Layers size={32} />
+            <div className="h-full w-full flex flex-col justify-center items-center gap-6 px-4 py-2 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full text-center">
+                    <div className={`p-6 rounded-3xl border-4 flex flex-col items-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
+                        <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
+                            <Layers size={40} />
                         </div>
-                        <h3 className={`text-2xl md:text-3xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Scalability</h3>
-                        <p className={`text-lg md:text-xl font-bold leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-300'}`}>
-                            Our asynchronous processing queues and stateless containerized architecture allow the system to scale effortlessly. Capable of handling thousands of concurrent annotators across diverse global regions without degrading model sampling latency.
+                        <h3 className={`text-xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Infinite<br/>Scalability</h3>
+                        <p className={`text-sm font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            Stateless queue architecture handles 10,000+ concurrent annotators with zero latency degradation.
                         </p>
                     </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? 'bg-white border-slate-900 shadow-2xl' : 'bg-slate-900/60 border-slate-800'}`}>
-                        <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-500 mb-2">
-                            <Globe size={32} />
+                    <div className={`p-6 rounded-3xl border-4 flex flex-col items-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
+                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+                            <Globe size={40} />
                         </div>
-                        <h3 className={`text-2xl md:text-3xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Interoperability & Compatibility</h3>
-                        <p className={`text-lg md:text-xl font-bold leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-300'}`}>
-                            Designed as an API-first platform. Seamlessly hooks into existing data pipelines (AWS S3, Databricks, Snowflake). Native integrations with popular frameworks like PyTorch and HuggingFace ensure drop-in compatibility for any enterprise ML stack.
+                        <h3 className={`text-xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Seamless<br/>Interoperability</h3>
+                        <p className={`text-sm font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            API-first integrations with AWS, Databricks, PyTorch, and HuggingFace out of the box.
                         </p>
                     </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? 'bg-white border-slate-900 shadow-2xl' : 'bg-slate-900/60 border-slate-800'}`}>
-                        <div className="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-500 mb-2">
-                            <Brain size={32} />
+                    <div className={`p-6 rounded-3xl border-4 flex flex-col items-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
+                        <div className="w-20 h-20 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-500">
+                            <Brain size={40} />
                         </div>
-                        <h3 className={`text-2xl md:text-3xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Technical Domain Novelty</h3>
-                        <p className={`text-lg md:text-xl font-bold leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-300'}`}>
-                            We are the first to mathematically fuse Cognitive Science (fatigue dynamics via OLS residuals) with Active Learning heuristics. Our Multi-Model SLM Committee approach drastically reduces entropy variance during early-stage training.
+                        <h3 className={`text-xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Cognitive<br/>Novelty</h3>
+                        <p className={`text-sm font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            The FIRST mathematical fusion of cognitive OLS fatigue tracking and Active Learning heuristics.
                         </p>
                     </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? 'bg-white border-slate-900 shadow-2xl' : 'bg-slate-900/60 border-slate-800'}`}>
-                        <div className="w-16 h-16 rounded-2xl bg-rose-500/20 flex items-center justify-center text-rose-500 mb-2">
-                            <ShieldCheck size={32} />
+                    <div className={`p-6 rounded-3xl border-4 flex flex-col items-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
+                        <div className="w-20 h-20 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-500">
+                            <ShieldCheck size={40} />
                         </div>
-                        <h3 className={`text-2xl md:text-3xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Privacy & Edge Deployment</h3>
-                        <p className={`text-lg md:text-xl font-bold leading-relaxed ${contrastLight ? 'text-slate-800' : 'text-slate-300'}`}>
-                            CAL-Log is fully deployable within air-gapped VPCs. All model inferences and user analytics are computed strictly on-device or within your secure local boundary, ensuring absolute compliance for FinTech and Healthcare data.
+                        <h3 className={`text-xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Air-Gapped<br/>Privacy</h3>
+                        <p className={`text-sm font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
+                            VPC-deployable edge execution ensures absolute compliance for FinTech and Healthcare data.
                         </p>
                     </div>
                 </div>
             </div>
         )
     },
-    // SLIDE 6 — PERFORMANCE (BIGGER)
+    // SLIDE 6 — PERFORMANCE (COMPACT)
     {
         title: "Validated Performance",
         subtitle: "Reaching target accuracy 3.9x faster.",
         icon: ShieldCheck,
         iconColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
         content: (
-            <div className="h-full flex flex-col justify-center gap-8 w-full max-w-7xl mx-auto px-6 py-4">
-                <div className="flex flex-col gap-8 w-full">
-                    <h3 className={`text-3xl md:text-4xl font-black text-center ${contrastLight ? 'text-slate-950' : 'text-white'}`}>
+            <div className="h-full flex flex-col justify-center gap-6 w-full max-w-5xl mx-auto px-4 py-2">
+                <div className="flex flex-col gap-4 w-full">
+                    <h3 className={`text-2xl md:text-3xl font-black text-center ${contrastLight ? 'text-slate-950' : 'text-white'}`}>
                         Time to Reach F1 = 0.80 across 10 NLP Datasets
                     </h3>
-                    <div className={`p-8 rounded-3xl border-4 space-y-6 ${contrastLight ? 'bg-white border-slate-900 shadow-2xl' : 'bg-slate-900/40 border-slate-850'}`}>
+                    <div className={`p-6 rounded-3xl border-4 space-y-4 ${contrastLight ? 'bg-white border-slate-900 shadow-2xl' : 'bg-slate-900/40 border-slate-850'}`}>
                         {[
                             { name: "Entropy", time: 148.5, ciStart: 5, ciEnd: 303, color: "bg-green-500/80" },
                             { name: "BADGE", time: 126.5, ciStart: 21, ciEnd: 242, color: "bg-blue-500/80" },
                             { name: "Margin", time: 121.0, ciStart: 5, ciEnd: 238, color: "bg-amber-600/85" },
                             { name: "Random", time: 93.7, ciStart: 38, ciEnd: 150, color: "bg-slate-550/80" },
-                            { name: "CAL-Log (Ours)", time: 38.3, ciStart: 15, ciEnd: 62, color: "bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.6)]", isHighlight: true }
+                            { name: "CAL-Log (Ours)", time: 38.3, ciStart: 15, ciEnd: 62, color: "bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.6)]", isHighlight: true }
                         ].map((item, idx) => {
                             const maxVal = 310;
                             const barWidth = (item.time / maxVal) * 100;
@@ -232,18 +230,18 @@ export const getSlides = (contrastLight, onClose) => [
                             const ciWidth = ((item.ciEnd - item.ciStart) / maxVal) * 100;
 
                             return (
-                                <div key={idx} className="grid grid-cols-12 gap-6 items-center">
-                                    <div className={`col-span-3 text-right text-xl md:text-2xl font-black uppercase ${item.isHighlight ? 'text-rose-500' : contrastLight ? 'text-slate-950' : 'text-slate-300'}`}>
+                                <div key={idx} className="grid grid-cols-12 gap-4 items-center">
+                                    <div className={`col-span-3 text-right text-lg md:text-xl font-black uppercase ${item.isHighlight ? 'text-rose-500' : contrastLight ? 'text-slate-950' : 'text-slate-300'}`}>
                                         {item.name}
                                     </div>
-                                    <div className={`col-span-7 relative h-10 flex items-center rounded-xl border-2 overflow-visible ${contrastLight ? 'bg-slate-100 border-slate-900' : 'bg-slate-955/40 border-slate-900'}`}>
+                                    <div className={`col-span-7 relative h-7 flex items-center rounded-xl border-2 overflow-visible ${contrastLight ? 'bg-slate-100 border-slate-900' : 'bg-slate-955/40 border-slate-900'}`}>
                                         <div className={`absolute h-1 flex items-center justify-between ${contrastLight ? 'bg-slate-950' : 'bg-slate-650'}`} style={{ left: `${ciLeft}%`, width: `${ciWidth}%` }}>
-                                            <div className={`w-1 h-4 shrink-0 ${contrastLight ? 'bg-slate-955' : 'bg-slate-650'}`} />
-                                            <div className={`w-1 h-4 shrink-0 ${contrastLight ? 'bg-slate-955' : 'bg-slate-650'}`} />
+                                            <div className={`w-1 h-3 shrink-0 ${contrastLight ? 'bg-slate-955' : 'bg-slate-650'}`} />
+                                            <div className={`w-1 h-3 shrink-0 ${contrastLight ? 'bg-slate-955' : 'bg-slate-650'}`} />
                                         </div>
-                                        <div className={`absolute h-8 rounded-lg transition-all duration-1000 ${item.color} ${item.isHighlight ? 'border-4 border-white' : ''} ${contrastLight ? 'border-2 border-slate-950' : ''}`} style={{ width: `${barWidth}%`, left: '0%' }} />
+                                        <div className={`absolute h-5 rounded-lg transition-all duration-1000 ${item.color} ${item.isHighlight ? 'border-2 border-white' : ''} ${contrastLight ? 'border border-slate-950' : ''}`} style={{ width: `${barWidth}%`, left: '0%' }} />
                                     </div>
-                                    <div className={`col-span-2 text-2xl font-mono font-black ${item.isHighlight ? 'text-rose-650' : contrastLight ? 'text-slate-955' : 'text-slate-400'}`}>
+                                    <div className={`col-span-2 text-xl font-mono font-black ${item.isHighlight ? 'text-rose-650' : contrastLight ? 'text-slate-955' : 'text-slate-400'}`}>
                                         {item.time.toFixed(1)}m
                                     </div>
                                 </div>
@@ -258,8 +256,8 @@ export const getSlides = (contrastLight, onClose) => [
     {
         title: "", // Lean canvas takes full screen
         subtitle: "",
-        icon: null,
-        iconColor: "",
+        icon: Layout,
+        iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
         content: (
             <div className="h-full w-full flex flex-col pt-8 px-4 pb-4">
                 <h2 className={`text-4xl font-black uppercase text-center mb-6 ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Business Model Canvas</h2>
@@ -346,37 +344,37 @@ export const getSlides = (contrastLight, onClose) => [
         icon: Users,
         iconColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
         content: (
-            <div className="h-full flex flex-col justify-center gap-8 w-full max-w-7xl mx-auto py-2 px-4">
+            <div className="h-full flex flex-col justify-center gap-6 w-full max-w-7xl mx-auto py-2 px-4">
                 {/* Papers Section */}
-                <div className={`p-8 rounded-3xl border-4 ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-800'}`}>
-                    <h3 className={`text-2xl font-black uppercase mb-6 ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Academic Validation (4 Published Papers)</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg font-bold">
+                <div className={`p-6 rounded-3xl border-4 ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-800'}`}>
+                    <h3 className={`text-xl font-black uppercase mb-4 ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Academic Validation (4 Published Papers)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base font-bold">
                         <div className="flex items-start gap-4">
-                            <img src="https://aclanthology.org/images/acl-logo-square.svg" alt="ACL Logo" className="h-10 w-10 object-contain bg-white p-1 rounded-lg border-2 border-slate-300 shrink-0" />
+                            <div className="h-10 w-10 bg-rose-100 text-rose-600 rounded-lg border-2 border-rose-300 flex items-center justify-center font-black"><BookOpen size={20} /></div>
                             <span><b className="text-rose-500">ACL 2026:</b> Cost-Aware Active Learning via Fatigue Clamping (A* NLP Conference)</span>
                         </div>
                         <div className="flex items-start gap-4">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/IEEE_logo.svg" alt="IEEE Logo" className="h-10 w-10 object-contain bg-white p-1 rounded-lg border-2 border-slate-300 shrink-0" />
+                            <div className="h-10 w-10 bg-blue-100 text-blue-600 rounded-lg border-2 border-blue-300 flex items-center justify-center font-black"><FileText size={20} /></div>
                             <span><b className="text-blue-500">IEEE CSNT 2026:</b> Scaling Enterprise NLP Pipelines using Committee Models</span>
                         </div>
                         <div className="flex items-start gap-4">
-                            <div className="h-10 w-10 bg-emerald-100 text-emerald-600 rounded-lg border-2 border-emerald-300 flex items-center justify-center font-black">NAACL</div>
+                            <div className="h-10 w-10 bg-emerald-100 text-emerald-600 rounded-lg border-2 border-emerald-300 flex items-center justify-center font-black"><BookOpen size={20} /></div>
                             <span><b className="text-emerald-500">NAACL 2025:</b> Behavioral Tracking in Data Annotation Workflows</span>
                         </div>
                         <div className="flex items-start gap-4">
-                            <div className="h-10 w-10 bg-purple-100 text-purple-600 rounded-lg border-2 border-purple-300 flex items-center justify-center font-black">EMNLP</div>
+                            <div className="h-10 w-10 bg-purple-100 text-purple-600 rounded-lg border-2 border-purple-300 flex items-center justify-center font-black"><FileText size={20} /></div>
                             <span><b className="text-purple-500">EMNLP 2024:</b> Overcoming Cognitive Bias in Sequential Human-in-the-loop Tasks</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Creative Roadmap Section */}
-                <div className={`p-8 rounded-3xl border-4 ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-800'}`}>
-                    <h3 className={`text-2xl font-black uppercase mb-10 text-center ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Strategic Product Roadmap</h3>
+                <div className={`p-6 rounded-3xl border-4 ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-800'}`}>
+                    <h3 className={`text-xl font-black uppercase mb-8 text-center ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Strategic Product Roadmap</h3>
                     
-                    <div className="flex flex-col md:flex-row items-center justify-between relative px-10 pb-8">
+                    <div className="flex flex-col md:flex-row items-center justify-between relative px-8 pb-4">
                         {/* Connecting Line */}
-                        <div className="hidden md:block absolute top-12 left-20 right-20 h-2 bg-gradient-to-r from-blue-500 via-rose-500 to-emerald-500 rounded-full z-0"></div>
+                        <div className="hidden md:block absolute top-10 left-16 right-16 h-2 bg-gradient-to-r from-blue-500 via-rose-500 to-emerald-500 rounded-full z-0"></div>
                         
                         {/* Roadmap Items */}
                         {[
@@ -385,14 +383,14 @@ export const getSlides = (contrastLight, onClose) => [
                             { step: "Phase 3", title: "Multi-Modal", icon: Layers, color: "text-rose-500 border-rose-500", desc: "Image & Audio support" },
                             { step: "Phase 4", title: "Global Scale", icon: Globe, color: "text-emerald-500 border-emerald-500", desc: "Open marketplace" },
                         ].map((item, i) => (
-                            <div key={i} className="flex flex-col items-center z-10 gap-4 group">
-                                <div className={`w-24 h-24 rounded-full border-8 bg-slate-900 flex items-center justify-center shadow-2xl transition-transform transform group-hover:scale-110 ${item.color}`}>
-                                    <item.icon size={36} className={item.color.split(' ')[0]} />
+                            <div key={i} className="flex flex-col items-center z-10 gap-3 group">
+                                <div className={`w-20 h-20 rounded-full border-4 bg-slate-900 flex items-center justify-center shadow-xl transition-transform transform group-hover:scale-110 ${item.color}`}>
+                                    <item.icon size={28} className={item.color.split(' ')[0]} />
                                 </div>
                                 <div className="text-center">
-                                    <span className={`block text-sm font-black uppercase tracking-widest ${contrastLight ? 'text-slate-500' : 'text-slate-400'}`}>{item.step}</span>
-                                    <h4 className={`text-xl font-black mt-1 ${contrastLight ? 'text-slate-900' : 'text-white'}`}>{item.title}</h4>
-                                    <p className={`text-sm font-bold mt-1 ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>{item.desc}</p>
+                                    <span className={`block text-xs font-black uppercase tracking-widest ${contrastLight ? 'text-slate-500' : 'text-slate-400'}`}>{item.step}</span>
+                                    <h4 className={`text-lg font-black mt-1 ${contrastLight ? 'text-slate-900' : 'text-white'}`}>{item.title}</h4>
+                                    <p className={`text-xs font-bold mt-1 ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>{item.desc}</p>
                                 </div>
                             </div>
                         ))}
