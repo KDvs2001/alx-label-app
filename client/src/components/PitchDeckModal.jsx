@@ -67,7 +67,7 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
 
     return (
         <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 animate-fade-in ${contrastLight ? 'bg-white' : 'bg-slate-950'}`}>
-            <div className={`w-full h-full relative flex flex-col justify-between overflow-hidden text-left transition-all ${
+            <div className={`w-full h-full min-h-0 relative flex flex-col justify-between overflow-hidden text-left transition-all ${
                 contrastLight ? 'bg-white text-slate-955' : 'bg-slate-955 text-white'
             }`}>
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-indigo-500 to-emerald-500 z-20" />
@@ -81,16 +81,16 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                     }`}
                     title="Exit Presentation"
                 >
-                    <X size={18} />
+                    <X size={15} />
                 </button>
 
                 {!isAuthenticated ? (
-                    <div className="flex-grow flex flex-col items-center justify-center py-10 space-y-6 text-center">
-                        <div className="w-16 h-16 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                            <Lock size={30} className="animate-pulse" />
+                    <div className="flex-grow flex flex-col items-center justify-center py-4 space-y-2.5 text-center">
+                        <div className="w-10 h-10 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <Lock size={22} className="animate-pulse" />
                         </div>
                         <div>
-                            <h3 className={`text-xl font-black ${contrastLight ? 'text-slate-955' : 'text-white'}`}>CAL-Log Presentation</h3>
+                            <h3 className={`text-base font-black ${contrastLight ? 'text-slate-955' : 'text-white'}`}>CAL-Log Presentation</h3>
                             <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Please enter the pitch presentation passkey to unlock the slides.</p>
                         </div>
                         <form onSubmit={handlePasswordSubmit} className="w-full max-w-xs space-y-3">
@@ -117,25 +117,25 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                     </div>
                 ) : (
                     <>
-                        <div className={`p-6 md:p-8 pb-4 border-b flex justify-between items-center ${
+                        <div className={`p-2.5 md:p-3 border-b flex justify-between items-center ${
                             contrastLight ? 'border-slate-350 bg-white border-b-2' : 'border-slate-900 bg-slate-950'
                         }`}>
-                            <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-xl border ${slides[currentSlide].iconColor}`}>
-                                    <CurrentIcon size={28} />
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className={`p-2 rounded-xl border shrink-0 ${slides[currentSlide].iconColor}`}>
+                                    <CurrentIcon size={18} />
                                 </div>
-                                <div>
+                                <div className="min-w-0">
                                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-505 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded">
                                         Slide {currentSlide + 1} of {slides.length}
                                     </span>
-                                    <h2 className={`text-2xl md:text-3xl font-black mt-1 tracking-tight ${contrastLight ? 'text-slate-955' : 'text-white'}`}>{slides[currentSlide].title}</h2>
-                                    <p className={`text-sm font-semibold mt-0.5 ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>{slides[currentSlide].subtitle}</p>
+                                    <h2 className={`text-base md:text-lg font-black mt-0.5 tracking-tight truncate ${contrastLight ? 'text-slate-955' : 'text-white'}`}>{slides[currentSlide].title}</h2>
+                                    <p className={`text-xs font-semibold mt-0.5 truncate ${contrastLight ? 'text-slate-900' : 'text-slate-400'}`}>{slides[currentSlide].subtitle}</p>
                                 </div>
                             </div>
                             
                             <button
                                 onClick={() => setIsProjectorMode(!isProjectorMode)}
-                                className={`mr-14 px-4 py-2 text-xs font-black rounded-lg transition border-2 ${
+                                className={`mr-12 shrink-0 px-3 py-1.5 text-[11px] font-black rounded-lg transition border-2 ${
                                     isProjectorMode 
                                         ? 'bg-amber-500 border-amber-600 text-black shadow-md' 
                                         : contrastLight
@@ -148,29 +148,29 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        <div className="flex-grow overflow-hidden relative">
+                        <div className="flex-grow min-h-0 overflow-hidden relative">
                             <div 
-                                className="flex h-full transition-transform duration-500 ease-out"
+                                className="flex h-full min-h-0 transition-transform duration-500 ease-out"
                                 style={{ transform: `translate3d(-${currentSlide * 100}%, 0, 0)` }}
                             >
                                 {slides.map((slide, idx) => (
-                                    <div key={idx} className="w-full h-full shrink-0 overflow-y-auto px-6 md:px-8 py-4">
+                                    <div key={idx} className="w-full h-full min-h-0 shrink-0 overflow-y-auto px-3 md:px-4 py-2">
                                         {slide.content}
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div className={`p-6 md:p-8 pt-4 border-t flex items-center justify-between ${
+                        <div className={`p-2.5 md:p-3 border-t flex items-center justify-between ${
                             contrastLight ? 'border-slate-350 bg-white border-t-2' : 'border-slate-900 bg-slate-950'
                         }`}>
                             <div className="flex gap-2">
                                 {slides.map((_, i) => (
                                     <span 
                                         key={i} 
-                                        className={`w-3.5 h-3.5 rounded-full transition-all duration-350 cursor-pointer ${
+                                        className={`w-2.5 h-2.5 rounded-full transition-all duration-350 cursor-pointer ${
                                             i === currentSlide 
-                                                ? 'bg-indigo-500 w-8' 
+                                                ? 'bg-indigo-500 w-6' 
                                                 : contrastLight ? 'bg-slate-300' : 'bg-slate-850'
                                         }`} 
                                         onClick={() => setCurrentSlide(i)}
@@ -181,18 +181,18 @@ const PitchDeckModal = ({ isOpen, onClose }) => {
                                 <button
                                     onClick={prevSlide}
                                     disabled={currentSlide === 0}
-                                    className={`p-3 rounded-xl border transition disabled:opacity-30 ${
+                                    className={`p-2.5 rounded-xl border transition disabled:opacity-30 ${
                                         contrastLight 
                                             ? 'bg-slate-100 border-slate-300 text-slate-955 hover:bg-slate-200 border-2 font-bold' 
                                             : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
                                     }`}
                                     title="Previous Slide"
                                 >
-                                    <ChevronLeft size={20} />
+                                    <ChevronLeft size={16} />
                                 </button>
                                 <button
                                     onClick={nextSlide}
-                                    className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-sm font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10 border-2 border-indigo-700 font-extrabold"
+                                    className="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-sm font-black rounded-xl transition flex items-center gap-2 shadow-lg shadow-indigo-500/10 border-2 border-indigo-700 font-extrabold"
                                 >
                                     {currentSlide === slides.length - 1 ? 'Start Live Demo' : 'Next Slide'} <ChevronRight size={16} />
                                 </button>

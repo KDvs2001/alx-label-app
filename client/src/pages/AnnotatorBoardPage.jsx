@@ -148,7 +148,7 @@ const KanbanColumn = ({ title, icon: Icon, color, count, children, emptyMsg }) =
     </div>
 );
 
-import PilotTestModal from '../components/workspace/PilotTestModal';
+
 import ResearchWorkspace from '../components/ResearchWorkspace';
 import { Bell, Sparkles, X as CloseIcon } from 'lucide-react';
 
@@ -317,7 +317,7 @@ const AnnotatorBoardPage = ({ username }) => {
 
     return (
         <div className="min-h-screen bg-slate-950 text-white p-4 md:p-6 pb-16 relative overflow-x-hidden">
-            {showPilot && <PilotTestModal username={username} onComplete={handlePilotComplete} />}
+            {showPilot }
 
             {/* Custom Modern Floating Toast Notification */}
             {toastNotification && (
