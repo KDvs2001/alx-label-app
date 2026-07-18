@@ -489,6 +489,23 @@ const ResearchWorkspace = ({ onExit }) => {
                 if (mData.verification_queue) {
                     setVerificationQueue(mData.verification_queue);
                 }
+
+                // Sync background auto-approved tasks that bypass human verification
+                if (mData.auto_approved_ids && mData.auto_approved_ids.length > 0) {
+                    const newlyApproved = mData.auto_approved_ids.filter(id => !labeledIdsRef.current.includes(id));
+                    if (newlyApproved.length > 0) {
+                        const nextLabeledIds = [...labeledIdsRef.current, ...newlyApproved];
+                        labeledIdsRef.current = nextLabeledIds;
+                        setLabeledTaskIds(nextLabeledIds);
+                        
+                        setAnnotationCount(prev => {
+                            const newCount = prev + newlyApproved.length;
+                            // Save session to Node.js backend
+                            saveSession(newCount, nextLabeledIds);
+                            return newCount;
+                        });
+                    }
+                }
             }
         } catch (e) {
             // Ignore poll errors
@@ -1342,7 +1359,7 @@ const ResearchWorkspace = ({ onExit }) => {
                             </p>
                         </div>
 
-                        {/* Scrollable list of verification tasks */}
+                    {/* Scrollable list of verification tasks */}
                         <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-4 max-h-[50vh] custom-scrollbar">
                             {verificationQueue.length === 0 ? (
                                 <div className="text-center py-8 text-slate-500">
@@ -1350,10 +1367,34 @@ const ResearchWorkspace = ({ onExit }) => {
                                 </div>
                             ) : (
                                 verificationQueue.map((task, index) => {
-                                    // Mock differing opinions based on index/text for the demo
-                                    const allLabels = ['Positive', 'Negative', 'Neutral'];
                                     const mainLabel = task.predicted_label || 'Neutral';
-                                    const altLabel = allLabels.find(l => l !== mainLabel) || 'Negative';
+                                    const llamaVote = task.llama_vote || mainLabel;
+                                    const mistralVote = task.mistral_vote || mainLabel;
+                                    
+                                    // Default mock fallback for Phi-3 only if not provided by backend
+                                    const allLabels = datasetConfig?.labels || ['Positive', 'Negative', 'Neutral'];
+                                    const defaultAlt = allLabels.find(l => l !== mainLabel) || 'Negative';
+                                    const phiVote = task.phi_vote || defaultAlt;
+                                    
+                                    // Highlight card borders if a model disagrees with the CAL-Log prediction (mainLabel)
+                                    const llamaAgrees = llamaVote === mainLabel;
+                                    const mistralAgrees = mistralVote === mainLabel;
+                                    const phiAgrees = phiVote === mainLabel;
+                                    
+                                    // Calculate dynamic majority vote of the 4-model committee
+                                    const votesList = [mainLabel, llamaVote, mistralVote, phiVote];
+                                    const voteCounts = {};
+                                    votesList.forEach(v => {
+                                        voteCounts[v] = (voteCounts[v] || 0) + 1;
+                                    });
+                                    let majorityVote = mainLabel;
+                                    let maxVotes = 0;
+                                    Object.keys(voteCounts).forEach(v => {
+                                        if (voteCounts[v] > maxVotes) {
+                                            maxVotes = voteCounts[v];
+                                            majorityVote = v;
+                                        }
+                                    });
                                     
                                     return (
                                         <div key={task.id} className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-4 flex flex-col gap-3">
@@ -1368,17 +1409,17 @@ const ResearchWorkspace = ({ onExit }) => {
                                                     <span className="text-[10px] uppercase tracking-widest font-bold text-rose-400">Consensus Broken</span>
                                                 </div>
                                                 <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
-                                                    <div className="bg-slate-800 rounded p-1.5 border border-slate-700">
-                                                        <span className="block text-slate-500 font-bold mb-0.5">Llama-3 (8B)</span>
-                                                        <span className="text-slate-300 font-bold">{mainLabel}</span>
+                                                    <div className={`bg-slate-800 rounded p-1.5 border ${llamaAgrees ? 'border-slate-700' : 'border-amber-500/30'}`}>
+                                                        <span className={`block font-bold mb-0.5 ${llamaAgrees ? 'text-slate-500' : 'text-amber-500/80'}`}>Llama-3 (8B)</span>
+                                                        <span className={`${llamaAgrees ? 'text-slate-300' : 'text-amber-400'} font-bold`}>{llamaVote}</span>
                                                     </div>
-                                                    <div className="bg-slate-800 rounded p-1.5 border border-slate-700">
-                                                        <span className="block text-slate-500 font-bold mb-0.5">Mistral (7B)</span>
-                                                        <span className="text-slate-300 font-bold">{mainLabel}</span>
+                                                    <div className={`bg-slate-800 rounded p-1.5 border ${mistralAgrees ? 'border-slate-700' : 'border-amber-500/30'}`}>
+                                                        <span className={`block font-bold mb-0.5 ${mistralAgrees ? 'text-slate-500' : 'text-amber-500/80'}`}>Mistral (7B)</span>
+                                                        <span className={`${mistralAgrees ? 'text-slate-300' : 'text-amber-400'} font-bold`}>{mistralVote}</span>
                                                     </div>
-                                                    <div className="bg-slate-800 rounded p-1.5 border border-amber-500/30">
-                                                        <span className="block text-amber-500/80 font-bold mb-0.5">Phi-3 (Mini)</span>
-                                                        <span className="text-amber-400 font-bold">{altLabel}</span>
+                                                    <div className={`bg-slate-800 rounded p-1.5 border ${phiAgrees ? 'border-slate-700' : 'border-amber-500/30'}`}>
+                                                        <span className={`block font-bold mb-0.5 ${phiAgrees ? 'text-slate-500' : 'text-amber-500/80'}`}>Phi-3 (Mini)</span>
+                                                        <span className={`${phiAgrees ? 'text-slate-300' : 'text-amber-400'} font-bold`}>{phiVote}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1389,7 +1430,7 @@ const ResearchWorkspace = ({ onExit }) => {
                                                         Avg Confidence: {(task.confidence * 100).toFixed(1)}%
                                                     </span>
                                                     <span className="text-xs text-slate-300">
-                                                        Majority Vote: <span className="font-bold text-purple-400">{mainLabel}</span>
+                                                        Majority Vote: <span className="font-bold text-purple-400">{majorityVote}</span>
                                                     </span>
                                                 </div>
                                                 <div className="flex gap-2">

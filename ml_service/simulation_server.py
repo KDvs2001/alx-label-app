@@ -105,6 +105,7 @@ class SimulationState:
         self.selected_task_lengths = [] # Track history of selected task lengths
         self.labeled_ids = set() # Track all task IDs labeled manually or automatically
         self.last_bg_auto_labeled_count = 0
+        self.auto_approved_ids = []
         self.round_size = 10
         self.verification_queue = {} # Maps taskId (int) -> dict of task details (text, label, confidence, etc.)
         self.auto_label_threshold = 0.95
@@ -350,7 +351,8 @@ def health():
         "verification_queue": verification_queue_list,
         "auto_label_threshold": getattr(state, 'auto_label_threshold', 0.95),
         "cognitive_pacing_active": getattr(state, 'cognitive_pacing_active', False),
-        "baseline_beta": getattr(state, 'baseline_beta', None)
+        "baseline_beta": getattr(state, 'baseline_beta', None),
+        "auto_approved_ids": getattr(state, 'auto_approved_ids', [])
     })
 
 @app.route('/session/init-priors', methods=['POST'])
@@ -882,13 +884,40 @@ def bg_train_worker(cal_log_data, random_data, entropy_data, test_set, current_s
                             pred_idx = int(np.argmax(prob))
                             custom_labels = getattr(state, 'custom_labels', ["Negative", "Positive"])
                             pred_label = custom_labels[pred_idx] if pred_idx < len(custom_labels) else str(pred_idx)
-                            state.verification_queue[task['id']] = {
-                                'id': task['id'],
-                                'text': task['text'],
-                                'predicted_label': pred_label,
-                                'confidence': float(max_conf)
-                            }
-                            auto_labeled_count += 1
+                            
+                            # Simulate Llama-3, Mistral, Phi-3 votes dynamically & deterministically
+                            local_rng = random.Random(task['id'])
+                            true_lbl_int = state.id_to_label.get(task['id'], 0)
+                            true_lbl_str = custom_labels[true_lbl_int] if true_lbl_int < len(custom_labels) else custom_labels[0]
+                            
+                            llama_vote = true_lbl_str if local_rng.random() < 0.90 else local_rng.choice(custom_labels)
+                            mistral_vote = true_lbl_str if local_rng.random() < 0.88 else local_rng.choice(custom_labels)
+                            phi_vote = true_lbl_str if local_rng.random() < 0.85 else local_rng.choice(custom_labels)
+                            
+                            # Consensus rule: If ALL models agree (unanimous), auto-approve directly (prune it!)
+                            if pred_label == llama_vote == mistral_vote == phi_vote:
+                                record_annotation_observation(
+                                    text=task['text'],
+                                    time_seconds=0.1,
+                                    label=pred_label,
+                                    task_id=task['id']
+                                )
+                                state.labeled_ids.add(task['id'])
+                                lbl_int = get_label_index(pred_label)
+                                state.backbone.partial_fit([task['text']], [lbl_int])
+                                state.auto_approved_ids.append(task['id'])
+                            else:
+                                # If consensus is broken, route it to human verification queue
+                                state.verification_queue[task['id']] = {
+                                    'id': task['id'],
+                                    'text': task['text'],
+                                    'predicted_label': pred_label,
+                                    'confidence': float(max_conf),
+                                    'llama_vote': llama_vote,
+                                    'mistral_vote': mistral_vote,
+                                    'phi_vote': phi_vote
+                                }
+                                auto_labeled_count += 1
                 except Exception as e:
                     logger.error(f"Background Thread: Dynamic auto-labeling failed: {e}")
             
@@ -1079,6 +1108,7 @@ def reset_session():
         state.custom_labels = custom_labels
         state.labeled_ids = set() # Clear server-side labeled IDs
         state.last_bg_auto_labeled_count = 0
+        state.auto_approved_ids = []
         state.task_difficulty = {}
         state.round_size = int(payload.get("roundSize", 10))
         state.verification_queue = {}
@@ -1103,7 +1133,7 @@ def reset_session():
         }
         
         # 3. Handle custom or preset dataset loading
-        if dataset_name == "custom" and uploaded_texts:
+        if uploaded_texts:
             logger.info(f"Loading custom uploaded dataset with {len(uploaded_texts)} items...")
             state.dataset = []
             state.id_to_label = {}
@@ -1367,6 +1397,71 @@ def auto_label():
         logger.error(f"Auto-labeling failed: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+def recalculate_and_save_metrics():
+    """Recalculate validation metrics (accuracy, ECE) and dynamic auto-label threshold."""
+    try:
+        X_test = [t['text'] for t in state.test_set]
+        y_test = [t['label'] for t in state.test_set]
+        
+        scores = {}
+        for name, model in state.models.items():
+            try:
+                preds = model.predict(X_test)
+                acc = np.mean([1 if p == y else 0 for p, y in zip(preds, y_test)])
+                scores[name] = round(acc, 3)
+            except Exception:
+                scores[name] = 0.5
+        
+        scores['step'] = state.step
+        state.accuracy_history.append(scores)
+        
+        ece_val = 0.0
+        try:
+            probs_test = state.models['cal_log'].predict_proba(X_test)
+            confidences = np.max(probs_test, axis=1)
+            predictions = np.argmax(probs_test, axis=1)
+            y_test_arr = np.array(y_test)
+            
+            bin_boundaries = np.linspace(0, 1, 11)
+            for i in range(10):
+                bin_lower = bin_boundaries[i]
+                bin_upper = bin_boundaries[i+1]
+                in_bin = (confidences > bin_lower) & (confidences <= bin_upper)
+                prop_in_bin = np.mean(in_bin)
+                if prop_in_bin > 0:
+                    accuracy_in_bin = np.mean(predictions[in_bin] == y_test_arr[in_bin])
+                    avg_confidence_in_bin = np.mean(confidences[in_bin])
+                    ece_val += prop_in_bin * np.abs(avg_confidence_in_bin - accuracy_in_bin)
+            ece_val = round(float(ece_val), 3)
+        except Exception:
+            pass
+            
+        if getattr(state, 'auto_label_threshold_mode', 'dynamic') == 'dynamic':
+            acc_val = scores.get('cal_log', 0.5)
+            raw_threshold = 0.98 - (acc_val - 0.5) * 0.2 + (ece_val * 0.1)
+            state.auto_label_threshold = round(max(0.85, min(0.98, raw_threshold)), 3)
+            logger.info(f"Self-Tuning Engine: Updated Auto-Pruning Threshold to {state.auto_label_threshold} based on Accuracy={acc_val:.2f}, ECE={ece_val:.3f}")
+            
+        try:
+            pool_remaining = len([t for t in state.clean_pool if t['id'] not in state.labeled_ids and t['id'] not in state.verification_queue])
+            metrics_data = {
+                "accuracy_history": state.accuracy_history,
+                "step": state.step,
+                "alpha": state.cost_model.alpha,
+                "beta": state.cost_model.beta,
+                "ece": ece_val,
+                "last_bg_auto_labeled_count": state.last_bg_auto_labeled_count,
+                "pool_remaining": pool_remaining,
+                "cognitive_pacing_active": getattr(state, 'cognitive_pacing_active', False),
+                "baseline_beta": getattr(state, 'baseline_beta', None)
+            }
+            with open(METRICS_PATH, "w") as f:
+                json.dump(metrics_data, f)
+        except Exception:
+            pass
+    except Exception as e:
+        logger.error(f"Failed to recalculate metrics: {e}")
+
 @app.route('/verify', methods=['POST'])
 def verify_task():
     """Verify (Approve or Correct) an auto-labeled task in the active learning loop."""
@@ -1378,6 +1473,8 @@ def verify_task():
         
         if action == "approve_all":
             count = 0
+            texts_to_fit = []
+            labels_to_fit = []
             # copy keys to avoid runtime modification errors
             for tid in list(state.verification_queue.keys()):
                 task = state.verification_queue.pop(tid, None)
@@ -1391,8 +1488,13 @@ def verify_task():
                     )
                     state.labeled_ids.add(tid)
                     lbl_int = get_label_index(lbl)
-                    state.backbone.partial_fit([task['text']], [lbl_int])
+                    texts_to_fit.append(task['text'])
+                    labels_to_fit.append(lbl_int)
                     count += 1
+            if texts_to_fit:
+                state.backbone.partial_fit(texts_to_fit, labels_to_fit)
+            
+            recalculate_and_save_metrics()
             return jsonify({"status": "success", "message": f"Approved all {count} tasks."})
             
         if task_id is None:
@@ -1418,6 +1520,8 @@ def verify_task():
             state.labeled_ids.add(task_id)
             lbl_int = get_label_index(lbl)
             state.backbone.partial_fit([task['text']], [lbl_int])
+            
+            recalculate_and_save_metrics()
             return jsonify({"status": "success", "message": f"Task {task_id} approved."})
             
         elif action == "correct":
@@ -1433,6 +1537,8 @@ def verify_task():
             lbl_int = get_label_index(corrected_label)
             state.backbone.partial_fit([task['text']], [lbl_int])
             logger.info(f"Retrained model on human correction for task {task_id} (corrected to {corrected_label})")
+            
+            recalculate_and_save_metrics()
             return jsonify({"status": "success", "message": f"Task {task_id} corrected."})
             
         else:
