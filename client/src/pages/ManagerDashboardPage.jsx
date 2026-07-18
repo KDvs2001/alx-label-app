@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
     Activity, Brain, Clock, DollarSign, Database, Download, 
     RefreshCw, Layers, ShieldCheck, TrendingUp, Info, HelpCircle, User, ArrowLeft,
-    FolderOpen, Users, BarChart2, CheckCircle2, ArrowRight, Pause, Play
+    FolderOpen, Users, BarChart2, CheckCircle2, ArrowRight, Pause, Play, X
 } from 'lucide-react';
 import SpyAnalysis from '../components/workspace/SpyAnalysis';
 import SimpleExplanationModal from '../components/workspace/SimpleExplanationModal';
@@ -41,6 +41,7 @@ const ManagerDashboardPage = () => {
     const [isAutoLabeling, setIsAutoLabeling] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
     const [showExplanation, setShowExplanation] = useState(false);
+    const [activeScenario, setActiveScenario] = useState(null); // 'roi' | 'pacing' | 'calibration' | 'pruning' | null
 
     // Reset Configuration Form State
     const [datasetName, setDatasetName] = useState('imdb'); // imdb, rotten_tomatoes, ag_news, custom
@@ -339,78 +340,100 @@ const ManagerDashboardPage = () => {
                         <Download size={15} /> Export
                     </button>
                 </div>
+            </div>            {/* ─── TOP KPI GRID: 4 Interactive Scenario Diagnostics ────────────────── */}
+            <div className="max-w-7xl mx-auto mb-3 text-left">
+                <span className="text-[10px] uppercase tracking-widest font-black text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded border border-blue-500/20">
+                    Interactive Scenarios
+                </span>
+                <span className="text-xs text-slate-500 ml-3">
+                    Click any widget below to open its diagnostic scenario panel & controllers.
+                </span>
             </div>
-
-            {/* ─── TOP KPI GRID: 4 Key Performance Metrics ────────────────── */}
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 
                 {/* 1. Labor & Budget Savings Card */}
-                <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-emerald-500/30 transition-all duration-300">
-                    <div className="flex justify-between items-start mb-2">
+                <button 
+                    onClick={() => setActiveScenario('roi')}
+                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-emerald-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-emerald-500/30"
+                >
+                    <div className="flex justify-between items-start mb-2 w-full">
                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Labor & Financial ROI</span>
                         <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><DollarSign size={16} /></div>
                     </div>
                     <div className="mt-1">
                         <h2 className="text-2xl md:text-3xl font-black text-white">{dollarsSaved} USD</h2>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                            Estimated saved: <span className="text-emerald-400 font-bold">{timeSavedHours}h</span> of manual reading latency.
+                        <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                            Saved: <span className="text-emerald-400 font-bold">{timeSavedHours}h</span> of annotator reading latency.
                         </p>
+                        <span className="text-[9px] text-emerald-400/80 font-bold uppercase mt-2.5 block tracking-wider">Click to view Details →</span>
                     </div>
-                </div>
-
-                {/* 2. Annotator Speed & Pacing Card */}
-                <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-amber-500/30 transition-all duration-300">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Cognitive Load & Pacing</span>
-                        <div className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><Activity size={16} /></div>
-                    </div>
-                    <div className="mt-1">
-                        <div className="flex items-center gap-1.5">
-                            <span className="relative flex h-2 w-2">
-                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
-                                <span className={`relative inline-flex rounded-full h-2 w-2 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
-                            </span>
-                            <span className="text-sm font-black text-slate-200">
-                                {metrics?.cognitive_pacing_active ? "Pacing Active" : "Optimal (Active)"}
-                            </span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1.5">
-                            Speed: <span className="font-mono text-white font-bold">{(metrics?.beta || 3.0).toFixed(2)}s</span> (Base: {(metrics?.baseline_beta || 3.0).toFixed(2)}s)
-                        </p>
-                    </div>
-                </div>
-
-                {/* 3. Expected Calibration Error Card */}
-                <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-blue-500/30 transition-all duration-300">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Calibration Error (ECE)</span>
-                        <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={16} /></div>
-                    </div>
-                    <div className="mt-1">
-                        <h2 className="text-2xl md:text-3xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                            Auto-labeling limit: <span className="text-amber-400 font-bold">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
-                        </p>
-                    </div>
-                </div>
-
-                {/* 4. Active Pruning Efficiency Card */}
-                <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-purple-500/30 transition-all duration-300">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Workload Reduction</span>
-                        <div className="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><Layers size={16} /></div>
-                    </div>
-                    <div className="mt-1">
-                        <h2 className="text-2xl md:text-3xl font-black text-white">
-                            {Math.round(autoPrunedCount / poolTotal * 100)}% Saved
-                        </h2>
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                            Pruned <span className="text-purple-400 font-bold">{autoPrunedCount}</span> redundant texts out of {poolTotal} pool.
-                        </p>
-                    </div>
-                </div>
-
-            </div>
+                </button>
+ 
+                 {/* 2. Annotator Speed & Pacing Card */}
+                <button 
+                    onClick={() => setActiveScenario('pacing')}
+                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-amber-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-amber-500/30"
+                >
+                     <div className="flex justify-between items-start mb-2 w-full">
+                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Cognitive Load & Pacing</span>
+                         <div className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><Activity size={16} /></div>
+                     </div>
+                     <div className="mt-1">
+                         <div className="flex items-center gap-1.5">
+                             <span className="relative flex h-2 w-2">
+                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                 <span className={`relative inline-flex rounded-full h-2 w-2 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                             </span>
+                             <span className="text-sm font-black text-slate-200">
+                                 {metrics?.cognitive_pacing_active ? "Pacing Active" : "Optimal (Active)"}
+                             </span>
+                         </div>
+                         <p className="text-[11px] text-slate-500 mt-1.5">
+                             Speed: <span className="font-mono text-white font-bold">{(metrics?.beta || 3.0).toFixed(2)}s</span> (Base: {(metrics?.baseline_beta || 3.0).toFixed(2)}s)
+                         </p>
+                         <span className="text-[9px] text-amber-400/80 font-bold uppercase mt-2 block tracking-wider">Click to adjust Pacing →</span>
+                     </div>
+                </button>
+ 
+                 {/* 3. Expected Calibration Error Card */}
+                <button 
+                    onClick={() => setActiveScenario('calibration')}
+                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-blue-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-blue-500/30"
+                >
+                     <div className="flex justify-between items-start mb-2 w-full">
+                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Calibration Error (ECE)</span>
+                         <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={16} /></div>
+                     </div>
+                     <div className="mt-1">
+                         <h2 className="text-2xl md:text-3xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
+                         <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                             Threshold: <span className="text-blue-400 font-bold">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span> (Dynamic)
+                         </p>
+                         <span className="text-[9px] text-blue-400/80 font-bold uppercase mt-2.5 block tracking-wider">Click to view Calibration →</span>
+                     </div>
+                </button>
+ 
+                 {/* 4. Active Pruning Efficiency Card */}
+                <button 
+                    onClick={() => setActiveScenario('pruning')}
+                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-purple-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-purple-500/30"
+                >
+                     <div className="flex justify-between items-start mb-2 w-full">
+                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Workload Reduction</span>
+                         <div className="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><Layers size={16} /></div>
+                     </div>
+                     <div className="mt-1">
+                         <h2 className="text-2xl md:text-3xl font-black text-white">
+                             {Math.round(autoPrunedCount / poolTotal * 100)}% Saved
+                         </h2>
+                         <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                             Pruned <span className="text-purple-400 font-bold">{autoPrunedCount}</span> redundant texts.
+                         </p>
+                         <span className="text-[9px] text-purple-400/80 font-bold uppercase mt-2.5 block tracking-wider">Click to run Auto-Label →</span>
+                     </div>
+                </button>
+ 
+             </div>
 
             {/* Main Dashboard Layout */}
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -779,7 +802,171 @@ const ManagerDashboardPage = () => {
                     )}
                 </div>
             </div>
+            {/* ─── SCENARIO DETAIL MODAL OVERLAY ──────────────────────────── */}
+            {activeScenario && (
+                <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl relative text-left my-8 overflow-hidden">
+                        {/* Glow accent decoration */}
+                        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${
+                            activeScenario === 'roi' ? 'bg-emerald-500/10' :
+                            activeScenario === 'pacing' ? 'bg-amber-500/10' :
+                            activeScenario === 'calibration' ? 'bg-blue-500/10' : 'bg-purple-500/10'
+                        }`} />
+                        
+                        {/* Close button */}
+                        <button 
+                            onClick={() => setActiveScenario(null)}
+                            className="absolute top-4 right-4 text-slate-400 hover:text-white transition p-1.5 hover:bg-slate-850 rounded-full"
+                        >
+                            <X size={18} />
+                        </button>
 
+                        {/* Title & Icon */}
+                        <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
+                            <div className={`p-2 rounded-xl border ${
+                                activeScenario === 'roi' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                                activeScenario === 'pacing' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
+                                activeScenario === 'calibration' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
+                                'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                            }`}>
+                                {activeScenario === 'roi' && <DollarSign size={20} />}
+                                {activeScenario === 'pacing' && <Activity size={20} />}
+                                {activeScenario === 'calibration' && <ShieldCheck size={20} />}
+                                {activeScenario === 'pruning' && <Layers size={20} />}
+                            </div>
+                            <div>
+                                <span className="text-[10px] uppercase font-black text-slate-500 tracking-widest block">Simulation Scenario</span>
+                                <h3 className="text-lg font-black text-white">
+                                    {activeScenario === 'roi' && 'Labor & Budget Optimization'}
+                                    {activeScenario === 'pacing' && 'Cognitive Load & Ergonomic Pacing'}
+                                    {activeScenario === 'calibration' && 'Model Calibration & Collapse Safeguards'}
+                                    {activeScenario === 'pruning' && 'Consensus-Based Active Pruning'}
+                                </h3>
+                            </div>
+                        </div>
+
+                        {/* Scenario Content */}
+                        <div className="space-y-6 text-sm text-slate-300">
+                            {activeScenario === 'roi' && (
+                                <>
+                                    <p className="leading-relaxed">
+                                        Active learning saves budget by selecting only the most informative texts for manual annotation. Redundant and high-confidence predictions are handled by the model, flattening your labeling cost curve.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Financial Return</span>
+                                            <span className="text-2xl font-black text-emerald-400">{dollarsSaved} USD</span>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Estimated Hours Reclaimed</span>
+                                            <span className="text-2xl font-black text-white">{timeSavedHours} Hours</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-2">
+                                        <h4 className="font-bold text-xs text-white uppercase tracking-wider">Ergonomic Budget Formula</h4>
+                                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                                            Calculated based on an average wage rate of <span className="text-white font-bold">$20.00/hour</span>. In a standard project, human reading latency dominates the expense. CAL-Log reduces this latency by routing clear predictions directly into the database observations.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+
+                            {activeScenario === 'pacing' && (
+                                <>
+                                    <p className="leading-relaxed">
+                                        OLS regression calculates keyboard and scroll latency residuals to model annotator cognitive fatigue. Pacing dynamically routes simpler tasks when fatigue is detected, preventing decision errors.
+                                    </p>
+                                    <div className="grid grid-cols-3 gap-3 text-center">
+                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Current Speed</span>
+                                            <span className="text-lg font-black text-white">{(metrics?.beta || 3.0).toFixed(2)}s/wd</span>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Baseline Speed</span>
+                                            <span className="text-lg font-black text-slate-400">{(metrics?.baseline_beta || 3.0).toFixed(2)}s/wd</span>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Pacing Status</span>
+                                            <span className={`text-xs font-black block mt-1.5 ${metrics?.cognitive_pacing_active ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}`}>
+                                                {metrics?.cognitive_pacing_active ? 'Fatigue Mode' : 'Optimal'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-2">
+                                        <h4 className="font-bold text-xs text-white uppercase tracking-wider">Ergonomic Diagnostic Rule</h4>
+                                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                                            If an annotator's response speed falls below 1.5x of their baseline speed (due to typing or scanning latency), OLS residuals trigger the <span className="text-amber-400 font-bold">Fatigue Recovery Loop</span>. Round sizes are reduced, and less complex tasks are prioritized until speed recovers.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+
+                            {activeScenario === 'calibration' && (
+                                <>
+                                    <p className="leading-relaxed">
+                                        Calibration verification computes Expected Calibration Error (ECE) on validation sets to ensure the model's confidence scores correspond to its actual correctness, preventing target-concept drift.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Validation Error (ECE)</span>
+                                            <span className="text-2xl font-black text-blue-400">{(metrics?.ece || 0.000).toFixed(3)}</span>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Auto-Label Threshold</span>
+                                            <span className="text-2xl font-black text-white">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-2">
+                                        <h4 className="font-bold text-xs text-white uppercase tracking-wider">Calibration Drift Protection</h4>
+                                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                                            When ECE spikes, the model's self-assessment is untrustworthy. The system dynamically raises the confidence threshold (e.g. from <span className="text-blue-300 font-bold">85% to 98%</span>) to freeze auto-labeling, preventing model collapse and routing questionable inputs to human annotators.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
+
+                            {activeScenario === 'pruning' && (
+                                <>
+                                    <p className="leading-relaxed">
+                                        Consensus-based active pruning uses the local SLM committee (Llama-3, Mistral, Phi-3) to filter high-confidence agreements. Only disagreed edge cases require human tie-breaker annotations.
+                                    </p>
+                                    <div className="grid grid-cols-3 gap-3 text-center">
+                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Auto-Pruned</span>
+                                            <span className="text-lg font-black text-purple-400">{autoPrunedCount}</span>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Manual Labels</span>
+                                            <span className="text-lg font-black text-white">{manualCount}</span>
+                                        </div>
+                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Remaining Pool</span>
+                                            <span className="text-lg font-black text-slate-400">{poolRemaining}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Action Buttons inside scenario */}
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            onClick={() => { handleAutoLabel(); setActiveScenario(null); }}
+                                            disabled={isAutoLabeling}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition disabled:opacity-50 text-xs"
+                                        >
+                                            <Brain size={14} className={isAutoLabeling ? "animate-spin" : ""} /> Bulk Auto-Label Pool
+                                        </button>
+                                        <button
+                                            onClick={() => { handleExport(); setActiveScenario(null); }}
+                                            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-slate-800 hover:bg-slate-700 text-purple-400 rounded-xl font-bold border border-slate-750 transition text-xs"
+                                        >
+                                            <Download size={14} /> Export Observations
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

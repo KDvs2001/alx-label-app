@@ -407,6 +407,7 @@ const ResearchWorkspace = ({ onExit }) => {
                 fetchSpySelection();
             } else {
                 setToast({ message: "All tasks have been labeled!", type: "success" });
+                setShowSummary(true);
             }
         } catch (e) {
             // Silently ignore AbortErrors, these are expected when:

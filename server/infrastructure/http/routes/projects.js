@@ -95,9 +95,9 @@ router.get('/', async (req, res) => {
                 contestantId: new RegExp('_' + project.projectId + '$')
             });
 
-            // sum up every labeled task across all annotators for this project
+            // sum up every labeled task across all annotators for this project (capped at project size)
             const totalLabeled = sessions.reduce(
-                (sum, s) => sum + (s.labeledTaskIds?.length ?? 0),
+                (sum, s) => sum + Math.min(s.labeledTaskIds?.length ?? 0, project.texts.length),
                 0
             );
 
@@ -142,8 +142,8 @@ router.get('/annotator/:username', async (req, res) => {
                 contestantId: `${username}_${project.projectId}`
             });
 
-            const labeled = session?.labeledTaskIds?.length ?? 0;
             const total   = project.texts.length;
+            const labeled = Math.min(session?.labeledTaskIds?.length ?? 0, total);
 
             // derive a human-readable board status from raw progress numbers
             let boardStatus;
@@ -186,7 +186,7 @@ router.get('/stats/all', async (req, res) => {
             });
 
             const labeled = sessions.reduce(
-                (sum, s) => sum + (s.labeledTaskIds?.length ?? 0),
+                (sum, s) => sum + Math.min(s.labeledTaskIds?.length ?? 0, project.texts.length),
                 0
             );
 
@@ -201,7 +201,7 @@ router.get('/stats/all', async (req, res) => {
 
                 return {
                     username,
-                    labeled: s.labeledTaskIds?.length || 0,
+                    labeled: Math.min(s.labeledTaskIds?.length || 0, project.texts.length),
                     timeSaved: s.cumulativeTimeSaved || 0,
                     readingStyle: profile?.readingStyle || 'Unknown',
                     baselineSpeed: profile?.baselineSpeed || 0,
