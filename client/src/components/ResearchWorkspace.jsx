@@ -148,32 +148,71 @@ const ResearchWorkspace = ({ onExit }) => {
     // 1. Initial Load & Polling (only after contestant ID is set)
     useEffect(() => {
         if (contestantId) {
-            // Check if the workspace was launched from the Kanban board with a specific project config.
-            // If so, we must reset the ML service with that project's corpus BEFORE fetching tasks.
-            // This ensures the ML service is seeded with the correct texts and label types.
-            // CITATION: sessionStorage — stores data for the duration of the page session
-            // SOURCE: MDN Web Docs (n.d.). "Window.sessionStorage"
-            // URL: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
-            const projectConfigStr = sessionStorage.getItem('cal_log_project_config');
-            if (projectConfigStr) {
-                try {
-                    const config = JSON.parse(projectConfigStr);
-                    sessionStorage.removeItem('cal_log_project_config'); // consume once
-                    setDatasetConfig(config);
-                    // Reset ML service with project corpus, then fetch first batch
-                    fetch(`${API_URL}/reset`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(config)
-                    })
-                    .then(() => fetchNextBatch())
-                    .catch(() => fetchNextBatch()); // still try even if reset fails
-                } catch {
-                    fetchNextBatch(); // corrupted config — fall through
+            const initSession = async () => {
+                const projectConfigStr = sessionStorage.getItem('cal_log_project_config');
+                let config = null;
+                
+                if (projectConfigStr) {
+                    try {
+                        config = JSON.parse(projectConfigStr);
+                        sessionStorage.removeItem('cal_log_project_config'); // consume once
+                        setDatasetConfig(config);
+                    } catch { }
                 }
-            } else {
+
+                // Try to load existing session from backend to restore progress
+                try {
+                    const response = await fetch(`${SERVER_URL}/api/session/load/${contestantId}`);
+                    const data = await response.json();
+                    if (data.exists) {
+                        setAnnotationCount(data.session.annotationCount || 0);
+                        const loadedIds = data.session.labeledTaskIds || [];
+                        setLabeledTaskIds(loadedIds);
+                        labeledIdsRef.current = loadedIds;
+                        setFullAnnotations(data.session.annotations || []);
+                        setCumulativeTimeSaved(data.session.cumulativeTimeSaved || 0);
+                        setCumulativeEntropyCost(data.session.cumulativeEntropyCost || 0);
+                        setCumulativeRandomCost(data.session.cumulativeRandomCost || 0);
+                        setCumulativeCalLogCost(data.session.cumulativeCalLogCost || 0);
+                        
+                        const rSize = data.session.roundSize || config?.roundSize || 10;
+                        setRoundSize(rSize);
+                        const thresh = data.session.autoLabelThreshold || config?.autoLabelThreshold || 'dynamic';
+                        setAutoLabelThreshold(thresh);
+                        setCurrentRound(Math.floor((data.session.annotationCount || 0) / rSize) + 1);
+                        setShowRoundTransition(false);
+
+                        // If no new config from Kanban, use the one from the session
+                        if (!config) {
+                            config = {
+                                datasetName: data.session.datasetName || 'imdb',
+                                labels: data.session.labels || null,
+                                uploadedTexts: data.session.uploadedTexts || null,
+                                seedType: 'unlabeled',
+                                seedCount: 0
+                            };
+                            setDatasetConfig(config);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to load existing session state:", e);
+                }
+
+                // Reset ML service with project corpus, then fetch first batch
+                if (config) {
+                    try {
+                        await fetch(`${API_URL}/reset`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(config)
+                        });
+                    } catch (e) { }
+                }
+
                 fetchNextBatch();
-            }
+            };
+
+            initSession();
 
             const interval = setInterval(pollMetrics, 2000); // Poll graphs every 2s
             return () => {
@@ -501,14 +540,31 @@ const ResearchWorkspace = ({ onExit }) => {
             });
             const data = await res.json();
             if (res.ok) {
+                let newlyLabeledIds = [];
+                let newCount = annotationCount;
+
                 if (action === 'approve_all') {
+                    newlyLabeledIds = verificationQueue.map(item => item.id);
                     setVerificationQueue([]);
                     setToast({ message: "Approved all auto-labeled predictions!", type: "success" });
                     setIsVerifying(false);
                 } else {
+                    newlyLabeledIds = [taskId];
                     setVerificationQueue(prev => prev.filter(item => item.id !== taskId));
                     setToast({ message: action === 'approve' ? "Prediction approved!" : `Corrected to ${correctedLabel}!`, type: "success" });
                 }
+
+                // Update local state and save session to backend so dashboard sees AI-labeled tasks
+                if (newlyLabeledIds.length > 0) {
+                    const nextLabeledIds = [...labeledIdsRef.current, ...newlyLabeledIds];
+                    labeledIdsRef.current = nextLabeledIds;
+                    setLabeledTaskIds(nextLabeledIds);
+                    newCount += newlyLabeledIds.length;
+                    setAnnotationCount(newCount);
+                    // Non-blocking save
+                    saveSession(newCount, nextLabeledIds);
+                }
+
                 pollMetrics();
             } else {
                 setToast({ message: "Verification failed: " + data.message, type: "error" });
