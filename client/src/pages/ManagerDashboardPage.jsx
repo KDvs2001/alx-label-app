@@ -41,7 +41,7 @@ const ManagerDashboardPage = () => {
     const [isAutoLabeling, setIsAutoLabeling] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
     const [showExplanation, setShowExplanation] = useState(false);
-    const [activeScenario, setActiveScenario] = useState(null); // 'roi' | 'pacing' | 'calibration' | 'pruning' | null
+    const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'roi' | 'pacing' | 'calibration' | 'pruning'
 
     // Reset Configuration Form State
     const [datasetName, setDatasetName] = useState('imdb'); // imdb, rotten_tomatoes, ag_news, custom
@@ -340,633 +340,579 @@ const ManagerDashboardPage = () => {
                         <Download size={15} /> Export
                     </button>
                 </div>
-            </div>            {/* ─── TOP KPI GRID: 4 Interactive Scenario Diagnostics ────────────────── */}
-            <div className="max-w-7xl mx-auto mb-3 text-left">
-                <span className="text-[10px] uppercase tracking-widest font-black text-blue-400 bg-blue-500/10 px-2.5 py-1 rounded border border-blue-500/20">
-                    Interactive Scenarios
-                </span>
-                <span className="text-xs text-slate-500 ml-3">
-                    Click any widget below to open its diagnostic scenario panel & controllers.
-                </span>
             </div>
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* ─── SIDEBAR & VIEWPORT LAYOUT ────────────────────────────── */}
+            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 mt-4 items-start w-full">
                 
-                {/* 1. Labor & Budget Savings Card */}
-                <button 
-                    onClick={() => setActiveScenario('roi')}
-                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-emerald-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-emerald-500/30"
-                >
-                    <div className="flex justify-between items-start mb-2 w-full">
-                        <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Labor & Financial ROI</span>
-                        <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><DollarSign size={16} /></div>
+                {/* FLOATING SIDEBAR NAVIGATION (NOT TOUCHING EDGE OF BROWSER SCREEN) */}
+                <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
+                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4.5 backdrop-blur-sm space-y-1 relative select-none">
+                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 px-2 block mb-3.5">
+                            Control Console
+                        </span>
+                        
+                        <button
+                            onClick={() => setActiveTab('overview')}
+                            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
+                                activeTab === 'overview'
+                                    ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-500/10 border border-blue-500/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                            }`}
+                        >
+                            <FolderOpen size={14} /> Overview & Campaigns
+                        </button>
+                        
+                        <button
+                            onClick={() => setActiveTab('roi')}
+                            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
+                                activeTab === 'roi'
+                                    ? 'bg-emerald-600/90 text-white shadow-lg shadow-emerald-500/10 border border-emerald-500/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                            }`}
+                        >
+                            <DollarSign size={14} /> Labor & Financial ROI
+                        </button>
+                        
+                        <button
+                            onClick={() => setActiveTab('pacing')}
+                            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
+                                activeTab === 'pacing'
+                                    ? 'bg-amber-600/90 text-white shadow-lg shadow-amber-500/10 border border-amber-500/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                            }`}
+                        >
+                            <Activity size={14} /> Cognitive Load & Pacing
+                        </button>
+                        
+                        <button
+                            onClick={() => setActiveTab('calibration')}
+                            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
+                                activeTab === 'calibration'
+                                    ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-500/10 border border-blue-500/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                            }`}
+                        >
+                            <ShieldCheck size={14} /> Model Calibration
+                        </button>
+                        
+                        <button
+                            onClick={() => setActiveTab('pruning')}
+                            className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
+                                activeTab === 'pruning'
+                                    ? 'bg-purple-600/90 text-white shadow-lg shadow-purple-500/10 border border-purple-500/20'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                            }`}
+                        >
+                            <Brain size={14} /> Supervision & Pruning
+                        </button>
                     </div>
-                    <div className="mt-1">
-                        <h2 className="text-2xl md:text-3xl font-black text-white">{dollarsSaved} USD</h2>
-                        <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                            Saved: <span className="text-emerald-400 font-bold">{timeSavedHours}h</span> of annotator reading latency.
-                        </p>
-                        <span className="text-[9px] text-emerald-400/80 font-bold uppercase mt-2.5 block tracking-wider">Click to view Details →</span>
-                    </div>
-                </button>
- 
-                 {/* 2. Annotator Speed & Pacing Card */}
-                <button 
-                    onClick={() => setActiveScenario('pacing')}
-                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-amber-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-amber-500/30"
-                >
-                     <div className="flex justify-between items-start mb-2 w-full">
-                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Cognitive Load & Pacing</span>
-                         <div className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><Activity size={16} /></div>
-                     </div>
-                     <div className="mt-1">
-                         <div className="flex items-center gap-1.5">
-                             <span className="relative flex h-2 w-2">
-                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
-                                 <span className={`relative inline-flex rounded-full h-2 w-2 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
-                             </span>
-                             <span className="text-sm font-black text-slate-200">
-                                 {metrics?.cognitive_pacing_active ? "Pacing Active" : "Optimal (Active)"}
-                             </span>
-                         </div>
-                         <p className="text-[11px] text-slate-500 mt-1.5">
-                             Speed: <span className="font-mono text-white font-bold">{(metrics?.beta || 3.0).toFixed(2)}s</span> (Base: {(metrics?.baseline_beta || 3.0).toFixed(2)}s)
-                         </p>
-                         <span className="text-[9px] text-amber-400/80 font-bold uppercase mt-2 block tracking-wider">Click to adjust Pacing →</span>
-                     </div>
-                </button>
- 
-                 {/* 3. Expected Calibration Error Card */}
-                <button 
-                    onClick={() => setActiveScenario('calibration')}
-                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-blue-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-blue-500/30"
-                >
-                     <div className="flex justify-between items-start mb-2 w-full">
-                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Calibration Error (ECE)</span>
-                         <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={16} /></div>
-                     </div>
-                     <div className="mt-1">
-                         <h2 className="text-2xl md:text-3xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
-                         <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                             Threshold: <span className="text-blue-400 font-bold">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span> (Dynamic)
-                         </p>
-                         <span className="text-[9px] text-blue-400/80 font-bold uppercase mt-2.5 block tracking-wider">Click to view Calibration →</span>
-                     </div>
-                </button>
- 
-                 {/* 4. Active Pruning Efficiency Card */}
-                <button 
-                    onClick={() => setActiveScenario('pruning')}
-                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm flex flex-col justify-between hover:border-purple-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/5 active:scale-98 transition-all duration-300 text-left select-none outline-none focus:border-purple-500/30"
-                >
-                     <div className="flex justify-between items-start mb-2 w-full">
-                         <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">Workload Reduction</span>
-                         <div className="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><Layers size={16} /></div>
-                     </div>
-                     <div className="mt-1">
-                         <h2 className="text-2xl md:text-3xl font-black text-white">
-                             {Math.round(autoPrunedCount / poolTotal * 100)}% Saved
-                         </h2>
-                         <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                             Pruned <span className="text-purple-400 font-bold">{autoPrunedCount}</span> redundant texts.
-                         </p>
-                         <span className="text-[9px] text-purple-400/80 font-bold uppercase mt-2.5 block tracking-wider">Click to run Auto-Label →</span>
-                     </div>
-                </button>
- 
-             </div>
 
-            {/* Main Dashboard Layout */}
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* LEFT & CENTER PANELS: Live Performance Monitoring */}
-                <div className="lg:col-span-2 space-y-6">
+                    <div className="hidden lg:block bg-slate-900/10 border border-slate-850 rounded-2xl p-4 text-[10px] text-slate-500 leading-relaxed text-left">
+                        <span className="font-bold text-slate-400 block mb-1">Documentation shortcuts</span>
+                        VPC stands for Variable Pacing Control. WCAG refers to Web Content Accessibility Guidelines. OLS stands for Ordinary Least Squares regression, used here to isolate annotator fatigue.
+                    </div>
+                </div>
+
+                {/* MAIN CONTENT VIEWPORT */}
+                <div className="flex-1 min-w-0 w-full flex flex-col gap-6">
                     
-                    {/* Live Progress Bar Widget */}
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                <Layers size={14} className="text-blue-400" /> Segmented Pool Allocation
-                            </h3>
-                            <span className="text-xs font-mono font-black text-slate-300">
-                                {Math.round(((manualCount + autoPrunedCount) / poolTotal) * 100)}% Total Progress
-                            </span>
-                        </div>
-                        
-                        <div className="h-6 bg-slate-950 rounded-full overflow-hidden flex border border-slate-800/50 mb-3 relative">
-                            <div 
-                                style={{ width: `${(manualCount / poolTotal) * 100}%` }}
-                                className="bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-700"
-                                title={`Manual labels: ${manualCount}`}
-                            />
-                            <div 
-                                style={{ width: `${(autoPrunedCount / poolTotal) * 100}%` }}
-                                className="bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
-                                title={`Auto-pruned tasks: ${autoPrunedCount}`}
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <span className="text-[10px] font-black text-white drop-shadow">
-                                    {(manualCount + autoPrunedCount)} / {poolTotal} Tasks Processed
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-3 text-center">
-                            <div className="bg-slate-950/60 p-2.5 rounded-lg border border-blue-500/10">
-                                <p className="text-[9px] text-slate-500 uppercase font-black">Manual Labels</p>
-                                <p className="text-lg font-black text-blue-400">{manualCount}</p>
-                            </div>
-                            <div className="bg-slate-950/60 p-2.5 rounded-lg border border-emerald-500/10">
-                                <p className="text-[9px] text-slate-500 uppercase font-black">Auto-Pruned</p>
-                                <p className="text-lg font-black text-emerald-400">{autoPrunedCount}</p>
-                            </div>
-                            <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-800">
-                                <p className="text-[9px] text-slate-500 uppercase font-black">Remaining Pool</p>
-                                <p className="text-lg font-black text-slate-400">{poolRemaining}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Reviewer FAQ: Collapse & Parameter Diagnostics */}
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-                            <Info size={14} className="text-blue-400" /> Reviewer Diagnostics: Cognitive Noise & Collapse Safeguards
-                        </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                            <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Q1: What happens if the algorithm collapses?
-                                </h4>
-                                <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                    If labels get noisy and the model begins to collapse, ECE (Expected Calibration Error) spikes. The system automatically detects this drift and raises the auto-label confidence threshold (up to 99% or suspends it entirely). This locks auto-labeling, requiring human validation.
-                                </p>
-                            </div>
-                            <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Q2: Are alpha/beta pre-configured?
-                                </h4>
-                                <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                    No. The backend uses online Ordinary Least Squares (OLS) regression to dynamically fit your exact reading speed (&beta;) and setup time (&alpha;) in real time. It automatically calibrates per-annotator within the first 5 manual labels.
-                                </p>
-                            </div>
-                            <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Q3: How do you handle timing cognitive noise?
-                                </h4>
-                                <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                    Reading time varies because of task difficulty (cognitive friction). The OLS residual (actual time minus predicted length-time) measures this cognitive load. If actual speed drops below 1.5x baseline, the system detects fatigue and switches to easy recovery pacing.
-                                </p>
-                            </div>
-                            <div className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl">
-                                <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Q4: How do you handle labeling decision noise?
-                                </h4>
-                                <p className="text-[10px] text-slate-500 leading-relaxed text-left">
-                                    Fatigued users make lazy errors (decision noise). We filter physical outliers (dropping top 20% longest times) to protect the pacing baseline, and use the Human-in-the-Loop double validation queue to verify and clean noisy model auto-labels.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Unified Spy Window Content */}
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-                            <Activity size={14} className="text-purple-400" /> Active Learning & Ergonomic Diagnostics
-                        </h3>
-                        <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-850">
-                            <SpyAnalysis 
-                                selectionLogic={selectionLogic}
-                                metrics={metrics}
-                                history={history}
-                                interactionLog={[]}
-                                shadowMetrics={shadowMetrics}
-                                onShowAlphaBetaPanel={() => {}}
-                                annotationCount={manualCount}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* RIGHT PANEL: Project Configuration (Settings Panel) */}
-                <div className="space-y-6">
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
-                            <Database size={14} className="text-blue-400" /> Configuration Console
-                        </h3>
-                        
-                        <form onSubmit={handleReset} className="space-y-4 text-xs">
+                    {/* VIEWPORT: OVERVIEW & PROJECTS LIST */}
+                    {activeTab === 'overview' && (
+                        <div className="space-y-6 w-full animate-fadeIn">
                             
-                            {/* Preset Dataset Selection */}
-                            <div className="space-y-1">
-                                <label className="text-slate-400 font-bold block text-left">Dataset Preset</label>
-                                <select 
-                                    value={datasetName}
-                                    onChange={(e) => setDatasetName(e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-800 p-2.5 rounded text-slate-300 focus:outline-none focus:border-blue-500"
+                            {/* Stats Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                                {/* 1. Labor & Budget Savings Card */}
+                                <button 
+                                    onClick={() => setActiveTab('roi')}
+                                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 hover:border-emerald-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-98 transition-all duration-300 text-left outline-none"
                                 >
-                                    <option value="imdb">IMDb Movie Reviews (Binary Sentiment)</option>
-                                    <option value="rotten_tomatoes">Rotten Tomatoes Movie Snippets</option>
-                                    <option value="ag_news">AG News Headings (4 Classes Category)</option>
-                                    <option value="custom">Custom Text Upload</option>
-                                </select>
-                            </div>
-
-                            {/* Class Labels configuration */}
-                            <div className="space-y-1">
-                                <label className="text-slate-400 font-bold block text-left">Custom Class Labels (Comma Separated)</label>
-                                <input 
-                                    type="text"
-                                    value={customLabels}
-                                    onChange={(e) => setClassLabels(e.target.value)}
-                                    placeholder="e.g. Negative, Positive"
-                                    className="w-full bg-slate-950 border border-slate-800 p-2.5 rounded text-slate-300 font-mono text-[11px] focus:outline-none focus:border-blue-500"
-                                />
-                            </div>
-
-                            {/* Custom Text Upload textarea (conditional) */}
-                            {datasetName === 'custom' && (
-                                <div className="space-y-1 animate-fadeIn">
-                                    <label className="text-slate-400 font-bold block text-left">Upload Custom Texts (One Document Per Line)</label>
-                                    <textarea 
-                                        rows={4}
-                                        value={customTexts}
-                                        onChange={(e) => setCustomTexts(e.target.value)}
-                                        placeholder="Enter texts..."
-                                        className="w-full bg-slate-950 border border-slate-800 p-2.5 rounded text-slate-300 font-mono text-[10px] focus:outline-none focus:border-blue-500 custom-scrollbar"
-                                    />
-                                </div>
-                            )}
-
-                            {/* Seeding & Parameters */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                    <label className="text-slate-400 font-bold block text-left">Warm seed count</label>
-                                    <input 
-                                        type="number"
-                                        min={2}
-                                        max={200}
-                                        value={seedCount}
-                                        onChange={(e) => setSeedCount(e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-800 p-2 rounded text-slate-300 focus:outline-none focus:border-blue-500"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-slate-400 font-bold block text-left">Round size (tasks)</label>
-                                    <input 
-                                        type="number"
-                                        min={5}
-                                        max={50}
-                                        value={roundSize}
-                                        onChange={(e) => setRoundSize(e.target.value)}
-                                        className="w-full bg-slate-950 border border-slate-800 p-2 rounded text-slate-300 focus:outline-none focus:border-blue-500"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Auto-Label threshold selector */}
-                            <div className="space-y-1">
-                                <label className="text-slate-400 font-bold block text-left">Auto-Label Threshold Mode</label>
-                                <select 
-                                    value={autoLabelThreshold}
-                                    onChange={(e) => setAutoLabelThreshold(e.target.value)}
-                                    className="w-full bg-slate-950 border border-slate-800 p-2.5 rounded text-slate-300 focus:outline-none focus:border-blue-500"
+                                    <div className="flex justify-between items-start mb-2 w-full">
+                                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Labor & Financial ROI</span>
+                                        <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><DollarSign size={14} /></div>
+                                    </div>
+                                    <div className="mt-1">
+                                        <h2 className="text-xl md:text-2xl font-black text-white">{dollarsSaved} USD</h2>
+                                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                                            Saved: <span className="text-emerald-400 font-bold">{timeSavedHours}h</span> of manual latency.
+                                        </p>
+                                    </div>
+                                </button>
+                                
+                                {/* 2. Annotator Speed & Pacing Card */}
+                                <button 
+                                    onClick={() => setActiveTab('pacing')}
+                                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 hover:border-amber-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/5 active:scale-98 transition-all duration-300 text-left outline-none"
                                 >
-                                    <option value="dynamic">Dynamic Calibration Tuning (Recommended)</option>
-                                    <option value="0.98">Strict 98% Confidence</option>
-                                    <option value="0.95">Standard 95% Confidence</option>
-                                    <option value="0.90">Relaxed 90% Confidence</option>
-                                </select>
+                                     <div className="flex justify-between items-start mb-2 w-full">
+                                         <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Cognitive Load & Pacing</span>
+                                         <div className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><Activity size={14} /></div>
+                                     </div>
+                                     <div className="mt-1">
+                                         <div className="flex items-center gap-1.5">
+                                             <span className="relative flex h-1.5 w-1.5">
+                                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                                 <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                             </span>
+                                             <span className="text-xs font-bold text-slate-200">
+                                                 {metrics?.cognitive_pacing_active ? "Pacing Active" : "Optimal (Active)"}
+                                             </span>
+                                         </div>
+                                         <p className="text-[10px] text-slate-500 mt-1">
+                                             Speed: <span className="font-mono text-white font-bold">{(metrics?.beta || 3.0).toFixed(2)}s/wd</span>
+                                         </p>
+                                     </div>
+                                </button>
+
+                                {/* 3. Expected Calibration Error Card */}
+                                <button 
+                                    onClick={() => setActiveTab('calibration')}
+                                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 hover:border-blue-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/5 active:scale-98 transition-all duration-300 text-left outline-none"
+                                >
+                                     <div className="flex justify-between items-start mb-2 w-full">
+                                         <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Calibration Error (ECE)</span>
+                                         <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={14} /></div>
+                                     </div>
+                                     <div className="mt-1">
+                                         <h2 className="text-xl md:text-2xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
+                                         <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                                             Limit: <span className="text-blue-400 font-bold">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
+                                         </p>
+                                     </div>
+                                </button>
+
+                                {/* 4. Active Pruning Efficiency Card */}
+                                <button 
+                                    onClick={() => setActiveTab('pruning')}
+                                    className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 hover:border-purple-500/50 hover:bg-slate-800/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/5 active:scale-98 transition-all duration-300 text-left outline-none"
+                                >
+                                     <div className="flex justify-between items-start mb-2 w-full">
+                                         <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Workload Reduction</span>
+                                         <div className="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><Layers size={14} /></div>
+                                     </div>
+                                     <div className="mt-1">
+                                         <h2 className="text-xl md:text-2xl font-black text-white">
+                                             {Math.round(autoPrunedCount / poolTotal * 100)}% Saved
+                                         </h2>
+                                         <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                                             Pruned <span className="text-purple-400 font-bold">{autoPrunedCount}</span> redundant texts.
+                                         </p>
+                                     </div>
+                                </button>
                             </div>
 
-                            {/* Reset trigger button */}
-                            <button
-                                type="submit"
-                                disabled={isResetting}
-                                className="w-full py-3 mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg border border-blue-700 shadow-lg shadow-blue-500/10 flex items-center justify-center gap-1.5 transition disabled:opacity-50"
-                            >
-                                <RefreshCw size={14} className={isResetting ? "animate-spin" : ""} />
-                                {isResetting ? 'Resetting Project...' : 'Re-initialize Project'}
-                            </button>
-                        </form>
-                    </div>
-
-                    {/* Operational Status Box */}
-                    <div className="bg-slate-900/20 border border-slate-850 rounded-2xl p-4 text-xs space-y-2 text-slate-400">
-                        <h4 className="font-bold text-slate-300 text-left">System Monitoring Status</h4>
-                        <div className="flex justify-between items-center py-1 border-b border-slate-850">
-                            <span>Backend ML Service</span>
-                            <span className="text-emerald-400 font-bold flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" /> Running
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center py-1 border-b border-slate-850">
-                            <span>Cost Estimator (OLS)</span>
-                            <span className="text-blue-400 font-bold">Active</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1 border-b border-slate-850">
-                            <span>Workload Pacer</span>
-                            <span className={metrics?.cognitive_pacing_active ? "text-amber-400 font-bold animate-pulse" : "text-emerald-400 font-bold"}>
-                                {metrics?.cognitive_pacing_active ? "Recovery Active" : "Optimal"}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center py-1">
-                            <span>Dataset Preset</span>
-                            <span className="text-slate-300 font-mono font-bold capitalize">
-                                {datasetName === 'imdb' ? 'IMDb Sentiment' : datasetName === 'rotten_tomatoes' ? 'Rotten Tomatoes' : datasetName === 'ag_news' ? 'AG News' : 'Custom'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            {/* ── PROJECT OVERVIEW SECTION ──────────────────────────────── */}
-            <div className="max-w-7xl mx-auto mt-8">
-                <div className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-purple-500/10 rounded-lg">
-                                <FolderOpen size={16} className="text-purple-400" />
-                            </div>
-                            <h3 className="font-bold text-white text-base">Project Overview</h3>
-                            <span className="text-xs text-slate-500 font-semibold">({projectStats.length} total)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={fetchProjectStats}
-                                className="p-1.5 hover:bg-slate-700 rounded-lg transition text-slate-400 hover:text-white"
-                                title="Refresh"
-                            >
-                                <RefreshCw size={14} className={loadingProjects ? 'animate-spin' : ''} />
-                            </button>
-                            <a
-                                href="/projects"
-                                className="flex items-center gap-1.5 text-xs font-bold text-purple-400 hover:text-purple-300 px-3 py-1.5 bg-purple-500/10 rounded-lg border border-purple-500/20 transition"
-                            >
-                                Manage Projects <ArrowRight size={12} />
-                            </a>
-                        </div>
-                    </div>
-
-                    {loadingProjects ? (
-                        <div className="space-y-2">
-                            {[1,2].map(i => <div key={i} className="h-14 bg-slate-800/60 rounded-xl animate-pulse" />)}
-                        </div>
-                    ) : projectStats.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-10 text-slate-600 gap-2">
-                            <FolderOpen size={28} strokeWidth={1.3} />
-                            <p className="text-sm font-semibold">No projects yet</p>
-                            <a href="/projects" className="text-xs text-purple-400 hover:underline">Create your first project →</a>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {projectStats.map(p => {
-                                const pct = p.total > 0 ? Math.round((p.labeled / p.total) * 100) : 0;
-                                const statusColor = {
-                                    active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                                    paused: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                                    completed: 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-                                }[p.status] || 'text-slate-400 bg-slate-700 border-slate-600';
-
-                                return (
-                                    <div key={p.projectId} className="flex flex-col gap-3 p-4 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-700 transition">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                    <span className="font-bold text-white text-sm">{p.name}</span>
-                                                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor}`}>{p.status}</span>
-                                                    <span className="text-xs text-slate-500 flex items-center gap-1">
-                                                        <Users size={11} /> {p.annotatorCount} Annotator{p.annotatorCount !== 1 && 's'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1 bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                                        <div
-                                                            className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
-                                                            style={{ width: `${pct}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{p.labeled}/{p.total} ({pct}%)</span>
-                                                </div>
-                                                <div className="flex gap-1.5 mt-2 flex-wrap">
-                                                    {(p.labelTypes || []).map(l => (
-                                                        <span key={l} className="text-xs bg-slate-800 border border-slate-700 text-slate-400 px-1.5 py-0.5 rounded-full">{l}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            {pct === 100 && <CheckCircle2 size={24} className="text-emerald-400 shrink-0" />}
+                            {/* Active Campaigns list */}
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm">
+                                <div className="flex items-center justify-between mb-5">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-1.5 bg-purple-500/10 rounded-lg">
+                                            <FolderOpen size={15} className="text-purple-400" />
                                         </div>
+                                        <h3 className="font-bold text-white text-sm">Campaigns List & Annotator Performance</h3>
+                                        <span className="text-xs text-slate-500 font-semibold">({projectStats.length} active)</span>
+                                    </div>
+                                    <button
+                                        onClick={fetchProjectStats}
+                                        className="p-1.5 hover:bg-slate-700 rounded-lg transition text-slate-400 hover:text-white"
+                                    >
+                                        <RefreshCw size={13} className={loadingProjects ? 'animate-spin' : ''} />
+                                    </button>
+                                </div>
 
-                                        {p.annotators && p.annotators.length > 0 && (
-                                            <div className="mt-2 pt-3 border-t border-slate-800/60">
-                                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Engaged Annotators & Performance</span>
-                                                <div className="grid grid-cols-1 gap-2">
-                                                    {p.annotators.map(annotator => (
-                                                        <div key={annotator.username} className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-black uppercase">
-                                                                    {annotator.username.charAt(0)}
-                                                                </div>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-sm font-bold text-slate-300 capitalize flex items-center gap-2">
-                                                                        {annotator.username}
-                                                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">{annotator.readingStyle}</span>
-                                                                    </span>
-                                                                    <span className="text-[10px] text-slate-500 font-mono">
-                                                                        Base Speed: {annotator.baselineSpeed > 0 ? annotator.baselineSpeed.toFixed(2) : '--'}s/word
-                                                                    </span>
-                                                                </div>
+                                {loadingProjects ? (
+                                    <div className="space-y-2">
+                                        {[1,2].map(i => <div key={i} className="h-14 bg-slate-800/60 rounded-xl animate-pulse" />)}
+                                    </div>
+                                ) : projectStats.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-8 text-slate-600 gap-1">
+                                        <FolderOpen size={24} strokeWidth={1.3} />
+                                        <p className="text-xs font-semibold">No campaigns configured yet</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {projectStats.map(p => {
+                                            const pct = p.total > 0 ? Math.round((p.labeled / p.total) * 100) : 0;
+                                            const statusColor = {
+                                                active: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                                                paused: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                                                completed: 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+                                            }[p.status] || 'text-slate-400 bg-slate-700 border-slate-600';
+
+                                            return (
+                                                <div key={p.projectId} className="flex flex-col gap-3 p-4 bg-slate-950/40 border border-slate-800/60 rounded-xl hover:border-slate-750 transition">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                                                <span className="font-bold text-white text-sm">{p.name}</span>
+                                                                <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${statusColor}`}>{p.status}</span>
+                                                                <span className="text-xs text-slate-500 flex items-center gap-1">
+                                                                    <Users size={11} /> {p.annotatorCount} Annotator{p.annotatorCount !== 1 && 's'}
+                                                                </span>
                                                             </div>
-                                                            <div className="flex items-center gap-6">
-                                                                <div className="text-right flex flex-col items-end">
-                                                                    <span className="text-[10px] uppercase font-bold text-slate-500">Labels</span>
-                                                                    <span className="text-sm font-black text-blue-400">{annotator.labeled}</span>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-1 bg-slate-850 rounded-full h-1.5 overflow-hidden">
+                                                                    <div
+                                                                        className="h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
+                                                                        style={{ width: `${pct}%` }}
+                                                                    />
                                                                 </div>
-                                                                <div className="text-right flex flex-col items-end">
-                                                                    <span className="text-[10px] uppercase font-bold text-slate-500">Accuracy</span>
-                                                                    <span className="text-sm font-black text-emerald-400">{annotator.accuracy}%</span>
-                                                                </div>
-                                                                <div className="text-right flex flex-col items-end">
-                                                                    <span className="text-[10px] uppercase font-bold text-slate-500">Saved Time</span>
-                                                                    <span className="text-sm font-black text-purple-400">~{Math.round(annotator.timeSaved)}s</span>
-                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-400 whitespace-nowrap">{p.labeled}/{p.total} ({pct}%)</span>
                                                             </div>
                                                         </div>
-                                                    ))}
+                                                    </div>
+
+                                                    {p.annotators && p.annotators.length > 0 && (
+                                                        <div className="mt-1 pt-3 border-t border-slate-800/40">
+                                                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Engaged Annotators</span>
+                                                            <div className="grid grid-cols-1 gap-2">
+                                                                {p.annotators.map(annotator => (
+                                                                    <div key={annotator.username} className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-black uppercase">
+                                                                                {annotator.username.charAt(0)}
+                                                                            </div>
+                                                                            <div className="flex flex-col">
+                                                                                <span className="text-xs font-bold text-slate-300 capitalize flex items-center gap-1.5">
+                                                                                    {annotator.username}
+                                                                                    <span className="text-[8px] px-1.5 py-0.2 bg-slate-800 text-slate-400 border border-slate-700 rounded">{annotator.readingStyle}</span>
+                                                                                </span>
+                                                                                <span className="text-[9px] text-slate-500 font-mono">
+                                                                                    Speed: {annotator.baselineSpeed > 0 ? annotator.baselineSpeed.toFixed(2) : '--'}s/word
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-5 text-right">
+                                                                            <div>
+                                                                                <span className="text-[8px] uppercase font-bold text-slate-500 block">Labels</span>
+                                                                                <span className="text-xs font-black text-blue-400">{annotator.labeled}</span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="text-[8px] uppercase font-bold text-slate-500 block">Accuracy</span>
+                                                                                <span className="text-xs font-black text-emerald-400">{annotator.accuracy}%</span>
+                                                                            </div>
+                                                                            <div>
+                                                                                <span className="text-[8px] uppercase font-bold text-slate-500 block">Saved Time</span>
+                                                                                <span className="text-xs font-black text-purple-400">~{Math.round(annotator.timeSaved)}s</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
-                                        )}
+                                            );
+                                        })}
                                     </div>
-                                );
-                            })}
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VIEWPORT: LABOR & FINANCIAL ROI PANEL */}
+                    {activeTab === 'roi' && (
+                        <div className="space-y-6 w-full animate-fadeIn text-left">
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm space-y-4">
+                                <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                                    <div className="p-1.5 bg-emerald-500/10 text-emerald-400 rounded-lg"><DollarSign size={16} /></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Labor & Budget ROI Diagnostics</h3>
+                                </div>
+                                <p className="text-xs text-slate-400 leading-relaxed">
+                                    CAL-Log cuts database labeling expenses by selecting the most informative elements for human validation. Outlier confidence predictions are verified in the background, minimizing cost scaling from linear complexity.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Financial Return</span>
+                                        <span className="text-2xl font-black text-emerald-400">{dollarsSaved} USD</span>
+                                    </div>
+                                    <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Estimated Hours Reclaimed</span>
+                                        <span className="text-2xl font-black text-white">{timeSavedHours} Hours</span>
+                                    </div>
+                                </div>
+                                <div className="p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                    <h4 className="font-bold text-xs text-white uppercase mb-1">Ergonomic Budget Formula</h4>
+                                    <p className="text-[10px] text-slate-500 leading-relaxed">
+                                        Calculated based on an average wage rate of <span className="text-slate-300 font-bold">$20.00/hour</span>. CAL-Log reduces this latency by routing clear predictions directly into the database observations.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Cost Curve Graph from SpyAnalysis */}
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                                    <Activity size={14} className="text-emerald-400" /> Live ROI & Comparative Performance Curves
+                                </h3>
+                                <div className="bg-slate-950/60 rounded-xl p-4 border border-slate-850">
+                                    <SpyAnalysis 
+                                        selectionLogic={selectionLogic}
+                                        metrics={metrics}
+                                        history={history}
+                                        interactionLog={[]}
+                                        shadowMetrics={shadowMetrics}
+                                        onShowAlphaBetaPanel={() => {}}
+                                        annotationCount={manualCount}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VIEWPORT: COGNITIVE LOAD & PACING */}
+                    {activeTab === 'pacing' && (
+                        <div className="space-y-6 w-full animate-fadeIn text-left">
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm space-y-4">
+                                <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                                    <div className="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg"><Activity size={16} /></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Cognitive Load & Pacing Diagnostics</h3>
+                                </div>
+                                <p className="text-xs text-slate-400 leading-relaxed">
+                                    Online Ordinary Least Squares (OLS) regression calculates keyboard and scroll latency residuals to model annotator fatigue. Pacing dynamically routes simpler tasks when fatigue is detected, preventing decision errors.
+                                </p>
+                                <div className="grid grid-cols-3 gap-3 text-center">
+                                    <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block">Current Speed</span>
+                                        <span className="text-lg font-black text-white">{(metrics?.beta || 3.0).toFixed(2)}s/wd</span>
+                                    </div>
+                                    <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block">Baseline Speed</span>
+                                        <span className="text-lg font-black text-slate-400">{(metrics?.baseline_beta || 3.0).toFixed(2)}s/wd</span>
+                                    </div>
+                                    <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block">Pacing Status</span>
+                                        <span className={`text-xs font-black block mt-1.5 ${metrics?.cognitive_pacing_active ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}`}>
+                                            {metrics?.cognitive_pacing_active ? 'Fatigue Mode' : 'Optimal'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Ergonomic Diagnostics FAQ</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                    <div className="p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                        <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Timing Cognitive Noise
+                                        </h4>
+                                        <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                            Reading time varies because of task difficulty. The OLS residual measures this cognitive load. If actual speed drops below 1.5x baseline, the system detects fatigue and switches to easy recovery pacing.
+                                        </p>
+                                    </div>
+                                    <div className="p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                        <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Decision Noise Filtering
+                                        </h4>
+                                        <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                            Fatigued users make lazy errors. We filter physical outliers (dropping top 20% longest times) to protect the baseline, and use the double-validation queue to clean model auto-labels.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VIEWPORT: MODEL CALIBRATION */}
+                    {activeTab === 'calibration' && (
+                        <div className="space-y-6 w-full animate-fadeIn text-left">
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm space-y-4">
+                                <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                                    <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={16} /></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Model Calibration & Safeguards</h3>
+                                </div>
+                                <p className="text-xs text-slate-400 leading-relaxed">
+                                    Calibration verification computes Expected Calibration Error (ECE) on validation sets to ensure the model's confidence scores correspond to its actual correctness, preventing target-concept drift.
+                                </p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Validation Error (ECE)</span>
+                                        <span className="text-2xl font-black text-blue-400">{(metrics?.ece || 0.000).toFixed(3)}</span>
+                                    </div>
+                                    <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Auto-Label Threshold</span>
+                                        <span className="text-2xl font-black text-white">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Model Reliability FAQ</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                    <div className="p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                        <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> Safeguard against model collapse
+                                        </h4>
+                                        <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                            If labels get noisy and the model begins to collapse, ECE spikes. The system automatically detects this drift and raises the auto-label confidence threshold to block auto-labeling.
+                                        </p>
+                                    </div>
+                                    <div className="p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl">
+                                        <h4 className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Online Parameter Scaling
+                                        </h4>
+                                        <p className="text-[10px] text-slate-500 leading-relaxed text-left">
+                                            The backend uses online OLS regression to fit your exact reading speed (beta) and setup time (alpha) in real time. It automatically calibrates within the first 5 manual labels.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VIEWPORT: SUPERVISION & PRUNING */}
+                    {activeTab === 'pruning' && (
+                        <div className="space-y-6 w-full animate-fadeIn text-left">
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm space-y-4">
+                                <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                                    <div className="p-1.5 bg-purple-500/10 text-purple-400 rounded-lg"><Brain size={16} /></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Supervision & Active Pruning Console</h3>
+                                </div>
+                                <p className="text-xs text-slate-400 leading-relaxed">
+                                    Consensus-based active pruning uses the local SLM committee (Llama-3, Mistral, Phi-3) to filter high-confidence agreements. Only disagreed edge cases require human tie-breaker annotations.
+                                </p>
+                                
+                                {/* Segmented progress bar */}
+                                <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-[9px] font-bold uppercase text-slate-500">Segmented Pool Allocation</span>
+                                        <span className="text-xs font-mono font-black text-slate-300">
+                                            {Math.round(((manualCount + autoPrunedCount) / poolTotal) * 100)}% Total Progress
+                                        </span>
+                                    </div>
+                                    <div className="h-4 bg-slate-900 rounded-full overflow-hidden flex border border-slate-855 mb-3 relative">
+                                        <div 
+                                            style={{ width: `${(manualCount / poolTotal) * 100}%` }}
+                                            className="bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-700"
+                                        />
+                                        <div 
+                                            style={{ width: `${(autoPrunedCount / poolTotal) * 100}%` }}
+                                            className="bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                                        <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                            <p className="text-[8px] text-slate-500 uppercase">Manual</p>
+                                            <p className="text-base font-black text-blue-400">{manualCount}</p>
+                                        </div>
+                                        <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                            <p className="text-[8px] text-slate-500 uppercase">Auto-Pruned</p>
+                                            <p className="text-base font-black text-emerald-400">{autoPrunedCount}</p>
+                                        </div>
+                                        <div className="bg-slate-900 p-2 rounded-lg border border-slate-800">
+                                            <p className="text-[8px] text-slate-500 uppercase">Remaining</p>
+                                            <p className="text-base font-black text-slate-400">{poolRemaining}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleAutoLabel}
+                                        disabled={isAutoLabeling}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition disabled:opacity-50 text-xs"
+                                    >
+                                        <Brain size={13} className={isAutoLabeling ? "animate-spin" : ""} /> Bulk Auto-Label Pool
+                                    </button>
+                                    <button
+                                        onClick={handleExport}
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-purple-400 rounded-xl font-bold border border-slate-750 transition text-xs"
+                                    >
+                                        <Download size={13} /> Export Observations
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Configuration Console form */}
+                            <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm space-y-4">
+                                <h4 className="font-bold text-xs text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-3">
+                                    <Database size={14} className="text-blue-400" /> Reset & Active Parameters Configuration
+                                </h4>
+                                <form onSubmit={handleReset} className="space-y-4 text-xs">
+                                    <div className="space-y-1">
+                                        <label className="text-slate-400 font-bold block">Dataset Preset</label>
+                                        <select 
+                                            value={datasetName}
+                                            onChange={(e) => setDatasetName(e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-850 p-2.5 rounded text-slate-300 focus:outline-none"
+                                        >
+                                            <option value="imdb">IMDb Movie Reviews (Binary Sentiment)</option>
+                                            <option value="rotten_tomatoes">Rotten Tomatoes Movie Snippets</option>
+                                            <option value="ag_news">AG News Headings (4 Classes Category)</option>
+                                            <option value="custom">Custom Text Upload</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-slate-400 font-bold block">Custom Class Labels (Comma Separated)</label>
+                                        <input 
+                                            type="text"
+                                            value={customLabels}
+                                            onChange={(e) => setClassLabels(e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-855 p-2.5 rounded text-slate-300 font-mono text-[10px]"
+                                        />
+                                    </div>
+
+                                    {datasetName === 'custom' && (
+                                        <div className="space-y-1">
+                                            <label className="text-slate-400 font-bold block">Upload Custom Texts (One Document Per Line)</label>
+                                            <textarea 
+                                                rows={3}
+                                                value={customTexts}
+                                                onChange={(e) => setCustomTexts(e.target.value)}
+                                                className="w-full bg-slate-950 border border-slate-855 p-2.5 rounded text-slate-300 font-mono text-[9px]"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <label className="text-slate-400 font-bold block">Warm Seed Count</label>
+                                            <input 
+                                                type="number"
+                                                value={seedCount}
+                                                onChange={(e) => setSeedCount(e.target.value)}
+                                                className="w-full bg-slate-950 border border-slate-855 p-2 rounded text-slate-300"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-slate-400 font-bold block">Round Size (Tasks)</label>
+                                            <input 
+                                                type="number"
+                                                value={roundSize}
+                                                onChange={(e) => setRoundSize(e.target.value)}
+                                                className="w-full bg-slate-950 border border-slate-855 p-2 rounded text-slate-300"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-slate-400 font-bold block">Auto-Label Threshold Mode</label>
+                                        <select 
+                                            value={autoLabelThreshold}
+                                            onChange={(e) => setAutoLabelThreshold(e.target.value)}
+                                            className="w-full bg-slate-950 border border-slate-855 p-2.5 rounded text-slate-300 focus:outline-none"
+                                        >
+                                            <option value="dynamic">Dynamic Calibration Tuning (Recommended)</option>
+                                            <option value="0.98">Strict 98% Confidence</option>
+                                            <option value="0.95">Standard 95% Confidence</option>
+                                            <option value="0.90">Relaxed 90% Confidence</option>
+                                        </select>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={isResetting}
+                                        className="w-full py-3 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg flex items-center justify-center gap-1.5 transition disabled:opacity-50"
+                                    >
+                                        <RefreshCw size={13} className={isResetting ? "animate-spin" : ""} />
+                                        {isResetting ? 'Resetting Project...' : 'Re-initialize Project'}
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
-            {/* ─── SCENARIO DETAIL MODAL OVERLAY ──────────────────────────── */}
-            {activeScenario && (
-                <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl relative text-left my-8 overflow-hidden">
-                        {/* Glow accent decoration */}
-                        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${
-                            activeScenario === 'roi' ? 'bg-emerald-500/10' :
-                            activeScenario === 'pacing' ? 'bg-amber-500/10' :
-                            activeScenario === 'calibration' ? 'bg-blue-500/10' : 'bg-purple-500/10'
-                        }`} />
-                        
-                        {/* Close button */}
-                        <button 
-                            onClick={() => setActiveScenario(null)}
-                            className="absolute top-4 right-4 text-slate-400 hover:text-white transition p-1.5 hover:bg-slate-850 rounded-full"
-                        >
-                            <X size={18} />
-                        </button>
-
-                        {/* Title & Icon */}
-                        <div className="flex items-center gap-3 border-b border-slate-800 pb-4 mb-6">
-                            <div className={`p-2 rounded-xl border ${
-                                activeScenario === 'roi' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
-                                activeScenario === 'pacing' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
-                                activeScenario === 'calibration' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
-                                'bg-purple-500/10 border-purple-500/30 text-purple-400'
-                            }`}>
-                                {activeScenario === 'roi' && <DollarSign size={20} />}
-                                {activeScenario === 'pacing' && <Activity size={20} />}
-                                {activeScenario === 'calibration' && <ShieldCheck size={20} />}
-                                {activeScenario === 'pruning' && <Layers size={20} />}
-                            </div>
-                            <div>
-                                <span className="text-[10px] uppercase font-black text-slate-500 tracking-widest block">Simulation Scenario</span>
-                                <h3 className="text-lg font-black text-white">
-                                    {activeScenario === 'roi' && 'Labor & Budget Optimization'}
-                                    {activeScenario === 'pacing' && 'Cognitive Load & Ergonomic Pacing'}
-                                    {activeScenario === 'calibration' && 'Model Calibration & Collapse Safeguards'}
-                                    {activeScenario === 'pruning' && 'Consensus-Based Active Pruning'}
-                                </h3>
-                            </div>
-                        </div>
-
-                        {/* Scenario Content */}
-                        <div className="space-y-6 text-sm text-slate-300">
-                            {activeScenario === 'roi' && (
-                                <>
-                                    <p className="leading-relaxed">
-                                        Active learning saves budget by selecting only the most informative texts for manual annotation. Redundant and high-confidence predictions are handled by the model, flattening your labeling cost curve.
-                                    </p>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Financial Return</span>
-                                            <span className="text-2xl font-black text-emerald-400">{dollarsSaved} USD</span>
-                                        </div>
-                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Estimated Hours Reclaimed</span>
-                                            <span className="text-2xl font-black text-white">{timeSavedHours} Hours</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-2">
-                                        <h4 className="font-bold text-xs text-white uppercase tracking-wider">Ergonomic Budget Formula</h4>
-                                        <p className="text-[11px] text-slate-400 leading-relaxed">
-                                            Calculated based on an average wage rate of <span className="text-white font-bold">$20.00/hour</span>. In a standard project, human reading latency dominates the expense. CAL-Log reduces this latency by routing clear predictions directly into the database observations.
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-
-                            {activeScenario === 'pacing' && (
-                                <>
-                                    <p className="leading-relaxed">
-                                        OLS regression calculates keyboard and scroll latency residuals to model annotator cognitive fatigue. Pacing dynamically routes simpler tasks when fatigue is detected, preventing decision errors.
-                                    </p>
-                                    <div className="grid grid-cols-3 gap-3 text-center">
-                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Current Speed</span>
-                                            <span className="text-lg font-black text-white">{(metrics?.beta || 3.0).toFixed(2)}s/wd</span>
-                                        </div>
-                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Baseline Speed</span>
-                                            <span className="text-lg font-black text-slate-400">{(metrics?.baseline_beta || 3.0).toFixed(2)}s/wd</span>
-                                        </div>
-                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Pacing Status</span>
-                                            <span className={`text-xs font-black block mt-1.5 ${metrics?.cognitive_pacing_active ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}`}>
-                                                {metrics?.cognitive_pacing_active ? 'Fatigue Mode' : 'Optimal'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-2">
-                                        <h4 className="font-bold text-xs text-white uppercase tracking-wider">Ergonomic Diagnostic Rule</h4>
-                                        <p className="text-[11px] text-slate-400 leading-relaxed">
-                                            If an annotator's response speed falls below 1.5x of their baseline speed (due to typing or scanning latency), OLS residuals trigger the <span className="text-amber-400 font-bold">Fatigue Recovery Loop</span>. Round sizes are reduced, and less complex tasks are prioritized until speed recovers.
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-
-                            {activeScenario === 'calibration' && (
-                                <>
-                                    <p className="leading-relaxed">
-                                        Calibration verification computes Expected Calibration Error (ECE) on validation sets to ensure the model's confidence scores correspond to its actual correctness, preventing target-concept drift.
-                                    </p>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Validation Error (ECE)</span>
-                                            <span className="text-2xl font-black text-blue-400">{(metrics?.ece || 0.000).toFixed(3)}</span>
-                                        </div>
-                                        <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-                                            <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Auto-Label Threshold</span>
-                                            <span className="text-2xl font-black text-white">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-2">
-                                        <h4 className="font-bold text-xs text-white uppercase tracking-wider">Calibration Drift Protection</h4>
-                                        <p className="text-[11px] text-slate-400 leading-relaxed">
-                                            When ECE spikes, the model's self-assessment is untrustworthy. The system dynamically raises the confidence threshold (e.g. from <span className="text-blue-300 font-bold">85% to 98%</span>) to freeze auto-labeling, preventing model collapse and routing questionable inputs to human annotators.
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-
-                            {activeScenario === 'pruning' && (
-                                <>
-                                    <p className="leading-relaxed">
-                                        Consensus-based active pruning uses the local SLM committee (Llama-3, Mistral, Phi-3) to filter high-confidence agreements. Only disagreed edge cases require human tie-breaker annotations.
-                                    </p>
-                                    <div className="grid grid-cols-3 gap-3 text-center">
-                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Auto-Pruned</span>
-                                            <span className="text-lg font-black text-purple-400">{autoPrunedCount}</span>
-                                        </div>
-                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Manual Labels</span>
-                                            <span className="text-lg font-black text-white">{manualCount}</span>
-                                        </div>
-                                        <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
-                                            <span className="text-[9px] font-bold text-slate-500 uppercase block">Remaining Pool</span>
-                                            <span className="text-lg font-black text-slate-400">{poolRemaining}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Action Buttons inside scenario */}
-                                    <div className="flex gap-3 pt-2">
-                                        <button
-                                            onClick={() => { handleAutoLabel(); setActiveScenario(null); }}
-                                            disabled={isAutoLabeling}
-                                            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold transition disabled:opacity-50 text-xs"
-                                        >
-                                            <Brain size={14} className={isAutoLabeling ? "animate-spin" : ""} /> Bulk Auto-Label Pool
-                                        </button>
-                                        <button
-                                            onClick={() => { handleExport(); setActiveScenario(null); }}
-                                            className="flex-1 flex items-center justify-center gap-1.5 py-3 bg-slate-800 hover:bg-slate-700 text-purple-400 rounded-xl font-bold border border-slate-750 transition text-xs"
-                                        >
-                                            <Download size={14} /> Export Observations
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
