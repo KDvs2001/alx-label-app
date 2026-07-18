@@ -34,15 +34,15 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Sparkles,
     iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center text-center gap-6 max-w-4xl mx-auto py-2 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start items-center text-center gap-2.5 max-w-4xl mx-auto py-6 overflow-y-auto">
         <img
           src="/logo.jpg"
           alt="CAL-Log Logo"
-          className="h-20 md:h-24 object-contain bg-white p-1.5 rounded-xl border-2 border-slate-900 shadow-sm animate-pulse"
+          className="h-12 md:h-14 object-contain bg-white p-1.5 rounded-xl border-2 border-slate-900 shadow-sm animate-pulse"
         />
-        <div className="space-y-4 mt-4">
+        <div className="space-y-2 mt-2">
           <h1
-            className={`text-4xl md:text-6xl font-black tracking-tight leading-tight uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+            className={`text-2xl md:text-4xl font-black tracking-tight leading-tight uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
           >
             AI doesn't run out of data.
             <br />
@@ -61,16 +61,16 @@ export const getSlides = (contrastLight, onClose) => [
     icon: HelpCircle,
     iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center text-center gap-6 max-w-4xl mx-auto py-2 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start items-center text-center gap-2.5 max-w-4xl mx-auto py-6 overflow-y-auto">
         <h2
-          className={`text-3xl md:text-5xl font-black uppercase tracking-tight leading-snug ${contrastLight ? "text-slate-950" : "text-white"}`}
+          className={`text-xl md:text-3xl font-black uppercase tracking-tight leading-snug ${contrastLight ? "text-slate-950" : "text-white"}`}
         >
           How much of your AI project
           <br />
           is spent labeling data by hand?
         </h2>
-        <div className="mt-8">
-          <span className="text-3xl font-black text-rose-500 animate-pulse uppercase tracking-widest">
+        <div className="mt-3">
+          <span className="text-xl font-black text-rose-500 animate-pulse uppercase tracking-widest">
             Take a guess.
           </span>
         </div>
@@ -84,33 +84,33 @@ export const getSlides = (contrastLight, onClose) => [
     icon: AlertTriangle,
     iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center gap-6 max-w-6xl mx-auto py-2 px-4 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start items-center gap-2.5 max-w-6xl mx-auto py-6 px-4 overflow-y-auto">
         <div className="text-center">
           <h2
-            className={`text-4xl md:text-6xl font-black tracking-tight uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+            className={`text-2xl md:text-4xl font-black tracking-tight uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
           >
             <span className="text-rose-500">80%</span> of every AI project.
           </h2>
           <p
-            className={`text-2xl md:text-3xl font-bold mt-2 ${contrastLight ? "text-slate-900" : "text-slate-400"}`}
+            className={`text-lg md:text-xl font-bold mt-2 ${contrastLight ? "text-slate-900" : "text-slate-400"}`}
           >
             Humans. One sample at a time.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mt-8 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full mt-3 text-left">
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
             <span className="text-sm font-black text-blue-500 uppercase tracking-widest">
               SCALE
             </span>
             <h3
-              className={`text-4xl md:text-5xl font-black ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-2xl md:text-3xl font-black ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               $20B
             </h3>
             <p
-              className={`text-lg font-bold flex-1 ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
+              className={`text-sm font-bold flex-1 ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
             >
               Projected data labeling market by 2030, growing 5x from 2024.
             </p>
@@ -119,18 +119,18 @@ export const getSlides = (contrastLight, onClose) => [
             </span>
           </div>
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
             <span className="text-sm font-black text-rose-500 uppercase tracking-widest">
               IMPACT
             </span>
             <h3
-              className={`text-4xl md:text-5xl font-black ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-2xl md:text-3xl font-black ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               60%
             </h3>
             <p
-              className={`text-lg font-bold flex-1 ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
+              className={`text-sm font-bold flex-1 ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
             >
               Of AI projects abandoned by 2026 due to poor data quality.
             </p>
@@ -139,18 +139,18 @@ export const getSlides = (contrastLight, onClose) => [
             </span>
           </div>
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
             <span className="text-sm font-black text-emerald-500 uppercase tracking-widest">
               URGENCY
             </span>
             <h3
-              className={`text-4xl md:text-5xl font-black ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-2xl md:text-3xl font-black ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               $14.3B
             </h3>
             <p
-              className={`text-lg font-bold flex-1 ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
+              className={`text-sm font-bold flex-1 ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
             >
               Meta paid this for 49% of Scale AI in June 2025.
             </p>
@@ -169,53 +169,53 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Crosshair,
     iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center gap-6 max-w-5xl mx-auto py-2 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start items-center gap-2.5 max-w-5xl mx-auto py-6 overflow-y-auto">
         <h3
-          className={`text-2xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+          className={`text-lg font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
         >
           Everyone competes on features. CAL-Log competes on time.
         </h3>
 
         <div
-          className={`relative w-full max-w-4xl aspect-video rounded-3xl border-4 flex items-center justify-center p-8 ${contrastLight ? "bg-white border-slate-900 shadow-2xl" : "bg-slate-900/60 border-slate-800"}`}
+          className={`relative w-full max-w-4xl aspect-video rounded-3xl border-4 flex items-center justify-center p-4 ${contrastLight ? "bg-white border-slate-900 shadow-2xl" : "bg-slate-900/60 border-slate-800"}`}
         >
           {/* Axes */}
           <div className="absolute left-8 right-8 top-1/2 h-1 bg-slate-300 -translate-y-1/2 rounded"></div>
           <div className="absolute top-8 bottom-8 left-1/2 w-1 bg-slate-300 -translate-x-1/2 rounded"></div>
 
           {/* Labels */}
-          <span className="absolute top-4 left-1/2 -translate-x-1/2 font-black text-lg uppercase text-slate-400 bg-white dark:bg-slate-900 px-2">
+          <span className="absolute top-4 left-1/2 -translate-x-1/2 font-black text-sm uppercase text-slate-400 bg-white dark:bg-slate-900 px-2">
             Cost-Aware
           </span>
-          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 font-black text-lg uppercase text-slate-400 bg-white dark:bg-slate-900 px-2">
+          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 font-black text-sm uppercase text-slate-400 bg-white dark:bg-slate-900 px-2">
             Cost-Blind
           </span>
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 font-black text-lg uppercase text-slate-400 -rotate-90 bg-white dark:bg-slate-900 px-2">
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 font-black text-sm uppercase text-slate-400 -rotate-90 bg-white dark:bg-slate-900 px-2">
             Rigid
           </span>
-          <span className="absolute right-0 top-1/2 -translate-y-1/2 font-black text-lg uppercase text-slate-400 rotate-90 bg-white dark:bg-slate-900 px-2">
+          <span className="absolute right-0 top-1/2 -translate-y-1/2 font-black text-sm uppercase text-slate-400 rotate-90 bg-white dark:bg-slate-900 px-2">
             Adaptive
           </span>
 
           {/* Competitors (Bottom/Left) */}
-          <div className="absolute bottom-1/4 left-1/4 -translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-6 py-3 rounded-xl shadow-lg">
+          <div className="absolute bottom-1/4 left-1/4 -translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-3 py-3 rounded-xl shadow-lg">
             Prodigy
           </div>
-          <div className="absolute bottom-1/3 left-1/3 -translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-6 py-3 rounded-xl shadow-lg">
+          <div className="absolute bottom-1/3 left-1/3 -translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-3 py-3 rounded-xl shadow-lg">
             Label Studio
           </div>
-          <div className="absolute top-2/3 right-1/3 translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-6 py-3 rounded-xl shadow-lg">
+          <div className="absolute top-2/3 right-1/3 translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-3 py-3 rounded-xl shadow-lg">
             Scale AI
           </div>
-          <div className="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-6 py-3 rounded-xl shadow-lg">
+          <div className="absolute top-1/3 left-1/4 -translate-x-1/2 -translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-3 py-3 rounded-xl shadow-lg">
             Snorkel Flow
           </div>
-          <div className="absolute bottom-1/4 right-1/3 translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-6 py-3 rounded-xl shadow-lg">
+          <div className="absolute bottom-1/4 right-1/3 translate-x-1/2 translate-y-1/2 bg-slate-100 border-2 border-slate-300 text-slate-700 font-black px-3 py-3 rounded-xl shadow-lg">
             Doccano
           </div>
 
           {/* CAL-Log (Top Right) */}
-          <div className="absolute top-1/4 right-1/4 translate-x-1/2 -translate-y-1/2 bg-rose-500 border-4 border-rose-700 text-white font-black px-8 py-4 rounded-2xl shadow-[0_0_40px_rgba(244,63,94,0.6)] animate-pulse text-2xl">
+          <div className="absolute top-1/4 right-1/4 translate-x-1/2 -translate-y-1/2 bg-rose-500 border-4 border-rose-700 text-white font-black px-4 py-2 rounded-2xl shadow-[0_0_40px_rgba(244,63,94,0.6)] animate-pulse text-lg">
             CAL-Log
           </div>
         </div>
@@ -229,7 +229,7 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Layers,
     iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center gap-6 max-w-7xl mx-auto py-2 px-4 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start gap-2.5 max-w-7xl mx-auto py-6 px-4 overflow-y-auto">
         {[
           {
             num: "1",
@@ -264,10 +264,10 @@ export const getSlides = (contrastLight, onClose) => [
         ].map((gap) => (
           <div
             key={gap.num}
-            className={`p-6 md:p-8 rounded-3xl border-4 flex flex-col md:flex-row md:items-center gap-4 md:gap-6 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-900"}`}
+            className={`p-3 md:p-4 rounded-3xl border-4 flex flex-col md:flex-row md:items-center gap-4 md:gap-2.5 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-900"}`}
           >
-            <div className="flex gap-4 md:gap-6 items-start text-left flex-1 min-w-0">
-              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-black text-2xl md:text-3xl shrink-0 border-2 border-rose-600/20">
+            <div className="flex gap-4 md:gap-2.5 items-start text-left flex-1 min-w-0">
+              <div className="w-10 h-10 md:w-10 md:h-10 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-black text-lg md:text-xl shrink-0 border-2 border-rose-600/20">
                 {gap.num}
               </div>
               <div className="space-y-2 flex-1 min-w-0">
@@ -277,12 +277,12 @@ export const getSlides = (contrastLight, onClose) => [
                   {gap.type}
                 </div>
                 <h4
-                  className={`font-black text-xl md:text-2xl ${contrastLight ? "text-slate-950" : "text-white"}`}
+                  className={`font-black text-base md:text-lg ${contrastLight ? "text-slate-950" : "text-white"}`}
                 >
                   {gap.title}
                 </h4>
                 <p
-                  className={`text-base md:text-lg font-bold ${contrastLight ? "text-slate-900" : "text-slate-400"}`}
+                  className={`text-base md:text-sm font-bold ${contrastLight ? "text-slate-900" : "text-slate-400"}`}
                 >
                   {gap.desc}
                 </p>
@@ -305,38 +305,38 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Navigation,
     iconColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center gap-8 max-w-7xl mx-auto py-2 px-4 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start items-center gap-3 max-w-7xl mx-auto py-6 px-4 overflow-y-auto">
         <div
-          className={`w-full p-10 rounded-3xl border-4 text-center ${contrastLight ? "bg-blue-50 border-blue-900 shadow-xl" : "bg-blue-900/20 border-blue-800"}`}
+          className={`w-full p-5 rounded-3xl border-4 text-center ${contrastLight ? "bg-blue-50 border-blue-900 shadow-xl" : "bg-blue-900/20 border-blue-800"}`}
         >
           <h2
-            className={`text-4xl md:text-5xl font-black uppercase ${contrastLight ? "text-blue-950" : "text-blue-100"}`}
+            className={`text-2xl md:text-3xl font-black uppercase ${contrastLight ? "text-blue-950" : "text-blue-100"}`}
           >
             Think of it as <span className="text-blue-600">Waze</span> for data
             labeling.
           </h2>
           <p
-            className={`text-2xl font-bold mt-4 ${contrastLight ? "text-blue-900" : "text-blue-300"}`}
+            className={`text-lg font-bold mt-2 ${contrastLight ? "text-blue-900" : "text-blue-300"}`}
           >
             It routes your team around the slow, the redundant, and the
             uncertain.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full text-left">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full text-left">
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
-            <div className="w-20 h-20 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-600 mb-4">
-              <Brain size={40} />
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-600 mb-4">
+              <Brain size={26} />
             </div>
             <h3
-              className={`text-3xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               Innovation
             </h3>
             <p
-              className={`text-lg font-bold leading-relaxed ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
+              className={`text-sm font-bold leading-relaxed ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
             >
               A new kind of active learning. First framework to combine
               cost-aware selection, live annotator adaptation, and calibrated
@@ -344,18 +344,18 @@ export const getSlides = (contrastLight, onClose) => [
             </p>
           </div>
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
-            <div className="w-20 h-20 rounded-2xl bg-rose-500/20 flex items-center justify-center text-rose-600 mb-4">
-              <Server size={40} />
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/20 flex items-center justify-center text-rose-600 mb-4">
+              <Server size={26} />
             </div>
             <h3
-              className={`text-3xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               Application
             </h3>
             <p
-              className={`text-lg font-bold leading-relaxed ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
+              className={`text-sm font-bold leading-relaxed ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
             >
               Production-grade engineering. RoBERTa + SBERT + Node/React +
               MongoDB. Distributed microservices. Not a research script. A
@@ -363,18 +363,18 @@ export const getSlides = (contrastLight, onClose) => [
             </p>
           </div>
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
-            <div className="w-20 h-20 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 mb-4">
-              <Settings size={40} />
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 mb-4">
+              <Settings size={26} />
             </div>
             <h3
-              className={`text-3xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               Compatibility
             </h3>
             <p
-              className={`text-lg font-bold leading-relaxed ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
+              className={`text-sm font-bold leading-relaxed ${contrastLight ? "text-slate-800" : "text-slate-300"}`}
             >
               Plugs into any pipeline. Standard REST API. JSON in, JSON out. Any
               annotation team, any domain, any deployment.
@@ -391,8 +391,8 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Brain,
     iconColor: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
     content: (
-      <div className="h-full flex flex-col justify-center gap-4 w-full max-w-7xl mx-auto px-6 py-2 overflow-y-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center h-full">
+      <div className="h-full flex flex-col justify-start gap-4 w-full max-w-7xl mx-auto px-3 py-6 overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 items-center h-full">
           <div className="lg:col-span-6 flex justify-center items-center w-full h-full">
             <div
               className={`relative w-full rounded-2xl p-2 overflow-hidden shadow-lg border-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-900"}`}
@@ -405,15 +405,15 @@ export const getSlides = (contrastLight, onClose) => [
               />
             </div>
           </div>
-          <div className="lg:col-span-6 space-y-4 text-left flex flex-col justify-center">
+          <div className="lg:col-span-6 space-y-2 text-left flex flex-col justify-center">
             <h2
-              className={`text-2xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+              className={`text-lg font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
             >
               Real-Time Cost-Aware Selection Engine
             </h2>
             {/* Shrunk padding and text size to fit screen comfortably */}
             <div
-              className={`p-4 rounded-xl border-4 font-mono text-sm leading-relaxed shadow-lg ${contrastLight ? "bg-slate-900 border-slate-950 text-emerald-500 font-black" : "bg-slate-950 border-slate-800 text-emerald-400"}`}
+              className={`p-2.5 rounded-xl border-4 font-mono text-sm leading-relaxed shadow-lg ${contrastLight ? "bg-slate-900 border-slate-950 text-emerald-500 font-black" : "bg-slate-950 border-slate-800 text-emerald-400"}`}
             >
               <div className="text-slate-500 mb-1">
                 // Utility = Information Density / Expected Time Cost
@@ -451,7 +451,7 @@ export const getSlides = (contrastLight, onClose) => [
             <div className="space-y-3 text-base text-slate-500 leading-snug font-bold">
               <div className="flex gap-3 items-center">
                 <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400 shrink-0">
-                  <Server size={20} />
+                  <Server size={16} />
                 </div>
                 <span
                   className={`${contrastLight ? "text-slate-900 font-black" : "text-slate-200"}`}
@@ -461,7 +461,7 @@ export const getSlides = (contrastLight, onClose) => [
               </div>
               <div className="flex gap-3 items-center">
                 <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0">
-                  <Database size={20} />
+                  <Database size={16} />
                 </div>
                 <span
                   className={`${contrastLight ? "text-slate-900 font-black" : "text-slate-200"}`}
@@ -471,7 +471,7 @@ export const getSlides = (contrastLight, onClose) => [
               </div>
               <div className="flex gap-3 items-center">
                 <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400 shrink-0">
-                  <Settings size={20} />
+                  <Settings size={16} />
                 </div>
                 <span
                   className={`${contrastLight ? "text-slate-900 font-black" : "text-slate-200"}`}
@@ -492,11 +492,11 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Cpu,
     iconColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center gap-4 px-6 py-2 max-w-7xl mx-auto overflow-y-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-stretch">
+      <div className="h-full w-full flex flex-col justify-start items-center gap-4 px-3 py-6 max-w-7xl mx-auto overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full items-stretch">
           {/* Left Pane: Two Core Scientific Novelties (HCI-ML Loop Fusion & ECE Self-Tuning Pruning) */}
           <div
-            className={`lg:col-span-8 p-5 rounded-3xl border-4 flex flex-col justify-between ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"} relative overflow-hidden`}
+            className={`lg:col-span-8 p-3 rounded-3xl border-4 flex flex-col justify-between ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"} relative overflow-hidden`}
           >
             {/* Ambient glow decoration */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -507,7 +507,7 @@ export const getSlides = (contrastLight, onClose) => [
                   Double Academic Novelty
                 </span>
                 <h3
-                  className={`text-xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+                  className={`text-base font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
                 >
                   Scientific Innovations
                 </h3>
@@ -516,11 +516,11 @@ export const getSlides = (contrastLight, onClose) => [
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch h-full">
               {/* Novelty 1: HCI-ML Cognitive Loop */}
               <div
-                className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${contrastLight ? "bg-slate-50 border-slate-200" : "bg-slate-950/30 border-slate-900/60"}`}
+                className={`p-2.5 rounded-2xl border flex flex-col justify-between gap-4 ${contrastLight ? "bg-slate-50 border-slate-200" : "bg-slate-950/30 border-slate-900/60"}`}
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-purple-500">
-                    <Brain size={18} />
+                    <Brain size={15} />
                     <h4
                       className={`text-xs font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
                     >
@@ -566,11 +566,11 @@ export const getSlides = (contrastLight, onClose) => [
 
               {/* Novelty 2: ECE Self-Tuning Pruning */}
               <div
-                className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${contrastLight ? "bg-slate-50 border-slate-200" : "bg-slate-950/30 border-slate-900/60"}`}
+                className={`p-2.5 rounded-2xl border flex flex-col justify-between gap-4 ${contrastLight ? "bg-slate-50 border-slate-200" : "bg-slate-950/30 border-slate-900/60"}`}
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-indigo-500">
-                    <Cpu size={18} />
+                    <Cpu size={15} />
                     <h4
                       className={`text-xs font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
                     >
@@ -619,7 +619,7 @@ export const getSlides = (contrastLight, onClose) => [
           {/* Right Pane: Supporting Enterprise Engineering & Security Standards */}
           <div className="lg:col-span-4 flex flex-col justify-between gap-4">
             <div
-              className={`p-4 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? "bg-white border-slate-900 shadow-sm" : "bg-slate-900/60 border-slate-800"}`}
+              className={`p-2.5 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? "bg-white border-slate-900 shadow-sm" : "bg-slate-900/60 border-slate-800"}`}
             >
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-500">
@@ -644,7 +644,7 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
 
             <div
-              className={`p-4 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? "bg-white border-slate-900 shadow-sm" : "bg-slate-900/60 border-slate-800"}`}
+              className={`p-2.5 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? "bg-white border-slate-900 shadow-sm" : "bg-slate-900/60 border-slate-800"}`}
             >
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-500">
@@ -673,7 +673,7 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
 
             <div
-              className={`p-4 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? "bg-white border-slate-900 shadow-sm" : "bg-slate-900/60 border-slate-800"}`}
+              className={`p-2.5 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? "bg-white border-slate-900 shadow-sm" : "bg-slate-900/60 border-slate-800"}`}
             >
               <div className="flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-500">
@@ -713,21 +713,21 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Zap,
     iconColor: "text-rose-400 bg-rose-500/10 border-rose-500/20",
     content: (
-      <div className="h-full flex flex-col justify-center gap-8 w-full max-w-7xl mx-auto px-6 py-4 overflow-y-auto">
-        <div className="flex flex-col gap-6 w-full text-center">
+      <div className="h-full flex flex-col justify-start gap-3 w-full max-w-7xl mx-auto px-3 py-6 overflow-y-auto">
+        <div className="flex flex-col gap-2.5 w-full text-center">
           <h3
-            className={`text-4xl md:text-5xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
+            className={`text-2xl md:text-3xl font-black uppercase ${contrastLight ? "text-slate-950" : "text-white"}`}
           >
             Time to Reach F1 = 0.80
           </h3>
           <p
-            className={`text-2xl font-bold ${contrastLight ? "text-slate-700" : "text-slate-300"}`}
+            className={`text-lg font-bold ${contrastLight ? "text-slate-700" : "text-slate-300"}`}
           >
             Averaged across 10 distinct NLP datasets
           </p>
 
           <div
-            className={`p-10 rounded-3xl border-4 space-y-8 mt-4 ${contrastLight ? "bg-white border-slate-900 shadow-2xl" : "bg-slate-900/40 border-slate-900"}`}
+            className={`p-5 rounded-3xl border-4 space-y-3 mt-2 ${contrastLight ? "bg-white border-slate-900 shadow-2xl" : "bg-slate-900/40 border-slate-900"}`}
           >
             {[
               {
@@ -773,14 +773,14 @@ export const getSlides = (contrastLight, onClose) => [
               const ciWidth = ((item.ciEnd - item.ciStart) / maxVal) * 100;
 
               return (
-                <div key={idx} className="grid grid-cols-12 gap-8 items-center">
+                <div key={idx} className="grid grid-cols-12 gap-3 items-center">
                   <div
-                    className={`col-span-3 text-right text-2xl font-black uppercase ${item.isHighlight ? "text-rose-500" : contrastLight ? "text-slate-950" : "text-slate-300"}`}
+                    className={`col-span-3 text-right text-lg font-black uppercase ${item.isHighlight ? "text-rose-500" : contrastLight ? "text-slate-950" : "text-slate-300"}`}
                   >
                     {item.name}
                   </div>
                   <div
-                    className={`col-span-7 relative h-12 flex items-center rounded-xl border-2 overflow-visible ${contrastLight ? "bg-slate-100 border-slate-900" : "bg-slate-950/40 border-slate-900"}`}
+                    className={`col-span-7 relative h-9 flex items-center rounded-xl border-2 overflow-visible ${contrastLight ? "bg-slate-100 border-slate-900" : "bg-slate-950/40 border-slate-900"}`}
                   >
                     <div
                       className={`absolute h-1 flex items-center justify-between ${contrastLight ? "bg-slate-950" : "bg-slate-700"}`}
@@ -799,7 +799,7 @@ export const getSlides = (contrastLight, onClose) => [
                     />
                   </div>
                   <div
-                    className={`col-span-2 text-3xl font-mono font-black ${item.isHighlight ? "text-rose-700" : contrastLight ? "text-slate-950" : "text-slate-400"}`}
+                    className={`col-span-2 text-xl font-mono font-black ${item.isHighlight ? "text-rose-700" : contrastLight ? "text-slate-950" : "text-slate-400"}`}
                   >
                     {item.time.toFixed(1)} min
                   </div>
@@ -818,11 +818,11 @@ export const getSlides = (contrastLight, onClose) => [
     icon: ShieldCheck,
     iconColor: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
     content: (
-      <div className="h-full flex flex-col justify-center gap-6 w-full max-w-7xl mx-auto px-4 py-2 overflow-y-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-stretch">
+      <div className="h-full flex flex-col justify-start gap-2.5 w-full max-w-7xl mx-auto px-4 py-6 overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 h-full items-stretch">
           {/* Left: Table */}
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
             <table className="w-full text-left border-collapse text-base flex-1">
               <thead>
@@ -830,25 +830,25 @@ export const getSlides = (contrastLight, onClose) => [
                   className={`border-b-4 ${contrastLight ? "border-slate-900" : "border-slate-700"}`}
                 >
                   <th
-                    className={`py-4 font-black text-xl ${contrastLight ? "text-slate-950" : "text-slate-200"}`}
+                    className={`py-2 font-black text-base ${contrastLight ? "text-slate-950" : "text-slate-200"}`}
                   >
                     Features
                   </th>
-                  <th className="py-4 font-black text-rose-600 text-center text-xl">
+                  <th className="py-2 font-black text-rose-600 text-center text-base">
                     CAL-Log
                   </th>
                   <th
-                    className={`py-4 font-black text-center text-xl ${contrastLight ? "text-slate-500" : "text-slate-500"}`}
+                    className={`py-2 font-black text-center text-base ${contrastLight ? "text-slate-500" : "text-slate-500"}`}
                   >
                     Prodigy
                   </th>
                   <th
-                    className={`py-4 font-black text-center text-xl ${contrastLight ? "text-slate-500" : "text-slate-500"}`}
+                    className={`py-2 font-black text-center text-base ${contrastLight ? "text-slate-500" : "text-slate-500"}`}
                   >
                     Scale AI
                   </th>
                   <th
-                    className={`py-4 font-black text-center text-xl ${contrastLight ? "text-slate-500" : "text-slate-500"}`}
+                    className={`py-2 font-black text-center text-base ${contrastLight ? "text-slate-500" : "text-slate-500"}`}
                   >
                     Snorkel
                   </th>
@@ -868,25 +868,25 @@ export const getSlides = (contrastLight, onClose) => [
                 ].map((row, idx) => (
                   <tr key={idx}>
                     <td
-                      className={`py-4 font-bold text-lg ${contrastLight ? "text-slate-950 font-black" : "text-slate-300"}`}
+                      className={`py-2 font-bold text-sm ${contrastLight ? "text-slate-950 font-black" : "text-slate-300"}`}
                     >
                       {row[0]}
                     </td>
-                    <td className="py-4 text-center font-black text-rose-600 text-2xl">
+                    <td className="py-2 text-center font-black text-rose-600 text-lg">
                       {row[1] ? "✓" : "—"}
                     </td>
                     <td
-                      className={`py-4 text-center text-2xl ${contrastLight ? "text-slate-400 font-bold" : "text-slate-600"}`}
+                      className={`py-2 text-center text-lg ${contrastLight ? "text-slate-400 font-bold" : "text-slate-600"}`}
                     >
                       {row[2] ? "✓" : "—"}
                     </td>
                     <td
-                      className={`py-4 text-center text-2xl ${contrastLight ? "text-slate-400 font-bold" : "text-slate-600"}`}
+                      className={`py-2 text-center text-lg ${contrastLight ? "text-slate-400 font-bold" : "text-slate-600"}`}
                     >
                       {row[3] ? "✓" : "—"}
                     </td>
                     <td
-                      className={`py-4 text-center text-2xl ${contrastLight ? "text-slate-400 font-bold" : "text-slate-600"}`}
+                      className={`py-2 text-center text-lg ${contrastLight ? "text-slate-400 font-bold" : "text-slate-600"}`}
                     >
                       {row[4] ? "✓" : "—"}
                     </td>
@@ -898,14 +898,14 @@ export const getSlides = (contrastLight, onClose) => [
 
           {/* Right: Standards */}
           <div
-            className={`p-10 rounded-3xl border-4 flex flex-col justify-center ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-5 rounded-3xl border-4 flex flex-col justify-center ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
-            <span className="text-xl font-black text-emerald-600 uppercase tracking-widest text-center mb-8">
+            <span className="text-base font-black text-emerald-600 uppercase tracking-widest text-center mb-3">
               STANDARDS COMPLIANT
             </span>
-            <div className="space-y-6 text-2xl font-bold">
+            <div className="space-y-2.5 text-lg font-bold">
               <div className="flex items-center gap-4">
-                <CheckCircle2 size={32} className="text-emerald-500 shrink-0" />{" "}
+                <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />{" "}
                 <span
                   className={`${contrastLight ? "text-slate-900" : "text-slate-200"}`}
                 >
@@ -913,7 +913,7 @@ export const getSlides = (contrastLight, onClose) => [
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <CheckCircle2 size={32} className="text-emerald-500 shrink-0" />{" "}
+                <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />{" "}
                 <span
                   className={`${contrastLight ? "text-slate-900" : "text-slate-200"}`}
                 >
@@ -921,7 +921,7 @@ export const getSlides = (contrastLight, onClose) => [
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <CheckCircle2 size={32} className="text-emerald-500 shrink-0" />{" "}
+                <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />{" "}
                 <span
                   className={`${contrastLight ? "text-slate-900" : "text-slate-200"}`}
                 >
@@ -929,7 +929,7 @@ export const getSlides = (contrastLight, onClose) => [
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <CheckCircle2 size={32} className="text-emerald-500 shrink-0" />{" "}
+                <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />{" "}
                 <span
                   className={`${contrastLight ? "text-slate-900" : "text-slate-200"}`}
                 >
@@ -937,7 +937,7 @@ export const getSlides = (contrastLight, onClose) => [
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <CheckCircle2 size={32} className="text-emerald-500 shrink-0" />{" "}
+                <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />{" "}
                 <span
                   className={`${contrastLight ? "text-slate-900" : "text-slate-200"}`}
                 >
@@ -945,7 +945,7 @@ export const getSlides = (contrastLight, onClose) => [
                 </span>
               </div>
               <div className="flex items-center gap-4">
-                <CheckCircle2 size={32} className="text-emerald-500 shrink-0" />{" "}
+                <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />{" "}
                 <span
                   className={`${contrastLight ? "text-slate-900" : "text-slate-200"}`}
                 >
@@ -966,18 +966,13 @@ export const getSlides = (contrastLight, onClose) => [
     iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
     content: (
       <div className="h-full w-full flex flex-col pt-1 px-4 pb-2 overflow-y-auto">
-        {/* 
-                  Merged Lean Canvas & Business Impact. 
-                  Font sizes and padding reduced so it fits entirely on screen without scrolling.
-                */}
         <div
           className={`flex-1 grid grid-cols-5 grid-rows-3 border-4 ${contrastLight ? "border-slate-950 bg-white text-slate-900" : "border-slate-700 bg-slate-900 text-slate-200"} shadow-2xl`}
         >
-          {/* Top Row */}
           <div
-            className={`col-span-1 row-span-2 border-r-4 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
+            className={`col-span-1 row-span-2 border-r-4 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
           >
-            <h3 className="text-lg font-black uppercase text-rose-600">
+            <h3 className="text-sm font-black uppercase text-rose-600">
               Problem
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -987,9 +982,9 @@ export const getSlides = (contrastLight, onClose) => [
             </ul>
           </div>
           <div
-            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
+            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
           >
-            <h3 className="text-lg font-black uppercase text-indigo-600">
+            <h3 className="text-sm font-black uppercase text-indigo-600">
               Solution
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -999,9 +994,9 @@ export const getSlides = (contrastLight, onClose) => [
             </ul>
           </div>
           <div
-            className={`col-span-1 row-span-2 border-r-4 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2 bg-rose-500/5`}
+            className={`col-span-1 row-span-2 border-r-4 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2 bg-rose-500/5`}
           >
-            <h3 className="text-lg font-black uppercase text-rose-600">
+            <h3 className="text-sm font-black uppercase text-rose-600">
               Unique Value Prop
             </h3>
             <p className="text-sm font-black leading-snug mt-2">
@@ -1013,9 +1008,9 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
           </div>
           <div
-            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
+            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
           >
-            <h3 className="text-lg font-black uppercase text-emerald-600">
+            <h3 className="text-sm font-black uppercase text-emerald-600">
               Unfair Advantage
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -1024,9 +1019,9 @@ export const getSlides = (contrastLight, onClose) => [
             </ul>
           </div>
           <div
-            className={`col-span-1 row-span-2 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
+            className={`col-span-1 row-span-2 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
           >
-            <h3 className="text-lg font-black uppercase text-purple-600">
+            <h3 className="text-sm font-black uppercase text-purple-600">
               Customer Segments
             </h3>
             <span className="text-xs font-black uppercase bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-2 py-1 rounded inline-block w-fit mb-1">
@@ -1045,12 +1040,10 @@ export const getSlides = (contrastLight, onClose) => [
               </li>
             </ul>
           </div>
-
-          {/* Middle Row nested components */}
           <div
-            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2 col-start-2 row-start-2`}
+            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2 col-start-2 row-start-2`}
           >
-            <h3 className="text-lg font-black uppercase text-indigo-600">
+            <h3 className="text-sm font-black uppercase text-indigo-600">
               Key Metrics
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -1059,9 +1052,9 @@ export const getSlides = (contrastLight, onClose) => [
             </ul>
           </div>
           <div
-            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2 col-start-4 row-start-2`}
+            className={`col-span-1 row-span-1 border-r-4 border-b-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2 col-start-4 row-start-2`}
           >
-            <h3 className="text-lg font-black uppercase text-emerald-600">
+            <h3 className="text-sm font-black uppercase text-emerald-600">
               Channels
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -1069,12 +1062,10 @@ export const getSlides = (contrastLight, onClose) => [
               <li>Open-source plugins (HuggingFace).</li>
             </ul>
           </div>
-
-          {/* Bottom Row */}
           <div
-            className={`col-span-2 row-span-1 border-r-4 p-4 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
+            className={`col-span-2 row-span-1 border-r-4 p-2.5 ${contrastLight ? "border-slate-950" : "border-slate-700"} flex flex-col gap-2`}
           >
-            <h3 className="text-lg font-black uppercase text-amber-600">
+            <h3 className="text-sm font-black uppercase text-amber-600">
               Cost Structure
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -1084,8 +1075,8 @@ export const getSlides = (contrastLight, onClose) => [
               <li>R&D and engineering maintenance.</li>
             </ul>
           </div>
-          <div className={`col-span-3 row-span-1 p-4 flex flex-col gap-2`}>
-            <h3 className="text-lg font-black uppercase text-amber-600">
+          <div className={`col-span-3 row-span-1 p-2.5 flex flex-col gap-2`}>
+            <h3 className="text-sm font-black uppercase text-amber-600">
               Revenue Streams
             </h3>
             <ul className="list-disc pl-5 text-sm font-bold leading-relaxed space-y-1">
@@ -1112,34 +1103,32 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Users,
     iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center gap-6 max-w-7xl mx-auto py-2 px-4 overflow-y-auto">
-        {/* Stats */}
+      <div className="h-full w-full flex flex-col justify-start gap-2.5 max-w-7xl mx-auto py-6 px-4 overflow-y-auto">
         <div className="flex flex-wrap justify-center gap-4">
-          <div className="px-6 py-3 rounded-full border-4 border-slate-300 bg-slate-100 text-slate-800 font-black text-lg md:text-xl">
+          <div className="px-3 py-3 rounded-full border-4 border-slate-300 bg-slate-100 text-slate-800 font-black text-sm md:text-base">
             42 Experts Contacted
           </div>
-          <div className="px-6 py-3 rounded-full border-4 border-rose-500 bg-rose-500 text-white font-black text-lg md:text-xl shadow-lg shadow-rose-500/30">
+          <div className="px-3 py-3 rounded-full border-4 border-rose-500 bg-rose-500 text-white font-black text-sm md:text-base shadow-lg shadow-rose-500/30">
             31 Usable Responses
           </div>
-          <div className="px-6 py-3 rounded-full border-4 border-slate-300 bg-slate-100 text-slate-800 font-black text-lg md:text-xl">
+          <div className="px-3 py-3 rounded-full border-4 border-slate-300 bg-slate-100 text-slate-800 font-black text-sm md:text-base">
             19 AL/NLP Researchers
           </div>
-          <div className="px-6 py-3 rounded-full border-4 border-slate-300 bg-slate-100 text-slate-800 font-black text-lg md:text-xl">
+          <div className="px-3 py-3 rounded-full border-4 border-slate-300 bg-slate-100 text-slate-800 font-black text-sm md:text-base">
             12 ML Engineers
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch mt-4">
-          {/* Quotes */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch mt-2">
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-6 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-2.5 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
             <span className="text-sm font-black text-indigo-500 uppercase tracking-widest">
               WHAT THEY SAID
             </span>
 
-            <div className="p-5 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
-              <p className="text-lg font-bold italic">
+            <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
+              <p className="text-sm font-bold italic">
                 "Strong practical and commercial value. The balance between
                 utility and annotation time is effective."
               </p>
@@ -1147,8 +1136,8 @@ export const getSlides = (contrastLight, onClose) => [
                 — Evaluator 19 · ML Engineer
               </span>
             </div>
-            <div className="p-5 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
-              <p className="text-lg font-bold italic">
+            <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
+              <p className="text-sm font-bold italic">
                 "75.6% improvement over baselines, with a clear peak at 60
                 minutes of annotation."
               </p>
@@ -1156,8 +1145,8 @@ export const getSlides = (contrastLight, onClose) => [
                 — Evaluator 13 · AL Researcher
               </span>
             </div>
-            <div className="p-5 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
-              <p className="text-lg font-bold italic">
+            <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/50">
+              <p className="text-sm font-bold italic">
                 "Cost angle is an important but largely neglected dimension in
                 current active learning."
               </p>
@@ -1167,14 +1156,13 @@ export const getSlides = (contrastLight, onClose) => [
             </div>
           </div>
 
-          {/* Feedback to changes */}
           <div
-            className={`p-8 rounded-3xl border-4 flex flex-col gap-6 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+            className={`p-4 rounded-3xl border-4 flex flex-col gap-2.5 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
           >
             <span className="text-sm font-black text-emerald-500 uppercase tracking-widest">
               FEEDBACK → WHAT CHANGED
             </span>
-            <div className="space-y-6 text-lg font-bold flex-1">
+            <div className="space-y-2.5 text-sm font-bold flex-1">
               <div className="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-700 pb-4">
                 <span
                   className={
@@ -1283,20 +1271,19 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Award,
     iconColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
     content: (
-      <div className="h-full flex flex-col justify-center gap-8 w-full max-w-7xl mx-auto py-2 px-4 overflow-y-auto">
-        {/* Papers Section */}
+      <div className="h-full flex flex-col justify-start gap-3 w-full max-w-7xl mx-auto py-6 px-4 overflow-y-auto">
         <div
-          className={`p-8 rounded-3xl border-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+          className={`p-4 rounded-3xl border-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
         >
           <h3
-            className={`text-2xl font-black uppercase mb-6 ${contrastLight ? "text-slate-950" : "text-white"}`}
+            className={`text-lg font-black uppercase mb-2 ${contrastLight ? "text-slate-950" : "text-white"}`}
           >
             TECHNICAL VALIDATION (PUBLISHED IN)
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xl font-bold">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-base font-bold">
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 bg-rose-100 text-rose-600 rounded-xl border-2 border-rose-300 flex items-center justify-center font-black shrink-0">
-                <BookOpen size={24} />
+              <div className="h-9 w-9 bg-rose-100 text-rose-600 rounded-xl border-2 border-rose-300 flex items-center justify-center font-black shrink-0">
+                <BookOpen size={18} />
               </div>
               <span>
                 <b className="text-rose-500">ACL 2026:</b> Accepted, presented,
@@ -1304,24 +1291,24 @@ export const getSlides = (contrastLight, onClose) => [
               </span>
             </div>
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 bg-blue-100 text-blue-600 rounded-xl border-2 border-blue-300 flex items-center justify-center font-black shrink-0">
-                <FileText size={24} />
+              <div className="h-9 w-9 bg-blue-100 text-blue-600 rounded-xl border-2 border-blue-300 flex items-center justify-center font-black shrink-0">
+                <FileText size={18} />
               </div>
               <span>
                 <b className="text-blue-500">IEEE CSNT 2026:</b> Accepted
               </span>
             </div>
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 bg-emerald-100 text-emerald-600 rounded-xl border-2 border-emerald-300 flex items-center justify-center font-black shrink-0">
-                <BookOpen size={24} />
+              <div className="h-9 w-9 bg-emerald-100 text-emerald-600 rounded-xl border-2 border-emerald-300 flex items-center justify-center font-black shrink-0">
+                <BookOpen size={18} />
               </div>
               <span>
                 <b className="text-emerald-500">ICAIIC 2026:</b> Published
               </span>
             </div>
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 bg-purple-100 text-purple-600 rounded-xl border-2 border-purple-300 flex items-center justify-center font-black shrink-0">
-                <FileText size={24} />
+              <div className="h-9 w-9 bg-purple-100 text-purple-600 rounded-xl border-2 border-purple-300 flex items-center justify-center font-black shrink-0">
+                <FileText size={18} />
               </div>
               <span>
                 <b className="text-purple-500">SCSE 2026:</b> Published
@@ -1330,21 +1317,18 @@ export const getSlides = (contrastLight, onClose) => [
           </div>
         </div>
 
-        {/* Creative Roadmap Section */}
         <div
-          className={`p-8 rounded-3xl border-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
+          className={`p-4 rounded-3xl border-4 ${contrastLight ? "bg-white border-slate-900 shadow-xl" : "bg-slate-900/60 border-slate-800"}`}
         >
           <h3
-            className={`text-2xl font-black uppercase mb-10 text-center ${contrastLight ? "text-slate-950" : "text-white"}`}
+            className={`text-lg font-black uppercase mb-3 text-center ${contrastLight ? "text-slate-950" : "text-white"}`}
           >
             THE ROADMAP
           </h3>
 
-          <div className="flex flex-col md:flex-row items-center justify-between relative px-10 pb-6">
-            {/* Connecting Line */}
+          <div className="flex flex-col md:flex-row items-center justify-between relative px-5 pb-6">
             <div className="hidden md:block absolute top-12 left-20 right-20 h-2 bg-gradient-to-r from-blue-500 via-rose-500 to-emerald-500 rounded-full z-0"></div>
 
-            {/* Roadmap Items */}
             {[
               {
                 step: "Now",
@@ -1380,9 +1364,9 @@ export const getSlides = (contrastLight, onClose) => [
                 className="flex flex-col items-center z-10 gap-4 group text-center px-4"
               >
                 <div
-                  className={`w-24 h-24 rounded-full border-4 bg-slate-900 flex items-center justify-center shadow-xl transition-transform transform group-hover:scale-110 ${item.color}`}
+                  className={`w-14 h-14 rounded-full border-4 bg-slate-900 flex items-center justify-center shadow-xl transition-transform transform group-hover:scale-110 ${item.color}`}
                 >
-                  <item.icon size={36} className={item.color.split(" ")[0]} />
+                  <item.icon size={24} className={item.color.split(" ")[0]} />
                 </div>
                 <div>
                   <span
@@ -1391,7 +1375,7 @@ export const getSlides = (contrastLight, onClose) => [
                     {item.step}
                   </span>
                   <h4
-                    className={`text-2xl font-black mt-1 ${contrastLight ? "text-slate-900" : "text-white"}`}
+                    className={`text-lg font-black mt-1 ${contrastLight ? "text-slate-900" : "text-white"}`}
                   >
                     {item.title}
                   </h4>
@@ -1415,15 +1399,15 @@ export const getSlides = (contrastLight, onClose) => [
     icon: Check,
     iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
     content: (
-      <div className="h-full w-full flex flex-col justify-center items-center text-center gap-6 max-w-5xl mx-auto py-2 overflow-y-auto">
+      <div className="h-full w-full flex flex-col justify-start items-center text-center gap-2.5 max-w-5xl mx-auto py-6 overflow-y-auto">
         <img
           src="/logo.jpg"
           alt="CAL-Log Logo"
           className="h-28 md:h-32 object-contain bg-white p-2 rounded-2xl border-4 border-slate-400 shadow-2xl animate-bounce"
         />
-        <div className="space-y-6">
+        <div className="space-y-2.5">
           <h2
-            className={`text-4xl md:text-6xl font-black uppercase tracking-tight ${contrastLight ? "text-slate-950" : "text-white"}`}
+            className={`text-2xl md:text-4xl font-black uppercase tracking-tight ${contrastLight ? "text-slate-950" : "text-white"}`}
           >
             This isn't a research idea.
             <br />
@@ -1432,22 +1416,22 @@ export const getSlides = (contrastLight, onClose) => [
             </span>
           </h2>
           <p
-            className={`text-2xl md:text-3xl font-bold max-w-3xl mx-auto leading-relaxed ${contrastLight ? "text-slate-900 font-extrabold" : "text-slate-300"}`}
+            className={`text-lg md:text-xl font-bold max-w-3xl mx-auto leading-relaxed ${contrastLight ? "text-slate-900 font-extrabold" : "text-slate-300"}`}
           >
             Same accuracy, a third of the time, at a fraction of the cost.
           </p>
         </div>
         <div className="w-full h-2 bg-gradient-to-r from-transparent via-slate-800 to-transparent my-6" />
         <h3
-          className={`text-2xl font-black italic ${contrastLight ? "text-slate-500" : "text-slate-400"}`}
+          className={`text-lg font-black italic ${contrastLight ? "text-slate-500" : "text-slate-400"}`}
         >
           Thank you. Happy to take your questions.
         </h3>
         <button
           onClick={onClose}
-          className="mt-4 px-10 py-6 bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-black text-2xl rounded-2xl shadow-2xl shadow-rose-500/30 transform hover:scale-105 active:scale-95 transition flex items-center gap-4"
+          className="mt-2 px-5 py-3 bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-500 hover:to-red-400 text-white font-black text-lg rounded-2xl shadow-2xl shadow-rose-500/30 transform hover:scale-105 active:scale-95 transition flex items-center gap-4"
         >
-          <Play size={28} className="fill-white" /> Start Live Annotation Demo
+          <Play size={20} className="fill-white" /> Start Live Annotation Demo
         </button>
       </div>
     ),
