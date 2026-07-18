@@ -249,48 +249,110 @@ export const getSlides = (contrastLight, onClose) => [
     // SLIDE 8 — TECHNOLOGICAL INNOVATION (DATA DRIVEN FOR NBQSA GOLD)
     {
         title: "Technological Innovation",
-        subtitle: "Engineering built for the NBQSA Gold Standard",
+        subtitle: "Core Academic Novelty & Production Engineering Standards",
         icon: Cpu,
-        iconColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+        iconColor: "text-blue-450 bg-blue-500/10 border-blue-500/20",
         content: (
-            <div className="h-full w-full flex flex-col justify-center items-center gap-6 px-4 py-2 max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-20 h-20 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-500">
-                            <Brain size={40} />
+            <div className="h-full w-full flex flex-col justify-center items-center gap-4 px-6 py-2 max-w-7xl mx-auto overflow-hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-stretch">
+                    
+                    {/* Left Pane: Two Core Scientific Novelties (HCI-ML Loop Fusion & ECE Self-Tuning Pruning) */}
+                    <div className={`lg:col-span-8 p-5 rounded-3xl border-4 flex flex-col justify-between ${contrastLight ? 'bg-white border-slate-900 shadow-xl' : 'bg-slate-900/60 border-slate-800'} relative overflow-hidden`}>
+                        {/* Ambient glow decoration */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+                        
+                        <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">Double Academic Novelty</span>
+                                <h3 className={`text-xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Scientific Innovations</h3>
+                            </div>
                         </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Cognitive Novelty</h3>
-                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            The FIRST mathematical fusion of <span className="text-purple-500 font-black">HCI telemetry and ML</span>. Tracks real-time OLS residuals to detect fatigue, while a <span className="text-purple-500 font-black">3-Model SLM Consensus</span> automatically intercepts the loop if models disagree.
-                        </p>
-                    </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
-                            <Layers size={40} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch h-full">
+                            {/* Novelty 1: HCI-ML Cognitive Loop */}
+                            <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${contrastLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/30 border-slate-850/60'}`}>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-purple-500">
+                                        <Brain size={18} />
+                                        <h4 className={`text-xs font-black uppercase ${contrastLight ? 'text-slate-955' : 'text-white'}`}>1. HCI-ML Cognitive Loop</h4>
+                                    </div>
+                                    <p className={`text-[10px] font-bold leading-normal ${contrastLight ? 'text-slate-700' : 'text-slate-400'}`}>
+                                        Fuses <span className="text-purple-500 font-bold">HCI (Human-Computer Interaction)</span> telemetry with active learning.
+                                    </p>
+                                    
+                                    {/* Tech details */}
+                                    <div className="space-y-1 mt-2 text-[9px] font-semibold text-slate-500 border-l border-purple-500/30 pl-2">
+                                        <div>• <span className="font-bold text-slate-400 uppercase">Tech Mechanism:</span> Fits OLS (Ordinary Least Squares) regression on keystroke and scroll latency. Tethers beta ($\beta$) complexity dynamically based on speed residuals.</div>
+                                    </div>
+                                </div>
+
+                                {/* Plain English Analogy */}
+                                <div className={`p-2.5 rounded-xl border text-[10px] font-semibold leading-relaxed ${contrastLight ? 'bg-purple-50/50 border-purple-200 text-purple-950' : 'bg-purple-500/5 border-purple-500/20 text-purple-300'}`}>
+                                    <span className="font-black uppercase tracking-wider block text-[9px] text-purple-400 mb-0.5">💡 In Plain English</span>
+                                    Like a smart treadmill that automatically slows down when it senses your heart rate rising, ensuring you don't burn out or make sloppy errors.
+                                </div>
+                            </div>
+
+                            {/* Novelty 2: ECE Self-Tuning Pruning */}
+                            <div className={`p-4 rounded-2xl border flex flex-col justify-between gap-4 ${contrastLight ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/30 border-slate-850/60'}`}>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-indigo-500">
+                                        <Cpu size={18} />
+                                        <h4 className={`text-xs font-black uppercase ${contrastLight ? 'text-slate-955' : 'text-white'}`}>2. Self-Tuning Active Pruning</h4>
+                                    </div>
+                                    <p className={`text-[10px] font-bold leading-normal ${contrastLight ? 'text-slate-700' : 'text-slate-400'}`}>
+                                        Thresholds dynamically auto-tune based on accuracy and <span className="text-indigo-500 font-bold">ECE (Expected Calibration Error)</span>.
+                                    </p>
+                                    
+                                    {/* Tech details */}
+                                    <div className="space-y-1 mt-2 text-[9px] font-semibold text-slate-500 border-l border-indigo-500/30 pl-2">
+                                        <div>• <span className="font-bold text-slate-400 uppercase">Tech Mechanism:</span> Tracks model certainty shifts, scaling confidence boundaries ($85\% \rightarrow 98\%$) to prevent overconfident pool pollution.</div>
+                                    </div>
+                                </div>
+
+                                {/* Plain English Analogy */}
+                                <div className={`p-2.5 rounded-xl border text-[10px] font-semibold leading-relaxed ${contrastLight ? 'bg-indigo-50/50 border-indigo-200 text-indigo-950' : 'bg-indigo-500/5 border-indigo-500/20 text-indigo-300'}`}>
+                                    <span className="font-black uppercase tracking-wider block text-[9px] text-indigo-400 mb-0.5">💡 In Plain English</span>
+                                    Like an automated factory inspector that does the easy work itself, but immediately stops and calls in human experts if it feels uncertain.
+                                </div>
+                            </div>
                         </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Infinite Scalability</h3>
-                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            Uses <span className="text-blue-500 font-black">SBERT embeddings for Semantic Deduplication</span> in real-time. The stateless React/Node/Flask architecture dynamically handles 10,000+ concurrent annotators with zero latency degradation.
-                        </p>
                     </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
-                            <Globe size={40} />
+
+                    {/* Right Pane: Supporting Enterprise Engineering & Security Standards */}
+                    <div className="lg:col-span-4 flex flex-col justify-between gap-4">
+                        
+                        <div className={`p-4 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? 'bg-white border-slate-900 shadow-sm' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-500"><Layers size={16} /></div>
+                                <h4 className={`text-xs font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Semantic Deduplication</h4>
+                            </div>
+                            <p className={`text-[10px] font-bold leading-relaxed ${contrastLight ? 'text-slate-700' : 'text-slate-400'}`}>
+                                Uses <span className="text-blue-555 font-bold">SBERT</span> (<span className="italic text-[9px] text-slate-555 font-semibold">Sentence-BERT</span>) to prune redundant texts. Stateless architecture scales to 10k+ concurrent users.
+                            </p>
                         </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Transparent UX</h3>
-                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            Replaces the AL "black box" with <span className="text-emerald-500 font-black">Dynamic Parameter Explainer Modals</span>. Fully lazy-loaded UI ensures sub-second rendering, backed by strict WCAG/ARIA accessibility standards.
-                        </p>
-                    </div>
-                    <div className={`p-8 rounded-3xl border-4 flex flex-col items-center text-center gap-4 ${contrastLight ? 'bg-gradient-to-b from-white to-slate-50 border-slate-900 shadow-xl' : 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-700'}`}>
-                        <div className="w-20 h-20 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-500">
-                            <ShieldCheck size={40} />
+
+                        <div className={`p-4 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? 'bg-white border-slate-900 shadow-sm' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-500"><Globe size={16} /></div>
+                                <h4 className={`text-xs font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Transparent Usability</h4>
+                            </div>
+                            <p className={`text-[10px] font-bold leading-relaxed ${contrastLight ? 'text-slate-700' : 'text-slate-400'}`}>
+                                Adheres to <span className="text-emerald-555 font-bold">WCAG</span> (<span className="italic text-[9px] text-slate-555 font-semibold">Web Content Accessibility Guidelines</span>) & <span className="text-emerald-555 font-bold">ARIA</span> (<span className="italic text-[9px] text-slate-555 font-semibold">Accessible Rich Internet Applications</span>) usability standards to simplify model parameters.
+                            </p>
                         </div>
-                        <h3 className={`text-2xl font-black uppercase ${contrastLight ? 'text-slate-950' : 'text-white'}`}>Air-Gapped Precision</h3>
-                        <p className={`text-base font-bold ${contrastLight ? 'text-slate-700' : 'text-slate-300'}`}>
-                            VPC-deployable edge execution for <span className="text-rose-500 font-black">zero-PII compliance</span>. Engine leverages <span className="text-rose-500 font-black">Calibrated Confidence Scores</span> to guarantee stability from round one of the Active Learning loop.
-                        </p>
+
+                        <div className={`p-4 rounded-2xl border-4 flex flex-col gap-1.5 ${contrastLight ? 'bg-white border-slate-900 shadow-sm' : 'bg-slate-900/60 border-slate-800'}`}>
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-lg bg-rose-500/20 text-rose-500"><ShieldCheck size={16} /></div>
+                                <h4 className={`text-xs font-black uppercase ${contrastLight ? 'text-slate-955' : 'text-white'}`}>Air-Gapped Compliance</h4>
+                            </div>
+                            <p className={`text-[10px] font-bold leading-relaxed ${contrastLight ? 'text-slate-700' : 'text-slate-400'}`}>
+                                Deployable inside private <span className="text-rose-505 font-bold">VPCs</span> (<span className="italic text-[9px] text-slate-505 font-semibold">Virtual Private Clouds</span>) for zero <span className="text-rose-505 font-bold">PII</span> (<span className="italic text-[9px] text-slate-505 font-semibold">Personally Identifiable Information</span>) risk with calibrated confidence scores.
+                            </p>
+                        </div>
+
                     </div>
+                    
                 </div>
             </div>
         )
