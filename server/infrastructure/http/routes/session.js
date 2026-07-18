@@ -42,6 +42,11 @@ router.post('/save', async (req, res) => {
         if (req.body.uploadedTexts) updateOps.uploadedTexts = req.body.uploadedTexts;
         if (req.body.roundSize) updateOps.roundSize = req.body.roundSize;
         if (req.body.autoLabelThreshold) updateOps.autoLabelThreshold = req.body.autoLabelThreshold;
+        if (req.body.ece !== undefined) updateOps.ece = req.body.ece;
+        if (req.body.accuracy !== undefined) updateOps.accuracy = req.body.accuracy;
+        if (req.body.cognitivePacingActive !== undefined) updateOps.cognitivePacingActive = req.body.cognitivePacingActive;
+        if (req.body.beta !== undefined) updateOps.beta = req.body.beta;
+        if (req.body.baselineBeta !== undefined) updateOps.baselineBeta = req.body.baselineBeta;
 
         // $set replaces scalar fields, $push appends to the annotations array.
         // doing both in one call makes it atomic — no read-modify-write race conditions
@@ -116,7 +121,12 @@ router.get('/load/:contestantId', async (req, res) => {
                 labels: session.labels,
                 uploadedTexts: session.uploadedTexts,
                 roundSize: session.roundSize,
-                autoLabelThreshold: session.autoLabelThreshold || 0.95
+                autoLabelThreshold: session.autoLabelThreshold || 0.95,
+                ece: session.ece || 0,
+                accuracy: session.accuracy || 0,
+                cognitivePacingActive: session.cognitivePacingActive || false,
+                beta: session.beta || 3.0,
+                baselineBeta: session.baselineBeta || 3.0
             }
         });
     } catch (error) {

@@ -42,6 +42,7 @@ const ManagerDashboardPage = () => {
     const [isResetting, setIsResetting] = useState(false);
     const [showExplanation, setShowExplanation] = useState(false);
     const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'roi' | 'pacing' | 'calibration' | 'pruning'
+    const [selectedCampaignId, setSelectedCampaignId] = useState('all');
 
     // Reset Configuration Form State
     const [datasetName, setDatasetName] = useState('imdb'); // imdb, rotten_tomatoes, ag_news, custom
@@ -231,24 +232,47 @@ const ManagerDashboardPage = () => {
         }
     };
 
-    // Time saved calculation derived from OLS parameters
-    const poolTotal = metrics?.pool_total || 1000;
-    const poolRemaining = metrics?.pool_remaining !== undefined ? metrics.pool_remaining : poolTotal;
-    const manualCount = metrics?.step || 0;
-    const autoPrunedCount = Math.max(0, poolTotal - poolRemaining - manualCount);
-    
-    const timeSavedSeconds = (() => {
-        const beta = metrics?.beta || 3.0;
-        const alpha = metrics?.alpha || 5.0;
-        if (autoPrunedCount > 0) {
-            const avgLogLen = 4.5; // log(90 words) ≈ 4.5
-            return autoPrunedCount * Math.max(0.5, alpha + beta * avgLogLen);
-        }
-        return 0;
-    })();
+    // Compute current campaign metrics based on selection (fully database persistent)
+    const currentProject = selectedCampaignId !== 'all' 
+        ? projectStats.find(p => p.projectId === selectedCampaignId)
+        : null;
 
-    const timeSavedHours = (timeSavedSeconds / 3600).toFixed(2);
-    const dollarsSaved = (timeSavedSeconds / 3600 * 20.0).toFixed(2); // $20/hr average wage
+    const poolTotal = currentProject 
+        ? currentProject.total 
+        : projectStats.reduce((sum, p) => sum + p.total, 0) || 1000;
+
+    const manualCount = currentProject
+        ? currentProject.manualCount
+        : projectStats.reduce((sum, p) => sum + p.manualCount, 0) || 0;
+
+    const autoPrunedCount = currentProject
+        ? currentProject.autoPruned
+        : projectStats.reduce((sum, p) => sum + p.autoPruned, 0) || 0;
+
+    const poolRemaining = Math.max(0, poolTotal - manualCount - autoPrunedCount);
+
+    const projectTimeSavedSeconds = currentProject
+        ? currentProject.timeSaved
+        : projectStats.reduce((sum, p) => sum + p.timeSaved, 0) || 0;
+
+    const timeSavedHours = (projectTimeSavedSeconds / 3600).toFixed(2);
+    const dollarsSaved = (projectTimeSavedSeconds / 3600 * 20.0).toFixed(2);
+
+    const displayEce = currentProject
+        ? currentProject.ece
+        : (projectStats.length > 0 ? (projectStats.reduce((sum, p) => sum + p.ece, 0) / projectStats.length) : 0);
+
+    const displayBeta = currentProject
+        ? currentProject.beta
+        : (projectStats.length > 0 ? (projectStats.reduce((sum, p) => sum + p.beta, 0) / projectStats.length) : 3.0);
+
+    const displayBaselineBeta = currentProject
+        ? currentProject.baselineBeta
+        : (projectStats.length > 0 ? (projectStats.reduce((sum, p) => sum + p.baselineBeta, 0) / projectStats.length) : 3.0);
+
+    const displayCognitivePacingActive = currentProject
+        ? currentProject.cognitivePacingActive
+        : projectStats.some(p => p.cognitivePacingActive);
 
     if (!isAuthorized) {
         return (
@@ -347,9 +371,25 @@ const ManagerDashboardPage = () => {
                 {/* FLOATING SIDEBAR NAVIGATION (NOT TOUCHING EDGE OF BROWSER SCREEN) */}
                 <div className="w-full lg:w-72 shrink-0 flex flex-col justify-between bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm h-full select-none">
                     <div className="space-y-1.5 w-full">
-                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 px-2 block mb-4">
+                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 px-2 block mb-2">
                             Control Console
                         </span>
+                        
+                        <div className="px-2 pb-3 mb-2 border-b border-slate-800/60">
+                            <label className="text-[8px] uppercase tracking-widest font-black text-slate-500 block mb-1">
+                                Scope Selector
+                            </label>
+                            <select 
+                                value={selectedCampaignId}
+                                onChange={(e) => setSelectedCampaignId(e.target.value)}
+                                className="w-full bg-slate-950 border border-slate-805 p-2 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition font-bold"
+                            >
+                                <option value="all">All Campaigns (Aggregated)</option>
+                                {projectStats.map(p => (
+                                    <option key={p.projectId} value={p.projectId}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
                         
                         <button
                             onClick={() => setActiveTab('overview')}
@@ -451,15 +491,15 @@ const ManagerDashboardPage = () => {
                                      <div className="mt-1">
                                          <div className="flex items-center gap-1.5">
                                              <span className="relative flex h-1.5 w-1.5">
-                                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
-                                                 <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${metrics?.cognitive_pacing_active ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${displayCognitivePacingActive ? "bg-amber-400" : "bg-emerald-400"}`}></span>
+                                                 <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${displayCognitivePacingActive ? "bg-amber-400" : "bg-emerald-400"}`}></span>
                                              </span>
                                              <span className="text-xs font-bold text-slate-200">
-                                                 {metrics?.cognitive_pacing_active ? "Pacing Active" : "Optimal (Active)"}
+                                                 {displayCognitivePacingActive ? "Pacing Active" : "Optimal (Active)"}
                                              </span>
                                          </div>
                                          <p className="text-[10px] text-slate-500 mt-1">
-                                             Speed: <span className="font-mono text-white font-bold">{(metrics?.beta || 3.0).toFixed(2)}s/wd</span>
+                                             Speed: <span className="font-mono text-white font-bold">{(displayBeta || 3.0).toFixed(2)}s/wd</span>
                                          </p>
                                      </div>
                                 </button>
@@ -474,7 +514,7 @@ const ManagerDashboardPage = () => {
                                          <div className="p-1.5 bg-blue-500/10 text-blue-400 rounded-lg"><ShieldCheck size={14} /></div>
                                      </div>
                                      <div className="mt-1">
-                                         <h2 className="text-xl md:text-2xl font-black text-white">{(metrics?.ece || 0.000).toFixed(3)}</h2>
+                                         <h2 className="text-xl md:text-2xl font-black text-white">{(displayEce || 0.000).toFixed(3)}</h2>
                                          <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
                                              Limit: <span className="text-blue-400 font-bold">{metrics?.auto_label_threshold ? (metrics.auto_label_threshold * 100).toFixed(0) + '%' : '95%'}</span>
                                          </p>
@@ -672,16 +712,16 @@ const ManagerDashboardPage = () => {
                                 <div className="grid grid-cols-3 gap-3 text-center">
                                     <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
                                         <span className="text-[9px] font-bold text-slate-500 uppercase block">Current Speed</span>
-                                        <span className="text-lg font-black text-white">{(metrics?.beta || 3.0).toFixed(2)}s/wd</span>
+                                        <span className="text-lg font-black text-white">{(displayBeta || 3.0).toFixed(2)}s/wd</span>
                                     </div>
                                     <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
                                         <span className="text-[9px] font-bold text-slate-500 uppercase block">Baseline Speed</span>
-                                        <span className="text-lg font-black text-slate-400">{(metrics?.baseline_beta || 3.0).toFixed(2)}s/wd</span>
+                                        <span className="text-lg font-black text-slate-400">{(displayBaselineBeta || 3.0).toFixed(2)}s/wd</span>
                                     </div>
                                     <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
                                         <span className="text-[9px] font-bold text-slate-500 uppercase block">Pacing Status</span>
-                                        <span className={`text-xs font-black block mt-1.5 ${metrics?.cognitive_pacing_active ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}`}>
-                                            {metrics?.cognitive_pacing_active ? 'Fatigue Mode' : 'Optimal'}
+                                        <span className={`text-xs font-black block mt-1.5 ${displayCognitivePacingActive ? 'text-amber-400 animate-pulse' : 'text-emerald-400'}`}>
+                                            {displayCognitivePacingActive ? 'Fatigue Mode' : 'Optimal'}
                                         </span>
                                     </div>
                                 </div>
@@ -725,7 +765,7 @@ const ManagerDashboardPage = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
                                         <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Validation Error (ECE)</span>
-                                        <span className="text-2xl font-black text-blue-400">{(metrics?.ece || 0.000).toFixed(3)}</span>
+                                        <span className="text-2xl font-black text-blue-400">{(displayEce || 0.000).toFixed(3)}</span>
                                     </div>
                                     <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800">
                                         <span className="text-[9px] font-bold text-slate-500 uppercase block mb-1">Auto-Label Threshold</span>

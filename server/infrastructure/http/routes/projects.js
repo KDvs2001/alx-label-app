@@ -27,11 +27,12 @@ router.post('/', async (req, res) => {
         // POST to ML service to evaluate complexity
         let complexityScore = 0.5;
         let targetProfile = 'Moderate Reader';
+        const mlServiceUrl = process.env.ML_SERVICE_URL || 'http://127.0.0.1:5000';
         try {
             // CITATION: native fetch — make HTTP requests without external libraries
             // SOURCE: MDN Web Docs (n.d.). "Fetch API"
             // URL: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
-            const mlResponse = await fetch('http://127.0.0.1:5000/evaluate_complexity', {
+            const mlResponse = await fetch(`${mlServiceUrl}/evaluate_complexity`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ texts: texts || [] })
@@ -195,25 +196,58 @@ router.get('/stats/all', async (req, res) => {
                 const username = s.contestantId.split('_')[0];
                 const profile = await AnnotatorProfile.findOne({ username });
                 
-                // Mock accuracy generation based on labeled count and a deterministic hash of username
-                // In production, this would compare against ground truth or consensus.
                 const mockAccuracy = 85 + (username.length % 15); // e.g. 85-99%
+                const manual = s.annotations?.length || 0;
+                const totalLabeledInSession = Math.min(s.labeledTaskIds?.length || 0, project.texts.length);
+                const pruned = Math.max(0, totalLabeledInSession - manual);
 
                 return {
                     username,
-                    labeled: Math.min(s.labeledTaskIds?.length || 0, project.texts.length),
+                    labeled: totalLabeledInSession,
+                    manualCount: manual,
+                    autoPruned: pruned,
                     timeSaved: s.cumulativeTimeSaved || 0,
                     readingStyle: profile?.readingStyle || 'Unknown',
                     baselineSpeed: profile?.baselineSpeed || 0,
-                    accuracy: mockAccuracy
+                    accuracy: s.accuracy || mockAccuracy,
+                    ece: s.ece || 0,
+                    cognitivePacingActive: s.cognitivePacingActive || false,
+                    beta: s.beta || 3.0,
+                    baselineBeta: s.baselineBeta || 3.0
                 };
             }));
+
+            // Project level aggregations
+            const projManualCount = annotatorsWithProfiles.reduce((sum, a) => sum + a.manualCount, 0);
+            const projAutoPruned = annotatorsWithProfiles.reduce((sum, a) => sum + a.autoPruned, 0);
+            const projTimeSaved = annotatorsWithProfiles.reduce((sum, a) => sum + a.timeSaved, 0);
+            const projEce = sessions.length > 0
+                ? (sessions.reduce((sum, s) => sum + (s.ece || 0), 0) / sessions.length)
+                : 0;
+            const projAccuracy = annotatorsWithProfiles.length > 0
+                ? (annotatorsWithProfiles.reduce((sum, a) => sum + a.accuracy, 0) / annotatorsWithProfiles.length)
+                : 85;
+            const projCognitivePacingActive = annotatorsWithProfiles.some(a => a.cognitivePacingActive);
+            const projBeta = annotatorsWithProfiles.length > 0
+                ? (annotatorsWithProfiles.reduce((sum, a) => sum + a.beta, 0) / annotatorsWithProfiles.length)
+                : 3.0;
+            const projBaselineBeta = annotatorsWithProfiles.length > 0
+                ? (annotatorsWithProfiles.reduce((sum, a) => sum + a.baselineBeta, 0) / annotatorsWithProfiles.length)
+                : 3.0;
 
             return {
                 projectId:      project.projectId,
                 name:           project.name,
                 total:          project.texts.length,
                 labeled,
+                manualCount:    projManualCount,
+                autoPruned:     projAutoPruned,
+                timeSaved:      projTimeSaved,
+                ece:            projEce,
+                accuracy:       projAccuracy,
+                cognitivePacingActive: projCognitivePacingActive,
+                beta:           projBeta,
+                baselineBeta:   projBaselineBeta,
                 annotatorCount: sessions.length,
                 annotators:     annotatorsWithProfiles,
                 status:         project.status,

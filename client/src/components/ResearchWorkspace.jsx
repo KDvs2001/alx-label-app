@@ -57,6 +57,7 @@ const ResearchWorkspace = ({ onExit }) => {
 
     // Ref to avoid stale closures in async handlers
     const labeledIdsRef = useRef([]);
+    const metricsRef = useRef(null);
 
     // AbortController allows us to cancel pending network requests if component unmounts or state changes
     // CITATION: AbortController - abort web requests
@@ -473,10 +474,10 @@ const ResearchWorkspace = ({ onExit }) => {
             } catch (e) { /* ignore */ }
 
             if (mData.status === 'ok') {
-                setMetrics({
+                const nextMetrics = {
                     alpha: mData.alpha,
                     beta: mData.beta,
-                    step: history.length * 5,
+                    step: (histData?.length || 0) * 5,
                     accuracy_history: mData.accuracy_history,
                     cumulative_costs: cumulativeCosts,
                     pool_remaining: mData.pool_remaining,
@@ -486,7 +487,9 @@ const ResearchWorkspace = ({ onExit }) => {
                     auto_label_threshold: mData.auto_label_threshold,
                     cognitive_pacing_active: mData.cognitive_pacing_active,
                     baseline_beta: mData.baseline_beta
-                });
+                };
+                setMetrics(nextMetrics);
+                metricsRef.current = nextMetrics;
                 if (mData.verification_queue) {
                     setVerificationQueue(mData.verification_queue);
                 }
@@ -824,7 +827,14 @@ const ResearchWorkspace = ({ onExit }) => {
                 cumulativeTimeSaved,
                 cumulativeEntropyCost,
                 cumulativeRandomCost,
-                cumulativeCalLogCost
+                cumulativeCalLogCost,
+                ece: metricsRef.current?.ece || 0,
+                accuracy: metricsRef.current?.accuracy_history && metricsRef.current.accuracy_history.length > 0
+                    ? Math.round(metricsRef.current.accuracy_history[metricsRef.current.accuracy_history.length - 1] * 100)
+                    : 85,
+                cognitivePacingActive: metricsRef.current?.cognitive_pacing_active || false,
+                beta: metricsRef.current?.beta || 3.0,
+                baselineBeta: metricsRef.current?.baseline_beta || 3.0
             };
             // Include dataset config if available
             const currentConfig = overrideConfig || datasetConfig;

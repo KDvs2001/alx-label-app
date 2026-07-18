@@ -81,6 +81,26 @@ const AnnotationSessionSchema = new mongoose.Schema({
     labels: [{
         type: String
     }],
+    ece: {
+        type: Number,
+        default: 0
+    },
+    accuracy: {
+        type: Number,
+        default: 0
+    },
+    cognitivePacingActive: {
+        type: Boolean,
+        default: false
+    },
+    beta: {
+        type: Number,
+        default: 3.0
+    },
+    baselineBeta: {
+        type: Number,
+        default: 3.0
+    },
     uploadedTexts: [{
         type: String
     }],

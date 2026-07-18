@@ -16,11 +16,29 @@ const EvaluatorFeedback = require("../../database/models/EvaluatorFeedback");
 // CITATION: Mongoose validation — built-in schema-level validators
 // SOURCE: Mongoosejs.com (n.d.). "Validation"
 // URL: https://mongoosejs.com/docs/validation.html
-router.post("/", async (req, res) => {
-    try {
-        // build a new doc from the request body and persist it
-        // .save() runs validation — throws if anything fails
-        const feedback = new EvaluatorFeedback(req.body);
+        const {
+            sessionId, role, nlpFamiliarity, selfReportedReadingStyle,
+            contestantId, annotationsCompleted, startingAlpha, endingAlpha,
+            startingBeta, endingBeta, avgTimeSavedVsEntropy, avgTimeSavedVsRandom,
+            vsEntropyPct, vsRandomPct, tasksReceived, avgTaskLength,
+            sessionDurationSeconds, systemReadingProfile, systemClassificationMatch,
+            calLogEfficiency, entropyEfficiency, randomEfficiency,
+            ratingDocumentSelection, ratingMathUnderstandable, ratingSystemAdaptationVisible,
+            ratingTrustSystem, ratingInterfaceClear, noticeChangeAtAnnotation,
+            mostSurprising, mostConfusing, strengthenSubmission
+        } = req.body;
+
+        const feedback = new EvaluatorFeedback({
+            sessionId, role, nlpFamiliarity, selfReportedReadingStyle,
+            contestantId, annotationsCompleted, startingAlpha, endingAlpha,
+            startingBeta, endingBeta, avgTimeSavedVsEntropy, avgTimeSavedVsRandom,
+            vsEntropyPct, vsRandomPct, tasksReceived, avgTaskLength,
+            sessionDurationSeconds, systemReadingProfile, systemClassificationMatch,
+            calLogEfficiency, entropyEfficiency, randomEfficiency,
+            ratingDocumentSelection, ratingMathUnderstandable, ratingSystemAdaptationVisible,
+            ratingTrustSystem, ratingInterfaceClear, noticeChangeAtAnnotation,
+            mostSurprising, mostConfusing, strengthenSubmission
+        });
         await feedback.save();
 
         // 201 = "Created", the right status code when a new resource is born
