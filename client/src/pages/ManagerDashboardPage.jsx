@@ -342,12 +342,12 @@ const ManagerDashboardPage = () => {
                 </div>
             </div>
             {/* ─── SIDEBAR & VIEWPORT LAYOUT ────────────────────────────── */}
-            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 mt-4 items-start w-full">
+            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 mt-4 w-full h-[calc(100vh-230px)] min-h-[580px] items-stretch">
                 
                 {/* FLOATING SIDEBAR NAVIGATION (NOT TOUCHING EDGE OF BROWSER SCREEN) */}
-                <div className="w-full lg:w-64 shrink-0 flex flex-col gap-3">
-                    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4.5 backdrop-blur-sm space-y-1 relative select-none">
-                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 px-2 block mb-3.5">
+                <div className="w-full lg:w-68 shrink-0 flex flex-col justify-between bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm h-full select-none">
+                    <div className="space-y-1.5 w-full">
+                        <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 px-2 block mb-4">
                             Control Console
                         </span>
                         
@@ -356,7 +356,7 @@ const ManagerDashboardPage = () => {
                             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
                                 activeTab === 'overview'
                                     ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-500/10 border border-blue-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/45 border border-transparent'
                             }`}
                         >
                             <FolderOpen size={14} /> Overview & Campaigns
@@ -367,7 +367,7 @@ const ManagerDashboardPage = () => {
                             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
                                 activeTab === 'roi'
                                     ? 'bg-emerald-600/90 text-white shadow-lg shadow-emerald-500/10 border border-emerald-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/45 border border-transparent'
                             }`}
                         >
                             <DollarSign size={14} /> Labor & Financial ROI
@@ -378,7 +378,7 @@ const ManagerDashboardPage = () => {
                             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
                                 activeTab === 'pacing'
                                     ? 'bg-amber-600/90 text-white shadow-lg shadow-amber-500/10 border border-amber-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/45 border border-transparent'
                             }`}
                         >
                             <Activity size={14} /> Cognitive Load & Pacing
@@ -389,7 +389,7 @@ const ManagerDashboardPage = () => {
                             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
                                 activeTab === 'calibration'
                                     ? 'bg-blue-600/90 text-white shadow-lg shadow-blue-500/10 border border-blue-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/45 border border-transparent'
                             }`}
                         >
                             <ShieldCheck size={14} /> Model Calibration
@@ -400,21 +400,21 @@ const ManagerDashboardPage = () => {
                             className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-left transition-all duration-200 outline-none ${
                                 activeTab === 'pruning'
                                     ? 'bg-purple-600/90 text-white shadow-lg shadow-purple-500/10 border border-purple-500/20'
-                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
+                                    : 'text-slate-400 hover:text-white hover:bg-slate-800/45 border border-transparent'
                             }`}
                         >
                             <Brain size={14} /> Supervision & Pruning
                         </button>
                     </div>
 
-                    <div className="hidden lg:block bg-slate-900/10 border border-slate-850 rounded-2xl p-4 text-[10px] text-slate-500 leading-relaxed text-left">
-                        <span className="font-bold text-slate-400 block mb-1">Documentation shortcuts</span>
+                    <div className="hidden lg:block border-t border-slate-800/60 pt-4 text-[10px] text-slate-500 leading-relaxed text-left">
+                        <span className="font-bold text-slate-400 block mb-1.5">Documentation shortcuts</span>
                         VPC stands for Variable Pacing Control. WCAG refers to Web Content Accessibility Guidelines. OLS stands for Ordinary Least Squares regression, used here to isolate annotator fatigue.
                     </div>
                 </div>
 
                 {/* MAIN CONTENT VIEWPORT */}
-                <div className="flex-1 min-w-0 w-full flex flex-col gap-6">
+                <div className="flex-1 min-w-0 w-full h-full overflow-y-auto pr-2 custom-scrollbar flex flex-col gap-6">
                     
                     {/* VIEWPORT: OVERVIEW & PROJECTS LIST */}
                     {activeTab === 'overview' && (
