@@ -345,7 +345,7 @@ const ManagerDashboardPage = () => {
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 mt-4 w-full h-[calc(100vh-230px)] min-h-[580px] items-stretch">
                 
                 {/* FLOATING SIDEBAR NAVIGATION (NOT TOUCHING EDGE OF BROWSER SCREEN) */}
-                <div className="w-full lg:w-68 shrink-0 flex flex-col justify-between bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm h-full select-none">
+                <div className="w-full lg:w-72 shrink-0 flex flex-col justify-between bg-slate-900/40 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm h-full select-none">
                     <div className="space-y-1.5 w-full">
                         <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 px-2 block mb-4">
                             Control Console
